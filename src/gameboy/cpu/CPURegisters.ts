@@ -13,6 +13,9 @@ export class CPURegisters {
   DE: CPURegister
   HL: CPURegister
 
+  SP: CPURegister
+  PC: CPURegister
+
   registerPairs: CPURegister[]
 
   constructor() {
@@ -29,6 +32,9 @@ export class CPURegisters {
     this.BC = new CPURegister()
     this.DE = new CPURegister()
     this.HL = new CPURegister()
+
+    this.SP = new CPURegister()
+    this.PC = new CPURegister()
 
     this.registerPairs = [this.AF, this.BC, this.DE, this.HL]
   }
