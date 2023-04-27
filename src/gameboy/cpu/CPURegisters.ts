@@ -50,8 +50,41 @@ export class CPURegisters {
     this.F.carry = newValue < source.value
 
     source.value = newValue
+  }
 
-    this.PC.value++
+  subtract(target: CPURegister) {
+    const newValue = (this.A.value - target.value) & 0xff
+
+    this.F.subtract = true
+    this.F.zero = newValue === 0
+    this.F.halfCarry = (newValue & 0x0f) > (this.A.value & 0x0f)
+    this.F.carry = newValue > this.A.value
+
+    this.A.value = newValue
+  }
+
+  load(source: CPURegister, target: CPURegister) {
+    source.value = target.value
+
+    // add debugging here also
+  }
+
+  and(target: CPURegister) {
+    this.A.value = (this.A.value & target.value) & 0xff
+
+    this.F.carry = false
+    this.F.halfCarry = true
+    this.F.subtract = false
+    this.F.zero = this.A.value === 0
+  }
+
+  xor(target: CPURegister) {
+    this.A.value = (this.A.value ^ target.value) & 0xff
+
+    this.F.carry = false
+    this.F.halfCarry = false
+    this.F.subtract = false
+    this.F.zero = this.A.value === 0
   }
 
   increment(source: CPURegister) {

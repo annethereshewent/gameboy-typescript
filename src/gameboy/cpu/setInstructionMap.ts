@@ -513,7 +513,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.B)
     }
   })
 
@@ -521,7 +521,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.C)
     }
   })
 
@@ -529,7 +529,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.D)
     }
   })
 
@@ -537,7 +537,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.D)
     }
   })
 
@@ -545,7 +545,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.H)
     }
   })
 
@@ -553,7 +553,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.L)
     }
   })
 
@@ -569,7 +569,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.B, this.registers.A)
     }
   })
 
@@ -577,7 +577,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.B)
     }
   })
 
@@ -585,7 +585,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.C)
     }
   })
 
@@ -593,7 +593,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.D)
     }
   })
 
@@ -601,7 +601,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.E)
     }
   })
 
@@ -609,7 +609,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.H)
     }
   })
 
@@ -617,7 +617,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.L)
     }
   })
 
@@ -633,7 +633,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.C, this.registers.A)
     }
   })
 
@@ -641,7 +641,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.B)
     }
   })
 
@@ -649,7 +649,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.C)
     }
   })
 
@@ -657,7 +657,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.D)
     }
   })
 
@@ -665,7 +665,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.E)
     }
   })
 
@@ -673,7 +673,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.H)
     }
   })
 
@@ -681,7 +681,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.L)
     }
   })
 
@@ -697,7 +697,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.D, this.registers.A)
     }
   })
 
@@ -705,7 +705,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.B)
     }
   })
 
@@ -713,7 +713,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.C)
     }
   })
 
@@ -721,7 +721,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.D)
     }
   })
 
@@ -729,7 +729,7 @@ export function setInstructionMap(this: CPU) {
     name: "E, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.E)
     }
   })
 
@@ -737,7 +737,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.H)
     }
   })
 
@@ -745,7 +745,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.L)
     }
   })
 
@@ -761,7 +761,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.E, this.registers.A)
     }
   })
 
@@ -769,7 +769,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.B)
     }
   })
 
@@ -777,7 +777,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.C)
     }
   })
 
@@ -785,7 +785,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.D)
     }
   })
 
@@ -793,7 +793,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.E)
     }
   })
 
@@ -801,7 +801,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.H)
     }
   })
 
@@ -809,7 +809,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.L)
     }
   })
 
@@ -825,7 +825,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.H, this.registers.A)
     }
   })
 
@@ -833,7 +833,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.B)
     }
   })
 
@@ -841,7 +841,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.C)
     }
   })
 
@@ -849,7 +849,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.D)
     }
   })
 
@@ -857,7 +857,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.E)
     }
   })
 
@@ -865,7 +865,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.H)
     }
   })
 
@@ -873,7 +873,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.L)
     }
   })
 
@@ -889,7 +889,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.L, this.registers.A)
     }
   })
 
@@ -961,7 +961,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.B)
     }
   })
 
@@ -969,7 +969,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.C)
     }
   })
 
@@ -977,7 +977,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.D)
     }
   })
 
@@ -985,7 +985,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.E)
     }
   })
 
@@ -993,7 +993,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.H)
     }
   })
 
@@ -1001,7 +1001,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.L)
     }
   })
 
@@ -1017,7 +1017,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.load(this.registers.A, this.registers.A)
     }
   })
 
@@ -1081,7 +1081,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.add(this.registers.A, this.registers.A)
     }
   })
 
@@ -1153,7 +1153,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.B)
     }
   })
 
@@ -1161,7 +1161,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.C)
     }
   })
 
@@ -1169,7 +1169,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.D)
     }
   })
 
@@ -1177,7 +1177,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.E)
     }
   })
 
@@ -1185,7 +1185,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.H)
     }
   })
 
@@ -1193,7 +1193,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.L)
     }
   })
 
@@ -1209,7 +1209,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.subtract(this.registers.A)
     }
   })
 
@@ -1281,7 +1281,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.B)
     }
   })
 
@@ -1289,7 +1289,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.C)
     }
   })
 
@@ -1297,7 +1297,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.D)
     }
   })
 
@@ -1305,7 +1305,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.E)
     }
   })
 
@@ -1313,7 +1313,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.H)
     }
   })
 
@@ -1321,7 +1321,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.L)
     }
   })
 
@@ -1337,7 +1337,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND A",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.and(this.registers.A)
     }
   })
 
@@ -1345,7 +1345,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR B",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.xor(this.registers.B)
     }
   })
 
@@ -1353,7 +1353,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR C",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.xor(this.registers.C)
     }
   })
 
@@ -1361,7 +1361,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR D",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.xor(this.registers.D)
     }
   })
 

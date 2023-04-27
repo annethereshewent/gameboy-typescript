@@ -28,10 +28,10 @@ export class CPU {
       if (instruction != null) {
         instruction.operation()
 
-        console.log(`found instruction ${instruction.name} with code ${instructionAddress.toString(16)} at address ${this.registers.PC.value.toString(16)}`
+        console.log(`found instruction ${instruction.name} with code 0x${instructionAddress.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`
         );
       } else {
-        console.warn(`invalid instruction code: ${instructionAddress.toString(16)}`)
+        throw new Error(`invalid instruction code: 0x${instructionAddress.toString(16).toUpperCase()}`)
       }
 
       this.registers.PC.value++;
