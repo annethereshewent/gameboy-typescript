@@ -115,7 +115,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.PC.value++
     }
   })
 
@@ -1025,7 +1025,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, B",
     cycleTime: 4,
     operation: () => {
-        this.registers.add(this.registers.A, this.registers.B)
+      this.registers.add(this.registers.A, this.registers.B)
     }
   })
 
@@ -1633,7 +1633,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.PC.value++
     }
   })
 
@@ -1694,10 +1694,10 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0XCE, {
-    name: "ADD A, d8",
+    name: "ADC A, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.PC.value++
     }
   })
 
@@ -1858,7 +1858,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.PC.value++
     }
   })
 

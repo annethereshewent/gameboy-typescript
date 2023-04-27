@@ -1,9 +1,7 @@
 import React from 'react'
 import './App.css'
-import { Gameboy } from 'gameboy-emulator'
 import JSZip from 'jszip'
-
-
+import { Gameboy } from './gameboy/Gameboy'
 function App() {
   const gameboy = new Gameboy()
 
@@ -24,15 +22,16 @@ function App() {
       }
 
       if (rom != null) {
-        gameboy.loadGame(rom as ArrayBuffer)
-        gameboy.apu.enableSound()
+        gameboy.loadCartridge(rom as ArrayBuffer)
 
-        const context = document.querySelector("canvas")?.getContext("2d")
-        gameboy.onFrameFinished((imageData: any) => {
-          context?.putImageData(imageData, 0, 0)
-        })
+        // // debug: run the first 256 instructions in the cartridge and see what happens
+        for (let i = 0; i < 256; i++) {
+          gameboy.cpu.step()
+        }
 
-        gameboy.run()
+        // gameboy.loadGame(rom as ArrayBuffer)
+
+        // gameboy.run()
       }
     }
   }
@@ -42,7 +41,7 @@ function App() {
       <input type="file" onChange={handleFileChange} />
       <canvas width="160" height="144"></canvas>
     </div>
-  )
+  );
 }
 
 function fileToArrayBuffer(file: File): Promise<string|ArrayBuffer|null|undefined> {

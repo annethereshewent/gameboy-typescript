@@ -34,7 +34,8 @@ export class CPURegisters {
     this.HL = new CPURegister()
 
     this.SP = new CPURegister()
-    this.PC = new CPURegister()
+    // first 255 (0xFF) instructions in memory are reserved for the gameboy
+    this.PC = new CPURegister(0x100)
 
     this.registerPairs = [this.AF, this.BC, this.DE, this.HL]
   }
@@ -49,6 +50,8 @@ export class CPURegisters {
     this.F.carry = newValue < source.value
 
     source.value = newValue
+
+    this.PC.value++
   }
 
   increment(source: CPURegister) {
@@ -147,5 +150,9 @@ class FlagsRegister {
 }
 
 export class CPURegister {
-  value = 0
+
+  value: number
+  constructor(value = 0) {
+    this.value = value
+  }
 }
