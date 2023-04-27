@@ -959,7 +959,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x78, {
     name: "LD A, B",
-    cycleTime: ,
+    cycleTime: 4,
     operation: () => {
 
     }
@@ -1527,7 +1527,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xB9, {
     name: "CP C",
-    cycleTime: ,
+    cycleTime: 4,
     operation: () => {
 
     }
