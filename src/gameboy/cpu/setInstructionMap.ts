@@ -1998,7 +1998,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xFB, {
     name: "EI",
-    cycleTime: ,
+    cycleTime: 4,
     operation: () => {
 
     }
