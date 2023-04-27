@@ -1580,4 +1580,445 @@ export function setInstructionMap(this: CPU) {
 
     }
   })
+
+  this.instructionMap.set(0xC0, {
+    name: "RET NZ",
+    cycleTime: this.registers.F.zero ? 20 : 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC1, {
+    name: "POP BC",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC2, {
+    name: "JP NZ, a16",
+    cycleTime: this.registers.F.zero ? 16 : 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC3, {
+    name: "JP a16",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC4, {
+    name: "CALL NZ, a16",
+    cycleTime: this.registers.F.zero ? 24 : 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC5, {
+    name: "PUSH BC",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC6, {
+    name: "ADD A, d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC7, {
+    name: "RST 00H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC8, {
+    name: "RET Z",
+    cycleTime: this.registers.F.zero ? 20 : 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xC9, {
+    name: "RET",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xCA, {
+    name: "JP Z, a16",
+    cycleTime: this.registers.F.zero ? 16 : 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xCB, {
+    name: "PREFIX CB",
+    cycleTime: 4,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xCC, {
+    name: "CALL Z, a16",
+    cycleTime: this.registers.F.zero ? 24 : 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xCD, {
+    name: "CALL a16",
+    cycleTime: 24,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0XCE, {
+    name: "ADD A, d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xCF, {
+    name: "RST 08H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD0, {
+    name: "RET NC",
+    cycleTime: this.registers.F.carry ? 20 : 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD1, {
+    name: "POP DE",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD2, {
+    name: "JP NC, a16",
+    cycleTime: this.registers.F.carry ? 16 : 12,
+    operation: () => {
+
+    }
+  })
+
+  // 0xD3 has no instruction
+
+  this.instructionMap.set(0xD4, {
+    name: "CALL NC, a16",
+    cycleTime: this.registers.F.carry ? 24 : 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD5, {
+    name: "PUSH DE",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD6, {
+    name: "SUB d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD7, {
+    name: "RST 10H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD8, {
+    name: "RET C",
+    cycleTime: this.registers.F.carry ? 20 : 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xD9, {
+    name: "RETI",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xDA, {
+    name: "JP C, a16",
+    cycleTime: this.registers.F.carry ? 16 : 12,
+    operation: () => {
+
+    }
+  })
+
+  // 0xDB has no instruction
+
+  this.instructionMap.set(0xDC, {
+    name: "CALL C, a16",
+    cycleTime: this.registers.F.carry ? 24 : 12,
+    operation: () => {
+
+    }
+  })
+
+  // 0xDD has no instruction
+
+  this.instructionMap.set(0xDE, {
+    name: "SBC A, d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xDF, {
+    name: "RST 18H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE0, {
+    name: "LDH (a8), A",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE1, {
+    name: "POP HL",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE2, {
+    name: "LD (C), A",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  // 0xE3 has no instruction
+  // 0xE4 has no instruction
+
+  this.instructionMap.set(0xE5, {
+    name: "PUSH HL",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE6, {
+    name: "AND d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE7, {
+    name: "RST 20H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE8, {
+    name: "ADD SP, r8",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xE9, {
+    name: "JP (HL)",
+    cycleTime: 4,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xEA, {
+    name: "LD (a16), A",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  // 0xEB has no instruction
+  // 0xEC has no instruction
+  // 0xED has no instruction
+
+  this.instructionMap.set(0xEE, {
+    name: "XOR d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xEF, {
+    name: "RST 28H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF0, {
+    name: "LDH A, (a8)",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF1, {
+    name: "POP AF",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF2, {
+    name: "LD A, (C)",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF3, {
+    name: "DI",
+    cycleTime: 4,
+    operation: () => {
+
+    }
+  })
+
+  // 0xF4 has no instruction
+
+  this.instructionMap.set(0xF5, {
+    name: "PUSH AF",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF6, {
+    name: "OR d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF7, {
+    name: "RST 30H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF8, {
+    name: "LD HL, SP + r8",
+    cycleTime: 12,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xF9, {
+    name: "LD SP, HL",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xFA, {
+    name: "LD A, (a16)",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xFB, {
+    name: "EI",
+    cycleTime: ,
+    operation: () => {
+
+    }
+  })
+
+  // 0xFC has no instruction
+  // 0xFD has no instruction
+  this.instructionMap.set(0xFE, {
+    name: "CP d8",
+    cycleTime: 8,
+    operation: () => {
+
+    }
+  })
+
+  this.instructionMap.set(0xFF, {
+    name: "RST 38H",
+    cycleTime: 16,
+    operation: () => {
+
+    }
+  })
 }
