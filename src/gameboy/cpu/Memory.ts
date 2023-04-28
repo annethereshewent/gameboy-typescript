@@ -1,5 +1,5 @@
 export class Memory {
-  memoryBuffer = new ArrayBuffer(2 ^ 16)
+  memoryBuffer = new ArrayBuffer(0x10000)
   memoryView = new DataView(this.memoryBuffer)
   memoryBytes = new Uint8Array(this.memoryBuffer)
   gameDataView?: DataView
@@ -10,9 +10,16 @@ export class Memory {
 
   readByte(address: number): number {
     if (this.gameDataView == null) {
-      throw new Error("game ROM not loaded into memory!");
+      throw new Error("game ROM not loaded into memory!")
     }
     return this.gameDataView.getUint8(address)
+  }
+
+  readSignedByte(address: number): number {
+    if (this.gameDataView == null) {
+      throw new Error("game ROM not loaded into memory!")
+    }
+    return this.gameDataView.getInt8(address)
   }
 
   readWord(address: number): number {
@@ -20,5 +27,9 @@ export class Memory {
       throw new Error("game ROM not loaded into memory!")
     }
     return this.gameDataView.getUint16(address, true)
+  }
+
+  writeByte(address: number, value: number) {
+    this.memoryView.setUint8(address, value)
   }
 }

@@ -12,16 +12,16 @@ export function setInstructionMap(this: CPU) {
   this.instructionMap.set(0x1, {
     name: "LD BC, d16",
     cycleTime: 12,
-    operation() {
-
+    operation: () => {
+      this.registers.loadWord(this.registers.BC)
     }
   })
 
   this.instructionMap.set(0x2, {
     name: "LD (BC), A",
     cycleTime: 8,
-    operation() {
-
+    operation: () => {
+      this.registers.writeToMemoryRegisterAddr(this.registers.BC, this.registers.A)
     }
   })
 
@@ -52,8 +52,8 @@ export function setInstructionMap(this: CPU) {
   this.instructionMap.set(0x6, {
     name: "LD B, d8",
     cycleTime: 8,
-    operation() {
-
+    operation: () =>  {
+      this.registers.readByte(this.registers.B)
     }
   })
 
@@ -68,7 +68,9 @@ export function setInstructionMap(this: CPU) {
   this.instructionMap.set(0x8, {
     name: "LD (a16), SP",
     cycleTime: 20,
-    operation: () => {}
+    operation: () => {
+      this.registers.writeToMemory16bit(this.registers.SP)
+    }
   })
 
   this.instructionMap.set(0x9, {
@@ -83,7 +85,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (BC)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.A, this.registers.BC)
     }
   })
 
@@ -115,7 +117,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, d8",
     cycleTime: 8,
     operation: () => {
-      this.registers.PC.value++
+      this.registers.readByte(this.registers.C)
     }
   })
 
@@ -139,7 +141,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD DE, d16",
     cycleTime: 12,
     operation: () => {
-
+      this.registers.loadWord(this.registers.DE)
     }
   })
 
@@ -147,7 +149,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (DE), A",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.writeToMemoryRegisterAddr(this.registers.DE, this.registers.A)
     }
   })
 
@@ -179,7 +181,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.readByte(this.registers.D)
     }
   })
 
@@ -195,7 +197,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR r8",
     cycleTime: 12,
     operation: () => {
-
+      this.registers.jr()
     }
   })
 
@@ -211,7 +213,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (DE)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.A, this.registers.DE)
     }
   })
 
@@ -243,7 +245,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.readByte(this.registers.E)
     }
   })
 
@@ -258,14 +260,16 @@ export function setInstructionMap(this: CPU) {
   this.instructionMap.set(0x20, {
     name: "JR NZ, r8",
     cycleTime: !this.registers.F.carry ? 12 : 8,
-    operation: () => {},
+    operation: () => {
+      this.registers.jrIfNotZero()
+    },
   })
 
   this.instructionMap.set(0x21, {
     name: "LD HL, d16",
     cycleTime: 12,
     operation: () => {
-
+      this.registers.loadWord(this.registers.HL)
     }
   })
 
@@ -305,7 +309,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD H, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.readByte(this.registers.H)
     }
   })
 
@@ -321,7 +325,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR Z, r8",
     cycleTime: this.registers.F.zero ? 12 : 8,
     operation: () => {
-
+      this.registers.jrIfZero()
     }
   })
 
@@ -369,7 +373,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, d8",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.readByte(this.registers.L)
     }
   })
 
@@ -393,7 +397,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD SP, d16",
     cycleTime: 12,
     operation: () => {
-
+      this.registers.loadWord(this.registers.SP)
     }
   })
 
@@ -561,7 +565,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, (HL)",
     cycleTime: 8,
     operation: () => {
-      this.registers.loadByte(this.registers.B, this.memory.readByte(this.registers.HL.value))
+      this.registers.loadByte(this.registers.B, this.registers.HL)
     }
   })
 
@@ -625,7 +629,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, (HL)",
     cycleTime: 8,
     operation: () => {
-      this.registers.loadByte(this.registers.C, this.memory.readByte(this.registers.HL.value))
+      this.registers.loadByte(this.registers.C, this.registers.HL)
     }
   })
 
@@ -689,7 +693,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, (HL)",
     cycleTime: 8,
     operation: () => {
-      this.registers.loadByte(this.registers.D, this.memory.readByte(this.registers.HL.value))
+      this.registers.loadByte(this.registers.D, this.registers.HL)
     }
   })
 
@@ -753,7 +757,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD E, (HL)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.E, this.registers.HL)
     }
   })
 
@@ -881,7 +885,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, (HL)",
     cycleTime: 8,
     operation: () => {
-      this.registers.loadByte(this.registers.L, this.memory.readByte(this.registers.HL.value))
+      this.registers.loadByte(this.registers.L, this.registers.HL)
     }
   })
 
@@ -1009,7 +1013,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (HL)",
     cycleTime: 8,
     operation: () => {
-      this.registers.loadByte(this.registers.A, this.memory.readByte(this.registers.HL.value))
+      this.registers.loadByte(this.registers.A, this.registers.HL)
     }
   })
 
@@ -1823,7 +1827,7 @@ export function setInstructionMap(this: CPU) {
     name: "LDH (a8), A",
     cycleTime: 12,
     operation: () => {
-
+      this.registers.writeToMemory8Bit(this.registers.A)
     }
   })
 
@@ -1890,7 +1894,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (a16), A",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.writeToMemory16bit(this.registers.A)
     }
   })
 

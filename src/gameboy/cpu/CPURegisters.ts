@@ -1,3 +1,5 @@
+import { Memory } from "./Memory"
+
 export class CPURegisters {
   A: CPURegister
   B: CPURegister
@@ -18,7 +20,9 @@ export class CPURegisters {
 
   registerPairs: CPURegister[]
 
-  constructor() {
+  memory: Memory
+
+  constructor(memory: Memory) {
     this.A = new CPURegister()
     this.B = new CPURegister()
     this.C = new CPURegister()
@@ -38,6 +42,8 @@ export class CPURegisters {
     this.PC = new CPURegister(0x100)
 
     this.registerPairs = [this.AF, this.BC, this.DE, this.HL]
+
+    this.memory = memory
   }
 
 
@@ -53,14 +59,67 @@ export class CPURegisters {
   }
 
   ccf() {
-    this.F.subtract = false;
-    this.F.halfCarry = false;
+    this.F.subtract = false
+    this.F.halfCarry = false
 
-    this.F.carry = !this.F.carry;
+    this.F.carry = !this.F.carry
   }
 
-  loadByte(target: CPURegister, byte: number) {
-    target.value = byte
+  readByte(target: CPURegister) {
+    target.value = this.memory.readByte(this.PC.value)
+    this.PC.value++
+  }
+
+  loadByte(target: CPURegister, source: CPURegister) {
+    target.value = this.memory.readByte(source.value)
+  }
+
+  loadWord(target: CPURegister) {
+    target.value = this.memory.readWord(this.PC.value);
+    this.PC.value += 2
+  }
+
+  jrIfZero() {
+    if (this.F.zero) {
+      const jumpDistance = this.memory.readSignedByte(this.PC.value)
+      this.PC.value++
+      this.PC.value += jumpDistance
+    } else {
+      this.PC.value++
+    }
+  }
+
+  jrIfNotZero() {
+    if (!this.F.zero) {
+      const jumpDistance = this.memory.readSignedByte(this.PC.value)
+      this.PC.value++
+      this.PC.value += jumpDistance
+    } else {
+      this.PC.value++
+    }
+  }
+
+  jr() {
+    const jumpDistance = this.memory.readSignedByte(this.PC.value)
+
+    this.PC.value++
+    this.PC.value += jumpDistance
+  }
+
+  writeToMemory8Bit(source: CPURegister) {
+    const baseAddress = this.memory.readByte(this.PC.value)
+    this.PC.value++
+    this.memory.writeByte(0xff00 + baseAddress, source.value)
+  }
+
+  writeToMemory16bit(source: CPURegister) {
+    const memoryAddress = this.memory.readWord(this.PC.value)
+    this.PC.value += 2
+    this.memory.writeByte(memoryAddress, source.value);
+  }
+
+  writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
+    this.memory.writeByte(target.value, source.value)
   }
 
   subtract(source: CPURegister) {
