@@ -41,19 +41,30 @@ export class CPURegisters {
   }
 
 
-  add(source: CPURegister, target: CPURegister) {
-    const newValue = (source.value + target.value) & 0xff
+  add(target: CPURegister, source: CPURegister) {
+    const newValue = (target.value + source.value) & 0xff
 
     this.F.subtract = false
     this.F.zero = newValue === 0
-    this.F.halfCarry = (newValue & 0x0f) < (source.value & 0x0f)
-    this.F.carry = newValue < source.value
+    this.F.halfCarry = (newValue & 0x0f) < (target.value & 0x0f)
+    this.F.carry = newValue < target.value
 
-    source.value = newValue
+    target.value = newValue
   }
 
-  subtract(target: CPURegister) {
-    const newValue = (this.A.value - target.value) & 0xff
+  ccf() {
+    this.F.subtract = false;
+    this.F.halfCarry = false;
+
+    this.F.carry = !this.F.carry;
+  }
+
+  loadByte(target: CPURegister, byte: number) {
+    target.value = byte
+  }
+
+  subtract(source: CPURegister) {
+    const newValue = (this.A.value - source.value) & 0xff
 
     this.F.subtract = true
     this.F.zero = newValue === 0
@@ -63,14 +74,14 @@ export class CPURegisters {
     this.A.value = newValue
   }
 
-  load(source: CPURegister, target: CPURegister) {
-    source.value = target.value
+  load(target: CPURegister, source: CPURegister) {
+    target.value = source.value
 
     // add debugging here also
   }
 
-  and(target: CPURegister) {
-    this.A.value = (this.A.value & target.value) & 0xff
+  and(source: CPURegister) {
+    this.A.value = (this.A.value & source.value) & 0xff
 
     this.F.carry = false
     this.F.halfCarry = true
@@ -78,8 +89,8 @@ export class CPURegisters {
     this.F.zero = this.A.value === 0
   }
 
-  xor(target: CPURegister) {
-    this.A.value = (this.A.value ^ target.value) & 0xff
+  xor(source: CPURegister) {
+    this.A.value = (this.A.value ^ source.value) & 0xff
 
     this.F.carry = false
     this.F.halfCarry = false
@@ -87,40 +98,40 @@ export class CPURegisters {
     this.F.zero = this.A.value === 0
   }
 
-  increment(source: CPURegister) {
-    const newValue = (source.value + 1) & 0xff
+  increment(target: CPURegister) {
+    const newValue = (target.value + 1) & 0xff
 
     this.F.subtract = false
     this.F.zero = newValue === 0
-    this.F.halfCarry = (newValue & 0x0f) < (source.value & 0x0f)
+    this.F.halfCarry = (newValue & 0x0f) < (target.value & 0x0f)
 
-    source.value = newValue
+    target.value = newValue
   }
 
-  decrement(source: CPURegister) {
-    const newValue = (source.value - 1) & 0xff
+  decrement(target: CPURegister) {
+    const newValue = (target.value - 1) & 0xff
 
     this.F.subtract = true
     this.F.zero = newValue === 0
-    this.F.halfCarry = (newValue & 0x0f) > (source.value & 0x0f)
-    this.F.carry = newValue > source.value
+    this.F.halfCarry = (newValue & 0x0f) > (target.value & 0x0f)
+    this.F.carry = newValue > target.value
 
-    source.value = newValue
+    target.value = newValue
   }
 
-  add16Bit(source: CPURegister, target: CPURegister) {
-    if (!this.registerPairs.includes(source) || !this.registerPairs.includes(target)) {
+  add16Bit(target: CPURegister, source: CPURegister) {
+    if (!this.registerPairs.includes(target) || !this.registerPairs.includes(source)) {
       throw Error("Invalid register pairs")
     }
 
-    const newValue = (source.value + target.value) & 0xffff
+    const newValue = (target.value + source.value) & 0xffff
 
     this.F.subtract = false
     this.F.zero = newValue === 0
-    this.F.halfCarry = (newValue & 0xfff) < (source.value & 0xfff)
-    this.F.carry = newValue < source.value
+    this.F.halfCarry = (newValue & 0xfff) < (target.value & 0xfff)
+    this.F.carry = newValue < target.value
 
-    source.value = newValue
+    target.value = newValue
   }
 }
 

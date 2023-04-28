@@ -259,7 +259,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR NZ, r8",
     cycleTime: !this.registers.F.carry ? 12 : 8,
     operation: () => {},
-  });
+  })
 
   this.instructionMap.set(0x21, {
     name: "LD HL, d16",
@@ -505,7 +505,7 @@ export function setInstructionMap(this: CPU) {
     name: "CCF",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.ccf()
     }
   })
 
@@ -561,7 +561,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, (HL)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.B, this.memory.readByte(this.registers.HL.value))
     }
   })
 
@@ -625,7 +625,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD C, (HL)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.C, this.memory.readByte(this.registers.HL.value))
     }
   })
 
@@ -689,7 +689,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD D, (HL)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.D, this.memory.readByte(this.registers.HL.value))
     }
   })
 
@@ -881,7 +881,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD L, (HL)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.L, this.memory.readByte(this.registers.HL.value))
     }
   })
 
@@ -1009,7 +1009,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (HL)",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.loadByte(this.registers.A, this.memory.readByte(this.registers.HL.value))
     }
   })
 
@@ -1369,7 +1369,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR E",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.xor(this.registers.E)
     }
   })
 
@@ -1377,7 +1377,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR H",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.xor(this.registers.H)
     }
   })
 
@@ -1385,7 +1385,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR L",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.xor(this.registers.L)
     }
   })
 
@@ -1609,7 +1609,7 @@ export function setInstructionMap(this: CPU) {
     name: "JP a16",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = this.memory.readWord(this.registers.PC.value)
     }
   })
 
@@ -1641,7 +1641,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 00H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x0
     }
   })
 
@@ -1705,7 +1705,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 08H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x8
     }
   })
 
@@ -1763,7 +1763,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 10H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x10
     }
   })
 
@@ -1815,7 +1815,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 18H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x18
     }
   })
 
@@ -1866,7 +1866,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 20H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x20
     }
   })
 
@@ -1910,7 +1910,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 28H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x28
     }
   })
 
@@ -1968,7 +1968,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 30H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x30
     }
   })
 
@@ -1992,7 +1992,10 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (a16)",
     cycleTime: 16,
     operation: () => {
+      const memoryAddress = this.memory.readWord(this.registers.PC.value)
+      this.registers.PC.value += 2
 
+      this.registers.A.value = this.memory.readByte(memoryAddress)
     }
   })
 
@@ -2018,7 +2021,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 38H",
     cycleTime: 16,
     operation: () => {
-
+      this.registers.PC.value = 0x38
     }
   })
 }

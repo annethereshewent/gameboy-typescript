@@ -8,7 +8,17 @@ export class Memory {
     this.gameDataView = gameDataView
   }
 
-  readByte(address: number): number|undefined {
-    return this.gameDataView?.getUint8(address)
+  readByte(address: number): number {
+    if (this.gameDataView == null) {
+      throw new Error("game ROM not loaded into memory!");
+    }
+    return this.gameDataView.getUint8(address)
+  }
+
+  readWord(address: number): number {
+    if (this.gameDataView == null) {
+      throw new Error("game ROM not loaded into memory!")
+    }
+    return this.gameDataView.getUint16(address, true)
   }
 }
