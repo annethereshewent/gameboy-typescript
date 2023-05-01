@@ -22,19 +22,15 @@ export class CPU {
   step() {
     const instructionAddress = this.memory.readByte(this.registers.PC.value)
 
-    if (instructionAddress != null) {
-      const instruction = this.instructionMap.get(instructionAddress)
-      if (instruction != null) {
-        console.log(`found instruction ${instruction.name} with code 0x${instructionAddress.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
-        this.registers.PC.value++
-        instruction.operation()
-      } else {
-        throw new Error(`invalid instruction code: 0x${instructionAddress.toString(16).toUpperCase()}`)
-      }
+    const instruction = this.instructionMap.get(instructionAddress)
+    if (instruction != null) {
+      console.log(`found instruction ${instruction.name} with code 0x${instructionAddress.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
 
+      this.registers.PC.value++
 
+      instruction.operation()
     } else {
-      throw new Error(`could not find instruction address at ${this.registers.PC.value}`)
+      throw new Error(`invalid instruction code: 0x${instructionAddress.toString(16).toUpperCase()}`)
     }
   }
 }

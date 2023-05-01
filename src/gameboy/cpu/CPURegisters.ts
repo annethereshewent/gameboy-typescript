@@ -79,6 +79,13 @@ export class CPURegisters {
     this.PC.value += 2
   }
 
+  jr() {
+    const jumpDistance = this.memory.readSignedByte(this.PC.value)
+
+    this.PC.value++
+    this.PC.value += jumpDistance
+  }
+
   jrIfZero() {
     if (this.F.zero) {
       const jumpDistance = this.memory.readSignedByte(this.PC.value)
@@ -99,11 +106,24 @@ export class CPURegisters {
     }
   }
 
-  jr() {
-    const jumpDistance = this.memory.readSignedByte(this.PC.value)
+  jrIfCarry() {
+    if (this.F.carry) {
+      const jumpDistance = this.memory.readSignedByte(this.PC.value)
+      this.PC.value++
+      this.PC.value += jumpDistance
+    } else {
+      this.PC.value++
+    }
+  }
 
-    this.PC.value++
-    this.PC.value += jumpDistance
+  jrIfNotCarry() {
+    if (!this.F.carry) {
+      const jumpDistance = this.memory.readSignedByte(this.PC.value)
+      this.PC.value++
+      this.PC.value += jumpDistance
+    } else {
+      this.PC.value++
+    }
   }
 
   writeToMemory8Bit(source: CPURegister) {
