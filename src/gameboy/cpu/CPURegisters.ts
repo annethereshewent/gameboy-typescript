@@ -58,7 +58,7 @@ export class CPURegisters {
     target.value = newValue
   }
 
-  ccf() {
+  complementCarryFlag() {
     this.F.subtract = false
     this.F.halfCarry = false
 
@@ -72,6 +72,11 @@ export class CPURegisters {
 
   loadByte(target: CPURegister, source: CPURegister) {
     target.value = this.memory.readByte(source.value)
+  }
+
+  loadByteAndIncrementSource(target: CPURegister, source: CPURegister) {
+    target.value = this.memory.readByte(source.value)
+    source.value++
   }
 
   loadWord(target: CPURegister) {
@@ -111,14 +116,14 @@ export class CPURegisters {
     }
   }
 
-  jr() {
+  relativeJump() {
     const jumpDistance = this.memory.readSignedByte(this.PC.value)
 
     this.PC.value++
     this.PC.value += jumpDistance
   }
 
-  jrIfZero() {
+  relativeJumpIfZero() {
     if (this.F.zero) {
       const jumpDistance = this.memory.readSignedByte(this.PC.value)
       this.PC.value++
@@ -128,7 +133,7 @@ export class CPURegisters {
     }
   }
 
-  jrIfNotZero() {
+  relativeJumpIfNotZero() {
     if (!this.F.zero) {
       const jumpDistance = this.memory.readSignedByte(this.PC.value)
       this.PC.value++
@@ -138,7 +143,7 @@ export class CPURegisters {
     }
   }
 
-  jrIfCarry() {
+  relativeJumpIfCarry() {
     if (this.F.carry) {
       const jumpDistance = this.memory.readSignedByte(this.PC.value)
       this.PC.value++
@@ -148,7 +153,7 @@ export class CPURegisters {
     }
   }
 
-  jrIfNotCarry() {
+  relativeJumpIfNotCarry() {
     if (!this.F.carry) {
       const jumpDistance = this.memory.readSignedByte(this.PC.value)
       this.PC.value++
@@ -187,8 +192,6 @@ export class CPURegisters {
 
   load(target: CPURegister, source: CPURegister) {
     target.value = source.value
-
-    // add debugging here also
   }
 
   or(source: CPURegister) {
@@ -301,10 +304,67 @@ export class CPURegisters {
     this.A.value = (this.A.value >> 1) + ((this.F.carry ? 1 : 0) << 7)
   }
 
-  writeToMemoryRegisterAddrAndIncrement(target: CPURegister, source: CPURegister) {
+  writeToMemoryRegisterAddrAndIncrementTarget(target: CPURegister, source: CPURegister) {
     this.memory.writeByte(target.value, source.value)
 
     target.value++
+  }
+
+  writeToMemoryRegisterAddrAndDecrementTarget(target: CPURegister, source: CPURegister) {
+    this.memory.writeByte(target.value, source.value)
+
+    target.value--
+  }
+
+  decimalAdjustAccumulator() {
+    const { A, F } = this
+    const onesPlaceCorrector = F.subtract ? -0x06 : 0x06
+    const tensPlaceCorrector = F.subtract ? -0x60 : 0x60
+
+    const isAdditionBcdHalfCarry = !F.subtract && (A.value & 0x0f) > 9
+    const isAdditionBcdCarry = !F.subtract && A.value > 0x99
+
+      if (F.halfCarry || isAdditionBcdHalfCarry) {
+        A.value += onesPlaceCorrector
+      }
+
+      if (F.carry || isAdditionBcdCarry) {
+        A.value += tensPlaceCorrector
+        F.carry = true
+      }
+
+      F.zero = A.value === 0
+      F.halfCarry = false
+  }
+
+  complementAccumulator() {
+    this.A.value = ~this.A.value
+
+    this.F.subtract = true
+    this.F.halfCarry = true
+  }
+
+  incrementMemoryValAtRegisterAddr(target: CPURegister) {
+    const oldValue = this.memory.readByte(target.value)
+    const newValue = (oldValue + 1) & 0xff
+
+    this.F.subtract = false
+    this.F.zero = newValue === 0
+    this.F.halfCarry = (newValue & 0x0f) < (oldValue & 0x0f)
+
+    this.memory.writeByte(target.value, newValue)
+  }
+
+  decrementMemoryValAtRegisterAddr(target: CPURegister) {
+    const oldValue = this.memory.readByte(target.value)
+    const newValue = (oldValue - 1) & 0xff
+
+    this.F.subtract = true
+    this.F.zero = newValue === 0
+    this.F.halfCarry = (newValue & 0x0f) > (oldValue & 0x0f)
+    this.F.carry = newValue > target.value
+
+    this.memory.writeByte(target.value, newValue)
   }
 }
 

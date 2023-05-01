@@ -197,7 +197,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR r8",
     cycleTime: 12,
     operation: () => {
-      this.registers.jr()
+      this.registers.relativeJump()
     }
   })
 
@@ -261,7 +261,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR NZ, r8",
     cycleTime: !this.registers.F.carry ? 12 : 8,
     operation: () => {
-      this.registers.jrIfNotZero()
+      this.registers.relativeJumpIfNotZero()
     },
   })
 
@@ -277,7 +277,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL+), A",
     cycleTime: 8,
     operation: () => {
-      this.registers.writeToMemoryRegisterAddrAndIncrement(this.registers.HL, this.registers.A)
+      this.registers.writeToMemoryRegisterAddrAndIncrementTarget(this.registers.HL, this.registers.A)
     }
   })
 
@@ -317,7 +317,7 @@ export function setInstructionMap(this: CPU) {
     name: "DAA",
     cycleTime: 4,
     operation: () => {
-
+      this.registers.decimalAdjustAccumulator()
     }
   })
 
@@ -325,7 +325,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR Z, r8",
     cycleTime: this.registers.F.zero ? 12 : 8,
     operation: () => {
-      this.registers.jrIfZero()
+      this.registers.relativeJumpIfZero()
     }
   })
 
@@ -341,7 +341,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (HL+)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.loadByteAndIncrementSource(this.registers.A, this.registers.HL)
     }
   })
 
@@ -381,7 +381,7 @@ export function setInstructionMap(this: CPU) {
     name: "CPL",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.complementAccumulator()
     }
   })
 
@@ -389,7 +389,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR NC, r8",
     cycleTime: this.registers.F.carry ? 8 : 12,
     operation: () => {
-      this.registers.jrIfNotCarry()
+      this.registers.relativeJumpIfNotCarry()
     }
   })
 
@@ -405,7 +405,7 @@ export function setInstructionMap(this: CPU) {
     name: "(HL-), A",
     cycleTime: 8,
     operation: () => {
-      // TO DO
+      this.registers.writeToMemoryRegisterAddrAndDecrementTarget(this.registers.HL, this.registers.A)
     }
   })
 
@@ -421,7 +421,7 @@ export function setInstructionMap(this: CPU) {
     name: "INC (HL)",
     cycleTime: 12,
     operation: () => {
-      // TO DO
+      this.registers.incrementMemoryValAtRegisterAddr(this.registers.HL)
     }
   })
 
@@ -429,7 +429,7 @@ export function setInstructionMap(this: CPU) {
     name: "DEC (HL)",
     cycleTime: 12,
     operation: () => {
-       // TO DO
+       this.registers.decrementMemoryValAtRegisterAddr(this.registers.HL)
     }
   })
 
@@ -437,7 +437,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), d8",
     cycleTime: 12,
     operation: () => {
-       // TO DO
+       // TODO
     }
   })
 
@@ -445,7 +445,7 @@ export function setInstructionMap(this: CPU) {
     name: "SCF",
     cycleTime: 4,
     operation: () => {
-       // TO DO
+       // TODO
     }
   })
 
@@ -453,7 +453,7 @@ export function setInstructionMap(this: CPU) {
     name: "JR C, r8",
     cycleTime: this.registers.F.carry ? 12 : 8,
     operation: () => {
-      this.registers.jrIfCarry()
+      this.registers.relativeJumpIfCarry()
     }
   })
 
@@ -469,7 +469,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (HL-)",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -509,7 +509,7 @@ export function setInstructionMap(this: CPU) {
     name: "CCF",
     cycleTime: 4,
     operation: () => {
-      this.registers.ccf()
+      this.registers.complementCarryFlag()
     }
   })
 
@@ -901,7 +901,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), B",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -909,7 +909,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL) C",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -917,7 +917,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), D",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -925,7 +925,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), E",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -933,7 +933,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), H",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -941,7 +941,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), L",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -949,7 +949,7 @@ export function setInstructionMap(this: CPU) {
     name: "HALT",
     cycleTime: 4,
     operation: () => {
-
+      this.isHalted = true
     }
   })
 
@@ -957,7 +957,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), A",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1077,7 +1077,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, (HL)",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1541,7 +1541,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP D",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1549,7 +1549,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP E",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1557,7 +1557,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP H",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1565,7 +1565,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP L",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1573,7 +1573,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP (HL)",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1581,7 +1581,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP A",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1589,7 +1589,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET NZ",
     cycleTime: this.registers.F.zero ? 20 : 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1597,7 +1597,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP BC",
     cycleTime: 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1621,7 +1621,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL NZ, a16",
     cycleTime: this.registers.F.zero ? 24 : 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1629,7 +1629,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH BC",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1637,7 +1637,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1653,7 +1653,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET Z",
     cycleTime: this.registers.F.zero ? 20 : 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1661,7 +1661,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1677,7 +1677,7 @@ export function setInstructionMap(this: CPU) {
     name: "PREFIX CB",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1685,7 +1685,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL Z, a16",
     cycleTime: this.registers.F.zero ? 24 : 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1693,7 +1693,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL a16",
     cycleTime: 24,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1701,7 +1701,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1717,7 +1717,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET NC",
     cycleTime: this.registers.F.carry ? 20 : 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1725,7 +1725,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP DE",
     cycleTime: 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1743,7 +1743,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL NC, a16",
     cycleTime: this.registers.F.carry ? 24 : 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1751,7 +1751,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH DE",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1759,7 +1759,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1775,7 +1775,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET C",
     cycleTime: this.registers.F.carry ? 20 : 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1783,7 +1783,7 @@ export function setInstructionMap(this: CPU) {
     name: "RETI",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1801,7 +1801,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL C, a16",
     cycleTime: this.registers.F.carry ? 24 : 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1811,7 +1811,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1835,7 +1835,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP HL",
     cycleTime: 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1854,7 +1854,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH HL",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1862,7 +1862,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1878,7 +1878,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD SP, r8",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1886,7 +1886,7 @@ export function setInstructionMap(this: CPU) {
     name: "JP (HL)",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1906,7 +1906,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1922,7 +1922,7 @@ export function setInstructionMap(this: CPU) {
     name: "LDH A, (a8)",
     cycleTime: 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1930,7 +1930,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP AF",
     cycleTime: 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1946,7 +1946,7 @@ export function setInstructionMap(this: CPU) {
     name: "DI",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1956,7 +1956,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH AF",
     cycleTime: 16,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1964,7 +1964,7 @@ export function setInstructionMap(this: CPU) {
     name: "OR d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1980,7 +1980,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD HL, SP + r8",
     cycleTime: 12,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -1988,7 +1988,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD SP, HL",
     cycleTime: 8,
     operation: () => {
-
+      this.registers.load(this.registers.SP, this.registers.HL)
     }
   })
 
@@ -2007,7 +2007,7 @@ export function setInstructionMap(this: CPU) {
     name: "EI",
     cycleTime: 4,
     operation: () => {
-
+      // TODO
     }
   })
 
@@ -2017,7 +2017,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP d8",
     cycleTime: 8,
     operation: () => {
-
+      // TODO
     }
   })
 
