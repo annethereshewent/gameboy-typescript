@@ -75,8 +75,40 @@ export class CPURegisters {
   }
 
   loadWord(target: CPURegister) {
-    target.value = this.memory.readWord(this.PC.value);
+    target.value = this.memory.readWord(this.PC.value)
     this.PC.value += 2
+  }
+
+  jumpIfNotZero() {
+    if (!this.F.zero) {
+      this.PC.value = this.memory.readWord(this.PC.value)
+    } else {
+      this.PC.value += 2
+    }
+  }
+
+  jumpIfZero() {
+    if (this.F.zero) {
+      this.PC.value = this.memory.readWord(this.PC.value)
+    } else {
+      this.PC.value += 2
+    }
+  }
+
+  jumpIfNotCarry() {
+    if (!this.F.carry) {
+      this.PC.value = this.memory.readWord(this.PC.value)
+    } else {
+      this.PC.value += 2
+    }
+  }
+
+  jumpIfCarry() {
+    if (this.F.carry) {
+      this.PC.value = this.memory.readWord(this.PC.value)
+    } else {
+      this.PC.value += 2
+    }
   }
 
   jr() {
@@ -135,7 +167,7 @@ export class CPURegisters {
   writeToMemory16bit(source: CPURegister) {
     const memoryAddress = this.memory.readWord(this.PC.value)
     this.PC.value += 2
-    this.memory.writeByte(memoryAddress, source.value);
+    this.memory.writeByte(memoryAddress, source.value)
   }
 
   writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
@@ -157,6 +189,17 @@ export class CPURegisters {
     target.value = source.value
 
     // add debugging here also
+  }
+
+  or(source: CPURegister) {
+    const newValue = (this.A.value | source.value) & 0xff
+
+    this.F.carry = false
+    this.F.zero = newValue === 0
+    this.F.halfCarry = false
+    this.F.subtract = false
+
+    this.A.value = newValue
   }
 
   and(source: CPURegister) {
@@ -200,7 +243,7 @@ export class CPURegisters {
 
   add16Bit(target: CPURegister, source: CPURegister) {
     if (!this.registerPairs.includes(target) || !this.registerPairs.includes(source)) {
-      throw Error("Invalid register pairs")
+      throw new Error("Invalid register pairs")
     }
 
     const newValue = (target.value + source.value) & 0xffff
@@ -211,6 +254,57 @@ export class CPURegisters {
     this.F.carry = newValue < target.value
 
     target.value = newValue
+  }
+
+  rotateLeft() {
+    const bit7 = this.A.value >> 7
+
+    this.F.carry = bit7 === 1
+    this.F.halfCarry = false
+    this.F.zero = false
+    this.F.subtract = false
+
+    this.A.value = (this.A.value << 1) + bit7
+  }
+
+  rotateLeftCarry() {
+    const bit7 = this.A.value >> 7
+    const result = (this.A.value << 1) + (this.F.carry ? 1 : 0)
+
+    this.F.carry = bit7 === 1
+    this.F.halfCarry = false
+    this.F.subtract = false
+    this.F.zero = false
+
+    this.A.value = result
+  }
+
+  rotateRight() {
+    const bit0 = this.A.value & 1
+
+    this.F.carry = bit0 === 1
+    this.F.halfCarry = false
+    this.F.zero = false
+    this.F.subtract = false
+
+    this.A.value = (this.A.value >> 1) + (bit0 << 7)
+  }
+
+  rotateRightCarry() {
+    const bit0 = this.A.value & 1
+
+    this.F.carry = bit0 === 1
+    this.F.zero = false
+    this.F.halfCarry = false
+    this.F.subtract = false
+
+    this.A.value = (this.A.value >> 1) + ((this.F.carry ? 1 : 0) << 7)
+  }
+
+  writeToMemoryRegisterAddrAndIncrement(target: CPURegister, source: CPURegister) {
+    this.memory.writeByte(target.value, source.value)
+
+    target.value++
   }
 }
 

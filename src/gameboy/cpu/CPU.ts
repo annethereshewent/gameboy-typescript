@@ -7,6 +7,9 @@ export class CPU {
   memory = new Memory()
   registers = new CPURegisters(this.memory)
 
+  isStopped = false
+  isHalted = false
+
   setInstructionMap = setInstructionMap
   instructionMap: Map<Number, Instruction> = new Map()
 
