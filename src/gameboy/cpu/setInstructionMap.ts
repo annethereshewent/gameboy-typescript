@@ -1141,7 +1141,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.addWithCarryFromMemory(this.registers.HL)
     }
   })
 
@@ -1205,7 +1205,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.subtractFromMemory(this.registers.HL)
     }
   })
 
@@ -1597,7 +1597,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP BC",
     cycleTime: 12,
     operation: () => {
-      // TODO
+      this.registers.popToRegister(this.registers.BC)
     }
   })
 
@@ -1629,7 +1629,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH BC",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.pushFromRegister(this.registers.BC)
     }
   })
 
@@ -1661,7 +1661,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.returnFromFunction()
     }
   })
 
@@ -1725,7 +1725,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP DE",
     cycleTime: 12,
     operation: () => {
-      // TODO
+      this.registers.popToRegister(this.registers.DE)
     }
   })
 
@@ -1751,7 +1751,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH DE",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.pushFromRegister(this.registers.DE)
     }
   })
 
@@ -1835,7 +1835,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP HL",
     cycleTime: 12,
     operation: () => {
-      // TODO
+      this.registers.popToRegister(this.registers.HL)
     }
   })
 
@@ -1854,7 +1854,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH HL",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.pushFromRegister(this.registers.HL)
     }
   })
 
@@ -1930,7 +1930,7 @@ export function setInstructionMap(this: CPU) {
     name: "POP AF",
     cycleTime: 12,
     operation: () => {
-      // TODO
+      this.registers.popToRegister(this.registers.AF)
     }
   })
 
@@ -1956,7 +1956,7 @@ export function setInstructionMap(this: CPU) {
     name: "PUSH AF",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.pushFromRegister(this.registers.AF)
     }
   })
 

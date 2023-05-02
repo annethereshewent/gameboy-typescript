@@ -23,23 +23,23 @@ export class CPURegisters {
   memory: Memory
 
   constructor(memory: Memory) {
-    this.A = new CPURegister()
-    this.B = new CPURegister()
-    this.C = new CPURegister()
-    this.D = new CPURegister()
-    this.E = new CPURegister()
+    this.A = new CPURegister("A")
+    this.B = new CPURegister("B")
+    this.C = new CPURegister("C")
+    this.D = new CPURegister("D")
+    this.E = new CPURegister("E")
     this.F = new FlagsRegister()
-    this.H = new CPURegister()
-    this.L = new CPURegister()
+    this.H = new CPURegister("H")
+    this.L = new CPURegister("L")
 
-    this.AF = new CPURegister()
-    this.BC = new CPURegister()
-    this.DE = new CPURegister()
-    this.HL = new CPURegister()
+    this.AF = new CPURegister("AF")
+    this.BC = new CPURegister("BC")
+    this.DE = new CPURegister("DE")
+    this.HL = new CPURegister("HL")
 
-    this.SP = new CPURegister()
+    this.SP = new CPURegister("SP", 0xfffe)
     // first 255 (0xFF) instructions in memory are reserved for the gameboy
-    this.PC = new CPURegister(0x100)
+    this.PC = new CPURegister("PC", 0x100)
 
     this.registerPairs = [this.AF, this.BC, this.DE, this.HL]
 
@@ -62,6 +62,17 @@ export class CPURegisters {
     return newValue
   }
 
+  private _subtract(a: number, b: number): number {
+    const newValue = (a - b) & 0xff
+
+    this.F.subtract = true
+    this.F.zero = newValue === 0
+    this.F.halfCarry = (newValue & 0x0f) > (a & 0x0f)
+    this.F.carry = newValue > a
+
+    return newValue
+  }
+
   addFromRegisterAddr(target: CPURegister, source: CPURegister) {
     const value = this.memory.readByte(source.value)
 
@@ -70,6 +81,12 @@ export class CPURegisters {
 
   addWithCarry(source: CPURegister) {
     const value = source.value + (this.F.carry ? 1 : 0)
+
+    this.A.value = this._add(this.A.value, value)
+  }
+
+  addWithCarryFromMemory(source: CPURegister) {
+    const value = this.memory.readByte(source.value) + (this.F.carry ? 1 : 0)
 
     this.A.value = this._add(this.A.value, value)
   }
@@ -89,6 +106,8 @@ export class CPURegisters {
 
   readByte(target: CPURegister) {
     target.value = this.memory.readByte(this.PC.value)
+
+    console.log(`${target.name} register value is now ${target.value}`)
     this.PC.value++
   }
 
@@ -224,14 +243,13 @@ export class CPURegisters {
   }
 
   subtract(source: CPURegister) {
-    const newValue = (this.A.value - source.value) & 0xff
+    this.A.value = this._subtract(this.A.value, source.value)
+  }
 
-    this.F.subtract = true
-    this.F.zero = newValue === 0
-    this.F.halfCarry = (newValue & 0x0f) > (this.A.value & 0x0f)
-    this.F.carry = newValue > this.A.value
+  subtractFromMemory(source: CPURegister) {
+    const value = this.memory.readByte(source.value)
 
-    this.A.value = newValue
+    this.A.value = this._subtract(this.A.value, value)
   }
 
   load(target: CPURegister, source: CPURegister) {
@@ -283,7 +301,8 @@ export class CPURegisters {
     this.F.subtract = true
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (target.value & 0x0f)
-    this.F.carry = newValue > target.value
+
+    console.log(`${target.name} register value is now ${newValue}`)
 
     target.value = newValue
   }
@@ -416,9 +435,7 @@ export class CPURegisters {
 
     this.PC.value += 2
 
-    this.SP.value -= 2
-
-    this.memory.writeWord(this.SP.value, this.PC.value)
+    this.pushToStack(this.PC.value)
 
     this.PC.value = address
   }
@@ -445,6 +462,34 @@ export class CPURegisters {
     if (this.F.carry) {
       this.callFunction()
     }
+  }
+
+  returnFromFunction() {
+    const address = this.popFromStack()
+
+    this.PC.value = address
+  }
+
+  private popFromStack(): number {
+    const returnVal = this.memory.readWord(this.SP.value)
+
+    this.SP.value += 2
+
+    return returnVal
+  }
+
+  private pushToStack(value: number) {
+    this.SP.value -= 2
+
+    this.memory.writeWord(this.SP.value, this.PC.value)
+  }
+
+  popToRegister(target: CPURegister) {
+    target.value = this.popFromStack()
+  }
+
+  pushFromRegister(source: CPURegister) {
+    this.pushToStack(source.value)
   }
 }
 
@@ -509,7 +554,9 @@ class FlagsRegister {
 export class CPURegister {
 
   value: number
-  constructor(value = 0) {
+  name: string
+  constructor(name: string, value = 0) {
     this.value = value
+    this.name = name
   }
 }
