@@ -20,6 +20,12 @@ export class CPU {
   loadCartridge(arrayBuffer: ArrayBuffer) {
     const gameDataView = new DataView(arrayBuffer)
     this.memory.loadCartridge(gameDataView)
+    this.initialize()
+  }
+
+  initialize() {
+    this.memory.reset()
+    this.registers = new CPURegisters(this.memory)
   }
 
   step() {

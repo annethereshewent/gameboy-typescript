@@ -8,6 +8,12 @@ export class Memory {
     this.gameDataView = gameDataView
   }
 
+  reset() {
+    this.memoryBuffer = new ArrayBuffer(0x10000)
+    this.memoryView = new DataView(this.memoryBuffer)
+    this.memoryBytes = new Uint8Array(this.memoryBuffer)
+  }
+
   readByte(address: number): number {
     if (this.gameDataView == null) {
       throw new Error("game ROM not loaded into memory!")
@@ -44,7 +50,7 @@ export class Memory {
   }
 
   writeWord(address: number, value: number) {
-    this.memoryView.setUint16(address, value)
+    this.memoryView.setUint16(address, value, true)
   }
 
   isAccessingCartridge(address: number): boolean {

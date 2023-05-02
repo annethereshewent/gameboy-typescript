@@ -32,11 +32,13 @@ export class CPURegisters {
     this.H = new CPURegister("H")
     this.L = new CPURegister("L")
 
-    this.AF = new CPURegister("AF")
-    this.BC = new CPURegister("BC")
-    this.DE = new CPURegister("DE")
-    this.HL = new CPURegister("HL")
 
+    this.AF = new CPURegister("AF", 0x1B0)
+    // see http://bgb.bircd.org/pandocs.htm#powerupsequence for info on initial register values
+    this.BC = new CPURegister("BC", 0x13)
+    this.DE = new CPURegister("DE", 0xd8)
+    this.HL = new CPURegister("HL", 0x14d)
+    // stack pointer starts at the top of the stack memory, which is at 0xfffe
     this.SP = new CPURegister("SP", 0xfffe)
     // first 255 (0xFF) instructions in memory are reserved for the gameboy
     this.PC = new CPURegister("PC", 0x100)
@@ -246,6 +248,18 @@ export class CPURegisters {
     this.A.value = this._subtract(this.A.value, source.value)
   }
 
+  subtractWithCarry(source: CPURegister) {
+    const value = source.value - (this.F.carry ? 1 : 0)
+
+    this.A.value = this._subtract(this.A.value, value)
+  }
+
+  subtractWithCarryFromMemory(source: CPURegister) {
+    const value = this.memory.readByte(source.value) - (this.F.carry ? 1 : 0)
+
+    this.A.value = this._subtract(this.A.value, value)
+  }
+
   subtractFromMemory(source: CPURegister) {
     const value = this.memory.readByte(source.value)
 
@@ -256,33 +270,66 @@ export class CPURegisters {
     target.value = source.value
   }
 
-  or(source: CPURegister) {
-    const newValue = (this.A.value | source.value) & 0xff
+  private _or(a: number, b: number) {
+    const newValue = (a| b) & 0xff
 
     this.F.carry = false
     this.F.zero = newValue === 0
     this.F.halfCarry = false
     this.F.subtract = false
 
-    this.A.value = newValue
+    return newValue
   }
 
-  and(source: CPURegister) {
-    this.A.value = (this.A.value & source.value) & 0xff
+  or(source: CPURegister) {
+    this.A.value = this._or(this.A.value, source.value)
+  }
+
+  orFromMemory(source: CPURegister) {
+    this.A.value = this._or(this.A.value, this.memory.readByte(source.value))
+  }
+
+  private _and(a: number, b: number): number {
+    const returnVal = (a & b) & 0xff
 
     this.F.carry = false
     this.F.halfCarry = true
     this.F.subtract = false
-    this.F.zero = this.A.value === 0
+    this.F.zero = returnVal === 0
+
+    return returnVal
+  }
+
+  and(source: CPURegister) {
+    this.A.value = this._and(this.A.value, source.value)
+  }
+
+  andFromMemory(source: CPURegister) {
+    this.A.value = this._and(this.A.value, this.memory.readByte(source.value))
+  }
+
+  private _xor(a: number, b: number): number {
+    const returnVal = (a ^ b) & 0xff
+
+    this.F.carry = false
+    this.F.halfCarry = false
+    this.F.subtract = false
+    this.F.zero = returnVal === 0
+
+    return returnVal
   }
 
   xor(source: CPURegister) {
-    this.A.value = (this.A.value ^ source.value) & 0xff
+    this.A.value = this._xor(this.A.value, source.value)
 
     this.F.carry = false
     this.F.halfCarry = false
     this.F.subtract = false
     this.F.zero = this.A.value === 0
+  }
+
+  xorFromMemory(source: CPURegister) {
+    this.A.value = this._xor(this.A.value, this.memory.readByte(source.value))
   }
 
   increment(target: CPURegister) {
@@ -435,6 +482,8 @@ export class CPURegisters {
 
     this.PC.value += 2
 
+    console.log(`return to address should be 0x${this.PC.value.toString(16)}`)
+
     this.pushToStack(this.PC.value)
 
     this.PC.value = address
@@ -467,7 +516,33 @@ export class CPURegisters {
   returnFromFunction() {
     const address = this.popFromStack()
 
+    console.log(`returning to address 0x${address.toString(16)}`)
+
     this.PC.value = address
+  }
+
+  returnFromFunctionIfNotZero() {
+    if (!this.F.zero) {
+      this.returnFromFunction()
+    }
+  }
+
+  returnFromFunctionIfZero() {
+    if (this.F.zero) {
+      this.returnFromFunction()
+    }
+  }
+
+  returnFromFunctionIfCarry() {
+    if (this.F.carry) {
+      this.returnFromFunction()
+    }
+  }
+
+  returnFromFunctionIfNotCarry() {
+    if (!this.F.carry) {
+      this.returnFromFunction()
+    }
   }
 
   private popFromStack(): number {
@@ -481,7 +556,7 @@ export class CPURegisters {
   private pushToStack(value: number) {
     this.SP.value -= 2
 
-    this.memory.writeWord(this.SP.value, this.PC.value)
+    this.memory.writeWord(this.SP.value, value)
   }
 
   popToRegister(target: CPURegister) {

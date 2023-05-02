@@ -1221,7 +1221,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, B",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.B)
     }
   })
 
@@ -1229,7 +1229,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, C",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.C)
     }
   })
 
@@ -1237,7 +1237,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, D",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.D)
     }
   })
 
@@ -1245,7 +1245,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, E",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.E)
     }
   })
 
@@ -1253,7 +1253,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, H",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.H)
     }
   })
 
@@ -1261,7 +1261,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, L",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.L)
     }
   })
 
@@ -1269,7 +1269,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarryFromMemory(this.registers.HL)
     }
   })
 
@@ -1277,7 +1277,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, A",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarry(this.registers.A)
     }
   })
 
@@ -1333,7 +1333,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.andFromMemory(this.registers.HL)
     }
   })
 
@@ -1397,7 +1397,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.xorFromMemory(this.registers.HL)
     }
   })
 
@@ -1461,7 +1461,7 @@ export function setInstructionMap(this: CPU) {
     name: "OR (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.orFromMemory(this.registers.HL)
     }
   })
 
@@ -1589,7 +1589,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET NZ",
     cycleTime: this.registers.F.zero ? 20 : 8,
     operation: () => {
-      // TODO
+      this.registers.returnFromFunctionIfNotZero()
     }
   })
 
@@ -1653,7 +1653,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET Z",
     cycleTime: this.registers.F.zero ? 20 : 8,
     operation: () => {
-      // TODO
+      this.registers.returnFromFunctionIfZero()
     }
   })
 
@@ -1717,7 +1717,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET NC",
     cycleTime: this.registers.F.carry ? 20 : 8,
     operation: () => {
-      // TODO
+      this.registers.returnFromFunctionIfNotCarry()
     }
   })
 
@@ -1775,7 +1775,7 @@ export function setInstructionMap(this: CPU) {
     name: "RET C",
     cycleTime: this.registers.F.carry ? 20 : 8,
     operation: () => {
-      // TODO
+      this.registers.returnFromFunctionIfCarry()
     }
   })
 
