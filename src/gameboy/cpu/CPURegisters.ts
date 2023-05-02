@@ -75,6 +75,14 @@ export class CPURegisters {
     return newValue
   }
 
+  addImmediate(target: CPURegister) {
+    const value = this.memory.readByte(this.PC.value)
+
+    this.PC.value++
+
+    target.value = this._add(target.value, value)
+  }
+
   addFromRegisterAddr(target: CPURegister, source: CPURegister) {
     const value = this.memory.readByte(source.value)
 
@@ -85,6 +93,27 @@ export class CPURegisters {
     const value = source.value + (this.F.carry ? 1 : 0)
 
     this.A.value = this._add(this.A.value, value)
+  }
+
+  addWithCarryImmediate() {
+    this.A.value = this._add(this.A.value, this.memory.readByte(this.PC.value))
+    this.PC.value++
+  }
+
+  loadHLStackPointer() {
+    const toAdd = this.memory.readSignedByte(this.PC.value)
+
+    this.PC.value++
+
+    const distanceFromWrappingBit3 = 0xf - (this.SP.value & 0x000f)
+    const distanceFromWrappingBit7 = 0xff - (this.SP.value & 0x00ff)
+
+    this.F.halfCarry = (toAdd & 0x0f) > distanceFromWrappingBit3
+    this.F.carry = (toAdd & 0xff) > distanceFromWrappingBit7
+    this.F.zero = false
+    this.F.subtract = false
+
+    this.HL.value = this.SP.value + toAdd
   }
 
   addWithCarryFromMemory(source: CPURegister) {
@@ -108,8 +137,6 @@ export class CPURegisters {
 
   readByte(target: CPURegister) {
     target.value = this.memory.readByte(this.PC.value)
-
-    console.log(`${target.name} register value is now ${target.value}`)
     this.PC.value++
   }
 
@@ -142,6 +169,10 @@ export class CPURegisters {
 
   jump() {
     this.PC.value = this.memory.readWord(this.PC.value)
+  }
+
+  jumpToRegisterAddr() {
+    this.PC.value = this.memory.readWord(this.HL.value)
   }
 
   jumpIfNotZero() {
@@ -248,6 +279,12 @@ export class CPURegisters {
     this.A.value = this._subtract(this.A.value, source.value)
   }
 
+  subtractImmediate() {
+    this.A.value = this._subtract(this.A.value, this.memory.readByte(this.PC.value))
+
+    this.PC.value++
+  }
+
   subtractWithCarry(source: CPURegister) {
     const value = source.value - (this.F.carry ? 1 : 0)
 
@@ -258,6 +295,25 @@ export class CPURegisters {
     const value = this.memory.readByte(source.value) - (this.F.carry ? 1 : 0)
 
     this.A.value = this._subtract(this.A.value, value)
+  }
+
+  subtractWithCarryImmediate() {
+    const value = this.memory.readByte(this.PC.value) - (this.F.carry ? 1 : 0)
+
+    this.PC.value++
+
+    this.A.value = this._subtract(this.A.value, value)
+  }
+
+  compare(source: CPURegister) {
+    // do subtract operation but don't store the value. the flags changing are what's important
+    this._subtract(this.A.value, source.value)
+  }
+
+  compareImmediate() {
+    this._subtract(this.A.value, this.memory.readByte(this.PC.value))
+
+    this.PC.value++
   }
 
   subtractFromMemory(source: CPURegister) {
@@ -289,6 +345,12 @@ export class CPURegisters {
     this.A.value = this._or(this.A.value, this.memory.readByte(source.value))
   }
 
+  orImmediate() {
+    this.A.value = this._or(this.A.value, this.memory.readByte(this.PC.value))
+
+    this.PC.value++
+  }
+
   private _and(a: number, b: number): number {
     const returnVal = (a & b) & 0xff
 
@@ -308,6 +370,12 @@ export class CPURegisters {
     this.A.value = this._and(this.A.value, this.memory.readByte(source.value))
   }
 
+  andImmediate() {
+    this.A.value = this._and(this.A.value, this.memory.readByte(this.PC.value))
+
+    this.PC.value++
+  }
+
   private _xor(a: number, b: number): number {
     const returnVal = (a ^ b) & 0xff
 
@@ -321,11 +389,12 @@ export class CPURegisters {
 
   xor(source: CPURegister) {
     this.A.value = this._xor(this.A.value, source.value)
+  }
 
-    this.F.carry = false
-    this.F.halfCarry = false
-    this.F.subtract = false
-    this.F.zero = this.A.value === 0
+  xorImmediate() {
+    this.A.value = this._xor(this.A.value, this.memory.readByte(this.PC.value))
+
+    this.PC.value++
   }
 
   xorFromMemory(source: CPURegister) {
@@ -348,8 +417,6 @@ export class CPURegisters {
     this.F.subtract = true
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (target.value & 0x0f)
-
-    console.log(`${target.name} register value is now ${newValue}`)
 
     target.value = newValue
   }
@@ -482,8 +549,6 @@ export class CPURegisters {
 
     this.PC.value += 2
 
-    console.log(`return to address should be 0x${this.PC.value.toString(16)}`)
-
     this.pushToStack(this.PC.value)
 
     this.PC.value = address
@@ -514,11 +579,7 @@ export class CPURegisters {
   }
 
   returnFromFunction() {
-    const address = this.popFromStack()
-
-    console.log(`returning to address 0x${address.toString(16)}`)
-
-    this.PC.value = address
+    this.PC.value = this.popFromStack()
   }
 
   returnFromFunctionIfNotZero() {

@@ -1477,7 +1477,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP B",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.B)
     }
   })
 
@@ -1485,7 +1485,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP C",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.C)
     }
   })
 
@@ -1493,55 +1493,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP D",
     cycleTime: 4,
     operation: () => {
-      // TODO
-    }
-  })
-
-  this.instructionMap.set(0xB8, {
-    name: "CP E",
-    cycleTime: 4,
-    operation: () => {
-      // TODO
-    }
-  })
-
-  this.instructionMap.set(0xB9, {
-    name: "CP H",
-    cycleTime: 4,
-    operation: () => {
-      // TODO
-    }
-  })
-
-  this.instructionMap.set(0xBA, {
-    name: "CP (HL)",
-    cycleTime: 8,
-    operation: () => {
-      // TODO
-    }
-  })
-
-  this.instructionMap.set(0xBB, {
-    name: "CP B",
-    cycleTime: 4,
-    operation: () => {
-      // TODO
-    }
-  })
-
-  this.instructionMap.set(0xB9, {
-    name: "CP C",
-    cycleTime: 4,
-    operation: () => {
-      // TODO
-    }
-  })
-
-  this.instructionMap.set(0xBA, {
-    name: "CP D",
-    cycleTime: 4,
-    operation: () => {
-      // TODO
+      this.registers.compare(this.registers.D)
     }
   })
 
@@ -1549,7 +1501,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP E",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.E)
     }
   })
 
@@ -1557,31 +1509,31 @@ export function setInstructionMap(this: CPU) {
     name: "CP H",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.H)
     }
   })
 
   this.instructionMap.set(0xBD, {
     name: "CP L",
-    cycleTime: 4,
+    cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.L)
     }
   })
 
   this.instructionMap.set(0xBE, {
-    name: "CP (HL)",
-    cycleTime: 8,
+    name: "CP B",
+    cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.B)
     }
   })
 
   this.instructionMap.set(0xBF, {
-    name: "CP A",
+    name: "CP C",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.compare(this.registers.C)
     }
   })
 
@@ -1637,7 +1589,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.addImmediate(this.registers.A)
     }
   })
 
@@ -1701,7 +1653,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.addWithCarryImmediate()
     }
   })
 
@@ -1759,7 +1711,7 @@ export function setInstructionMap(this: CPU) {
     name: "SUB d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.subtractImmediate()
     }
   })
 
@@ -1783,7 +1735,8 @@ export function setInstructionMap(this: CPU) {
     name: "RETI",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.returnFromFunction()
+      this.interruptMasterEnabled = true
     }
   })
 
@@ -1811,7 +1764,7 @@ export function setInstructionMap(this: CPU) {
     name: "SBC A, d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.subtractWithCarryImmediate()
     }
   })
 
@@ -1862,7 +1815,7 @@ export function setInstructionMap(this: CPU) {
     name: "AND d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.andImmediate()
     }
   })
 
@@ -1878,7 +1831,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD SP, r8",
     cycleTime: 16,
     operation: () => {
-      // TODO
+      this.registers.addImmediate(this.registers.SP)
     }
   })
 
@@ -1886,7 +1839,7 @@ export function setInstructionMap(this: CPU) {
     name: "JP (HL)",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.jumpToRegisterAddr()
     }
   })
 
@@ -1906,7 +1859,7 @@ export function setInstructionMap(this: CPU) {
     name: "XOR d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.xorImmediate()
     }
   })
 
@@ -1946,7 +1899,7 @@ export function setInstructionMap(this: CPU) {
     name: "DI",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.interruptMasterEnabled = false
     }
   })
 
@@ -1964,7 +1917,7 @@ export function setInstructionMap(this: CPU) {
     name: "OR d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.orImmediate()
     }
   })
 
@@ -1981,7 +1934,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD HL, SP + r8",
     cycleTime: 12,
     operation: () => {
-      // TODO
+      this.registers.loadHLStackPointer()
     }
   })
 
@@ -2008,7 +1961,7 @@ export function setInstructionMap(this: CPU) {
     name: "EI",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.interruptMasterEnabled = true
     }
   })
 
@@ -2018,7 +1971,7 @@ export function setInstructionMap(this: CPU) {
     name: "CP d8",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.compareImmediate()
     }
   })
 

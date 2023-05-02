@@ -9,6 +9,7 @@ export class CPU {
 
   isStopped = false
   isHalted = false
+  interruptMasterEnabled = true
 
   setInstructionMap = setInstructionMap
   instructionMap: Map<Number, Instruction> = new Map()
