@@ -12,24 +12,42 @@ export class Memory {
     if (this.gameDataView == null) {
       throw new Error("game ROM not loaded into memory!")
     }
-    return this.gameDataView.getUint8(address)
+    if (this.isAccessingCartridge(address)) {
+      return this.gameDataView.getUint8(address)
+    }
+    return this.memoryView.getUint8(address)
   }
 
   readSignedByte(address: number): number {
     if (this.gameDataView == null) {
       throw new Error("game ROM not loaded into memory!")
     }
-    return this.gameDataView.getInt8(address)
+    if (this.isAccessingCartridge(address)) {
+      return this.gameDataView.getInt8(address)
+    }
+    return this.memoryView.getInt8(address)
   }
 
   readWord(address: number): number {
     if (this.gameDataView == null) {
       throw new Error("game ROM not loaded into memory!")
     }
-    return this.gameDataView.getUint16(address, true)
+    if (this.isAccessingCartridge(address)) {
+      return this.gameDataView.getUint16(address, true)
+    }
+
+    return this.memoryView.getUint16(address, true)
   }
 
   writeByte(address: number, value: number) {
     this.memoryView.setUint8(address, value)
+  }
+
+  writeWord(address: number, value: number) {
+    this.memoryView.setUint16(address, value)
+  }
+
+  isAccessingCartridge(address: number): boolean {
+    return address <= 0x7FFF || (address >= 0xA000 && address <= 0xBFFF)
   }
 }

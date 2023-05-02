@@ -48,14 +48,30 @@ export class CPURegisters {
 
 
   add(target: CPURegister, source: CPURegister) {
-    const newValue = (target.value + source.value) & 0xff
+    target.value = this._add(target.value, source.value)
+  }
+
+  private _add(a: number, b: number): number {
+    const newValue = (a + b) & 0xff
 
     this.F.subtract = false
     this.F.zero = newValue === 0
-    this.F.halfCarry = (newValue & 0x0f) < (target.value & 0x0f)
-    this.F.carry = newValue < target.value
+    this.F.halfCarry = (newValue & 0x0f) < (a & 0x0f)
+    this.F.carry = newValue < a
 
-    target.value = newValue
+    return newValue
+  }
+
+  addFromRegisterAddr(target: CPURegister, source: CPURegister) {
+    const value = this.memory.readByte(source.value)
+
+    target.value = this._add(target.value, value)
+  }
+
+  addWithCarry(source: CPURegister) {
+    const value = source.value + (this.F.carry ? 1 : 0)
+
+    this.A.value = this._add(this.A.value, value)
   }
 
   complementCarryFlag() {
@@ -65,9 +81,23 @@ export class CPURegisters {
     this.F.carry = !this.F.carry
   }
 
+  setCarryFlag() {
+    this.F.subtract = false
+    this.F.halfCarry = false
+    this.F.carry = true
+  }
+
   readByte(target: CPURegister) {
     target.value = this.memory.readByte(this.PC.value)
     this.PC.value++
+  }
+
+  loadFromBase(target: CPURegister) {
+    const baseAddress = this.memory.readByte(this.PC.value)
+
+    this.PC.value++
+
+    target.value = this.memory.readByte(0xff00 + baseAddress)
   }
 
   loadByte(target: CPURegister, source: CPURegister) {
@@ -79,9 +109,18 @@ export class CPURegisters {
     source.value++
   }
 
+  loadByteAndDecrementSource(target: CPURegister, source: CPURegister) {
+    target.value = this.memory.readByte(source.value)
+    source.value--
+  }
+
   loadWord(target: CPURegister) {
     target.value = this.memory.readWord(this.PC.value)
     this.PC.value += 2
+  }
+
+  jump() {
+    this.PC.value = this.memory.readWord(this.PC.value)
   }
 
   jumpIfNotZero() {
@@ -177,6 +216,11 @@ export class CPURegisters {
 
   writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
     this.memory.writeByte(target.value, source.value)
+  }
+
+  writeByteIntoRegisterAddress(target: CPURegister) {
+    this.memory.writeByte(target.value, this.memory.readByte(this.PC.value))
+    this.PC.value++
   }
 
   subtract(source: CPURegister) {
@@ -365,6 +409,42 @@ export class CPURegisters {
     this.F.carry = newValue > target.value
 
     this.memory.writeByte(target.value, newValue)
+  }
+
+  callFunction() {
+    const address = this.memory.readWord(this.PC.value)
+
+    this.PC.value += 2
+
+    this.SP.value -= 2
+
+    this.memory.writeWord(this.SP.value, this.PC.value)
+
+    this.PC.value = address
+  }
+
+  callFunctionIfNotZero() {
+    if (!this.F.zero) {
+      this.callFunction()
+    }
+  }
+
+  callFunctionIfZero() {
+    if (this.F.zero) {
+      this.callFunction()
+    }
+  }
+
+  callFunctionIfNotCarry() {
+    if (!this.F.carry) {
+      this.callFunction()
+    }
+  }
+
+  callFunctionIfCarry() {
+    if (this.F.carry) {
+      this.callFunction()
+    }
   }
 }
 

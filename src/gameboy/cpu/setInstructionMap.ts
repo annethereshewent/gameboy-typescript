@@ -402,7 +402,7 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x32, {
-    name: "(HL-), A",
+    name: "LD (HL-), A",
     cycleTime: 8,
     operation: () => {
       this.registers.writeToMemoryRegisterAddrAndDecrementTarget(this.registers.HL, this.registers.A)
@@ -437,7 +437,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), d8",
     cycleTime: 12,
     operation: () => {
-       // TODO
+      this.registers.writeByteIntoRegisterAddress(this.registers.HL)
     }
   })
 
@@ -445,7 +445,7 @@ export function setInstructionMap(this: CPU) {
     name: "SCF",
     cycleTime: 4,
     operation: () => {
-       // TODO
+      this.registers.setCarryFlag()
     }
   })
 
@@ -469,7 +469,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (HL-)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.loadByteAndDecrementSource(this.registers.A, this.registers.HL)
     }
   })
 
@@ -818,10 +818,10 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x66, {
-    name: "H, (HL)",
+    name: "LD H, (HL)",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.loadByte(this.registers.H, this.registers.HL)
     }
   })
 
@@ -901,7 +901,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), B",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.B)
     }
   })
 
@@ -909,7 +909,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL) C",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.C)
     }
   })
 
@@ -917,7 +917,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), D",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.D)
     }
   })
 
@@ -925,7 +925,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), E",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.E)
     }
   })
 
@@ -933,7 +933,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), H",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.H)
     }
   })
 
@@ -941,7 +941,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), L",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.L)
     }
   })
 
@@ -957,7 +957,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (HL), A",
     cycleTime: 8,
     operation: () => {
-      // TODO
+      this.registers.writeToMemoryRegisterAddr(this.registers.HL, this.registers.A)
     }
   })
 
@@ -1077,7 +1077,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, (HL)",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addFromRegisterAddr(this.registers.A, this.registers.HL)
     }
   })
 
@@ -1093,7 +1093,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, B",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.B)
     }
   })
 
@@ -1101,7 +1101,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, C",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.C)
     }
   })
 
@@ -1109,7 +1109,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, D",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.D)
     }
   })
 
@@ -1117,7 +1117,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, E",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.E)
     }
   })
 
@@ -1125,7 +1125,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, H",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.H)
     }
   })
 
@@ -1133,7 +1133,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, L",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.L)
     }
   })
 
@@ -1149,7 +1149,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADC A, A",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      this.registers.addWithCarry(this.registers.A)
     }
   })
 
@@ -1613,7 +1613,7 @@ export function setInstructionMap(this: CPU) {
     name: "JP a16",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = this.memory.readWord(this.registers.PC.value)
+      this.registers.jump()
     }
   })
 
@@ -1621,7 +1621,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL NZ, a16",
     cycleTime: this.registers.F.zero ? 24 : 12,
     operation: () => {
-      // TODO
+      this.registers.callFunctionIfNotZero()
     }
   })
 
@@ -1685,7 +1685,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL Z, a16",
     cycleTime: this.registers.F.zero ? 24 : 12,
     operation: () => {
-      // TODO
+      this.registers.callFunctionIfZero()
     }
   })
 
@@ -1693,7 +1693,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL a16",
     cycleTime: 24,
     operation: () => {
-      // TODO
+      this.registers.callFunction()
     }
   })
 
@@ -1743,7 +1743,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL NC, a16",
     cycleTime: this.registers.F.carry ? 24 : 12,
     operation: () => {
-      // TODO
+      this.registers.callFunctionIfNotCarry()
     }
   })
 
@@ -1801,7 +1801,7 @@ export function setInstructionMap(this: CPU) {
     name: "CALL C, a16",
     cycleTime: this.registers.F.carry ? 24 : 12,
     operation: () => {
-      // TODO
+      this.registers.callFunctionIfCarry()
     }
   })
 
@@ -1922,7 +1922,7 @@ export function setInstructionMap(this: CPU) {
     name: "LDH A, (a8)",
     cycleTime: 12,
     operation: () => {
-      // TODO
+      this.registers.loadFromBase(this.registers.A)
     }
   })
 
@@ -1973,6 +1973,7 @@ export function setInstructionMap(this: CPU) {
     cycleTime: 16,
     operation: () => {
       this.registers.PC.value = 0x30
+      throw new Error("should not be getting here")
     }
   })
 
@@ -2026,6 +2027,7 @@ export function setInstructionMap(this: CPU) {
     cycleTime: 16,
     operation: () => {
       this.registers.PC.value = 0x38
+      throw new Error("shouldn't be getting here")
     }
   })
 }

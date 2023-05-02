@@ -24,8 +24,8 @@ function App() {
       if (rom != null) {
         gameboy.loadCartridge(rom as ArrayBuffer)
 
-        // // debug: run the first 256 instructions in the cartridge and see what happens
-        for (let i = 0; i < 1024; i++) {
+        // // debug: run the first couple of instrucitons and see what happens
+        for (let i = 0; i < 2048; i++) {
           gameboy.cpu.step()
         }
 
