@@ -1629,7 +1629,10 @@ export function setInstructionMap(this: CPU) {
     name: "PREFIX CB",
     cycleTime: 4,
     operation: () => {
-      // TODO
+      const cbOpCode = this.memory.readByte(this.registers.PC.value)
+      this.registers.PC.value++
+
+      this.cbMap.get(cbOpCode)?.operation()
     }
   })
 
@@ -1926,7 +1929,6 @@ export function setInstructionMap(this: CPU) {
     cycleTime: 16,
     operation: () => {
       this.registers.PC.value = 0x30
-      throw new Error("should not be getting here")
     }
   })
 

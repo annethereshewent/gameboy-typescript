@@ -1,6 +1,7 @@
 import { CPURegisters } from "./CPURegisters"
 import { Instruction } from "./Instruction"
 import { Memory } from "./Memory"
+import { setCbMap } from "./setCbMap"
 import { setInstructionMap } from "./setInstructionMap"
 
 export class CPU {
@@ -12,10 +13,13 @@ export class CPU {
   interruptMasterEnabled = true
 
   setInstructionMap = setInstructionMap
+  setCbMap = setCbMap
   instructionMap: Map<Number, Instruction> = new Map()
+  cbMap: Map<Number, Instruction> = new Map()
 
   constructor() {
     this.setInstructionMap()
+    this.setCbMap()
   }
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
