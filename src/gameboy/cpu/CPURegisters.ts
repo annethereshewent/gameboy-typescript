@@ -137,11 +137,16 @@ export class CPURegisters {
 
   readByte(target: CPURegister) {
     target.value = this.memory.readByte(this.PC.value)
+
+    console.log(`read ${this.memory.readByte(this.PC.value)}`)
+
     this.PC.value++
   }
 
   loadFromBase(target: CPURegister) {
     const baseAddress = this.memory.readByte(this.PC.value)
+
+    console.log(`reading from 0x${(0xff00 + baseAddress).toString(16)}`)
 
     this.PC.value++
 
@@ -230,6 +235,7 @@ export class CPURegisters {
       this.PC.value++
       this.PC.value += jumpDistance
     } else {
+      console.log('zero!')
       this.PC.value++
     }
   }
@@ -311,6 +317,7 @@ export class CPURegisters {
   }
 
   compareImmediate() {
+    console.log(`comparing ${this.A.value} to ${this.memory.readByte(this.PC.value)}`)
     this._subtract(this.A.value, this.memory.readByte(this.PC.value))
 
     this.PC.value++

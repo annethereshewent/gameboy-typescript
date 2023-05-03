@@ -24,10 +24,7 @@ function App() {
       if (rom != null) {
         gameboy.loadCartridge(rom as ArrayBuffer)
 
-        // // debug: run the first couple of instrucitons and see what happens
-        for (let i = 0; i < Math.pow(2, 16); i++) {
-          gameboy.cpu.step()
-        }
+        gameboy.run()
 
         // gameboy.loadGame(rom as ArrayBuffer)
 

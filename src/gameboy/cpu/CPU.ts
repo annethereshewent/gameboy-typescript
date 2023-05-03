@@ -5,8 +5,8 @@ import { setCbMap } from "./setCbMap"
 import { setInstructionMap } from "./setInstructionMap"
 
 export class CPU {
-  memory = new Memory()
-  registers = new CPURegisters(this.memory)
+  memory: Memory
+  registers: CPURegisters
 
   isStopped = false
   isHalted = false
@@ -17,7 +17,10 @@ export class CPU {
   instructionMap: Map<Number, Instruction> = new Map()
   cbMap: Map<Number, Instruction> = new Map()
 
-  constructor() {
+  constructor(memory: Memory) {
+    this.registers = new CPURegisters(memory)
+    this.memory = memory
+
     this.setInstructionMap()
     this.setCbMap()
   }
