@@ -425,6 +425,8 @@ export class CPURegisters {
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (target.value & 0x0f)
 
+    console.log(`register value is now ${newValue}`)
+
     target.value = newValue
   }
 

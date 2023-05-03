@@ -36,7 +36,7 @@ export class CPU {
     this.registers = new CPURegisters(this.memory)
   }
 
-  step() {
+  step(): number {
     const instructionAddress = this.memory.readByte(this.registers.PC.value)
 
     const instruction = this.instructionMap.get(instructionAddress)
@@ -46,6 +46,8 @@ export class CPU {
       this.registers.PC.value++
 
       instruction.operation()
+
+      return instruction.cycleTime
     } else {
       throw new Error(`invalid instruction code: 0x${instructionAddress.toString(16).toUpperCase()}`)
     }
