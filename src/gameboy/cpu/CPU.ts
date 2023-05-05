@@ -51,37 +51,31 @@ export class CPU {
   checkInterrupts() {
     const { interruptRequestRegister, interruptEnableRegister } = this.registers
     if (this.interruptMasterEnabled) {
-      console.log('checking interrupts')
       if (interruptEnableRegister.isVBlankInterruptEnabled() && interruptRequestRegister.vBlankInterruptRequest()) {
-        console.log(`vblank interrupt received!`)
         interruptRequestRegister.clearVBlankRequest()
         this.registers.PC.value = VBLANK_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isLCDStatInterruptEnabled() && interruptRequestRegister.lcdStatInterruptRequest()) {
-        console.log('lcd interrupt received!')
         interruptRequestRegister.clearLcdStatRequest()
         this.registers.PC.value = LCD_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isTimerInterruptEnabled() && interruptRequestRegister.timerInterruptRequest()) {
-        console.log('timer interrupt received!')
         interruptRequestRegister.clearTimerRequest()
         this.registers.PC.value = TIMER_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isSerialInterruptEnabled() && interruptRequestRegister.serialInterruptRequest()) {
-        console.log('serial interrupt received!')
         interruptRequestRegister.clearSerialRequest()
         this.registers.PC.value = SERIAL_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isJoypadInterruptEnabled() && interruptRequestRegister.joypadInterruptRequest()) {
-        console.log('joypad interrupt received!')
         interruptRequestRegister.clearJoypadRequest()
         this.registers.PC.value = JOYPAD_INTERRUPT_ADDRESS
 
@@ -103,7 +97,7 @@ export class CPU {
 
     const instruction = this.instructionMap.get(instructionAddress)
     if (instruction != null) {
-      console.log(`found instruction ${instruction.name} with code 0x${instructionAddress.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
+      // console.log(`found instruction ${instruction.name} with code 0x${instructionAddress.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
 
       this.registers.PC.value++
 

@@ -14,8 +14,6 @@ export function setCbMap(this: CPU) {
     cycleTime: 8,
     operation: () => {
       this.registers.A.value = this.registers.A.value & ~(0b1)
-
-      console.log(`register A's value is now ${this.registers.A.value}`)
     }
   })
 

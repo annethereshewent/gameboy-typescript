@@ -289,8 +289,6 @@ export function setInstructionMap(this: CPU) {
     cycleTime: 8,
     operation: () => {
       this.registers.HL.value++
-
-      console.log(`HL is now ${this.registers.HL.value}`)
     }
   })
 
@@ -1659,8 +1657,6 @@ export function setInstructionMap(this: CPU) {
         throw new Error("CB operation not implemented yet")
       }
 
-      console.log(`found CB instruction ${instruction.name}`)
-
       instruction.operation()
     }
   })
@@ -1945,7 +1941,6 @@ export function setInstructionMap(this: CPU) {
     name: "DI",
     cycleTime: 4,
     operation: () => {
-      console.log("interrupts disabled :(")
       this.interruptMasterEnabled = false
     }
   })

@@ -7,6 +7,9 @@ const memory = new Memory()
 const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
 
+
+const MAX_FRAMES_TO_RUN = 5 * 60 * 60
+
 export class Gameboy {
 
   cpu = new CPU(memory)
@@ -47,8 +50,10 @@ export class Gameboy {
       this.frames++
     }
 
-    if (this.frames !== 120) {
+    if (this.frames !== MAX_FRAMES_TO_RUN) {
       requestAnimationFrame((time: number) => this.runFrame(time))
+    } else {
+      alert(`finished running ${MAX_FRAMES_TO_RUN} frames successfully!`)
     }
 
     this.cycles %= GPU.CyclesPerFrame

@@ -46,12 +46,10 @@ export class InterruptRequestRegister extends MemoryRegister {
   }
 
   triggerVBlankRequest() {
-    console.log('triggering vblank request')
     this.setBit(0, 1)
   }
 
   triggerLcdStatRequest() {
-    console.log('triggering lcd stat request')
     this.setBit(1, 1)
   }
 

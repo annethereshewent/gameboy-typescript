@@ -153,15 +153,11 @@ export class CPURegisters {
   readByte(target: CPURegister) {
     target.value = this.memory.readByte(this.PC.value)
 
-    console.log(`read ${this.memory.readByte(this.PC.value)} at address 0x${this.PC.value.toString(16)}`)
-
     this.PC.value++
   }
 
   loadFromBase(target: CPURegister) {
     const baseAddress = this.memory.readByte(this.PC.value)
-
-    console.log(`reading from 0x${(0xff00 + baseAddress).toString(16)} value ${this.memory.readByte(0xff00 + baseAddress)}`)
 
     this.PC.value++
 
@@ -250,7 +246,6 @@ export class CPURegisters {
       this.PC.value++
       this.PC.value += jumpDistance
     } else {
-      console.log('zero!')
       this.PC.value++
     }
   }
@@ -279,7 +274,6 @@ export class CPURegisters {
     const baseAddress = this.memory.readByte(this.PC.value)
     this.PC.value++
 
-    console.log(`writing to address 0x${(0xff00 + baseAddress).toString(16)} value ${source.value}`)
     this.memory.writeByte(0xff00 + baseAddress, source.value)
   }
 
@@ -287,18 +281,14 @@ export class CPURegisters {
     const memoryAddress = this.memory.readWord(this.PC.value)
     this.PC.value += 2
 
-    console.log(`writing to memory address 0x${memoryAddress.toString(16)} value ${source.value}`)
-
     this.memory.writeByte(memoryAddress, source.value)
   }
 
   writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
-    console.log(`writing to memory address 0x${target.value.toString(16)} value ${source.value}`)
     this.memory.writeByte(target.value, source.value)
   }
 
   writeByteIntoRegisterAddress(target: CPURegister) {
-    console.log(`writing to memory address 0x${target.value.toString(16)} value ${this.memory.readByte(this.PC.value)}`)
     this.memory.writeByte(target.value, this.memory.readByte(this.PC.value))
     this.PC.value++
   }
@@ -339,7 +329,6 @@ export class CPURegisters {
   }
 
   compareImmediate() {
-    console.log(`comparing ${this.A.value} to ${this.memory.readByte(this.PC.value)}`)
     this._subtract(this.A.value, this.memory.readByte(this.PC.value))
 
     this.PC.value++
@@ -358,7 +347,6 @@ export class CPURegisters {
   }
 
   load(target: CPURegister, source: CPURegister) {
-    console.log(`register ${source.name}'s value is ${source.value}`)
     target.value = source.value
   }
 
@@ -375,9 +363,6 @@ export class CPURegisters {
 
   or(source: CPURegister) {
     this.A.value = this._or(this.A.value, source.value)
-
-    console.log(`register A's value is ${this.A.value.toString(2)}`)
-    console.log(`register ${source.name}'s value is ${source.value.toString(2)}`)
   }
 
   orFromMemory(source: CPURegister) {
@@ -427,10 +412,7 @@ export class CPURegisters {
   }
 
   xor(source: CPURegister) {
-    console.log(`register A's value is ${this.A.value}, register ${source.name}'s value is ${source.value}`)
     this.A.value = this._xor(this.A.value, source.value)
-
-    console.log(`register A's value is now ${this.A.value}`)
   }
 
   xorImmediate() {
@@ -450,8 +432,6 @@ export class CPURegisters {
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) < (target.value & 0x0f)
 
-    console.log(`register ${target.name}'s value is now ${target.value}`)
-
     target.value = newValue
   }
 
@@ -461,8 +441,6 @@ export class CPURegisters {
     this.F.subtract = true
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (target.value & 0x0f)
-
-    console.log(`register ${target.name}'s value is now ${newValue}`)
 
     target.value = newValue
   }
@@ -528,7 +506,6 @@ export class CPURegisters {
   }
 
   writeToMemoryRegisterAddrAndIncrementTarget(target: CPURegister, source: CPURegister) {
-    console.log(`attempting to write to address 0x${target.value.toString(16)}`)
     this.memory.writeByte(target.value, source.value)
 
     target.value++
@@ -537,11 +514,7 @@ export class CPURegisters {
   writeToMemoryRegisterAddrAndDecrementTarget(target: CPURegister, source: CPURegister) {
     this.memory.writeByte(target.value, source.value)
 
-    console.log(`writing to memory address 0x${target.value.toString(16)} value ${source.value}`)
-
     target.value--
-
-    console.log(`register ${target.name}'s value is now 0x${target.value.toString(16)}`)
   }
 
   decimalAdjustAccumulator() {
@@ -597,8 +570,6 @@ export class CPURegisters {
 
   callFunction() {
     const address = this.memory.readWord(this.PC.value)
-
-    console.log(`calling function at address 0x${address.toString(16)}`)
 
     this.PC.value += 2
 
