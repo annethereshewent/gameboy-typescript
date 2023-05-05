@@ -1,6 +1,6 @@
-import { GPURegister } from "./GPURegister"
+import { MemoryRegister } from "../../cpu/memory_registers/MemoryRegister"
 
-export class ObjectPaletteRegister extends GPURegister {
+export class ObjectPaletteRegister extends MemoryRegister {
   get color0() {
     return this.value & 0b11
   }

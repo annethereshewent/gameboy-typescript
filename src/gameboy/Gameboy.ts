@@ -47,7 +47,7 @@ export class Gameboy {
       this.frames++
     }
 
-    if (this.frames !== 60) {
+    if (this.frames !== 120) {
       requestAnimationFrame((time: number) => this.runFrame(time))
     }
 

@@ -1,6 +1,6 @@
 import { Memory } from "../../cpu/Memory"
 import { BackgroundPaletteRegister } from "./BackgroundPaletteRegister"
-import { GPURegister } from "./GPURegister"
+import { MemoryRegister } from "../../cpu/memory_registers/MemoryRegister"
 import { LCDControlRegister } from "./LCDControlRegister"
 import { ObjectPaletteRegister } from "./ObjectPaletteRegister"
 import { LCDStatusRegister } from "./lcd_status/LCDStatusRegister"
@@ -9,27 +9,30 @@ export class GPURegisters {
   memory: Memory
 
   lcdStatusRegister: LCDStatusRegister
-  lineYRegister: GPURegister
+  lineYRegister: MemoryRegister
   lcdControlRegister: LCDControlRegister
-  scrollYRegister: GPURegister
-  lineYCompareRegister: GPURegister
-  windowYRegister: GPURegister
-  backgroundPaletteRegister: GPURegister
+  scrollYRegister: MemoryRegister
+  lineYCompareRegister: MemoryRegister
+  windowYRegister: MemoryRegister
+  backgroundPaletteRegister: MemoryRegister
   objectPaletteRegister0: ObjectPaletteRegister
   objectPaletteRegister1: ObjectPaletteRegister
 
   constructor(memory: Memory) {
     this.memory = memory
 
-    this.lcdStatusRegister = new LCDStatusRegister(0xff41, memory)
-    this.lineYRegister = new GPURegister(0xff44, memory)
-    this.lcdControlRegister = new LCDControlRegister(0xff40, memory)
-    this.scrollYRegister = new GPURegister(0xff42, memory)
-    this.lineYCompareRegister = new GPURegister(0xff45, memory)
-    this.windowYRegister = new GPURegister(0xff4a, memory)
-    this.backgroundPaletteRegister = new BackgroundPaletteRegister(0xff47, memory)
+    this.lcdStatusRegister = new LCDStatusRegister(memory)
+    this.lineYRegister = new MemoryRegister(0xff44, memory)
+    this.lcdControlRegister = new LCDControlRegister(memory)
+    this.scrollYRegister = new MemoryRegister(0xff42, memory)
+    this.lineYCompareRegister = new MemoryRegister(0xff45, memory)
+    this.windowYRegister = new MemoryRegister(0xff4a, memory)
+    this.backgroundPaletteRegister = new BackgroundPaletteRegister(memory)
     this.objectPaletteRegister0 = new ObjectPaletteRegister(0xff48, memory)
     this.objectPaletteRegister1 = new ObjectPaletteRegister(0xff49, memory)
+
+    // default value according to docs
+    this.lcdControlRegister.value = 0x83
   }
 }
 

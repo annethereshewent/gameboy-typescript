@@ -1,4 +1,5 @@
 import { Memory } from "../cpu/Memory"
+import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { GPURegisters } from "./registers/GPURegisters"
 import { LCDMode } from "./registers/lcd_status/LCDMode"
 
@@ -35,6 +36,8 @@ export class GPU {
   }
 
   step(cycles: number) {
+    const interruptRequestRegister = new InterruptRequestRegister(this.memory)
+
     this.cycles += cycles
     switch (this.registers.lcdStatusRegister.mode) {
       case LCDMode.HBlank:
@@ -44,6 +47,7 @@ export class GPU {
 
           if (this.registers.lineYRegister.value === GPU.screenHeight) {
             this.registers.lcdStatusRegister.mode = LCDMode.VBlank
+            interruptRequestRegister.triggerVBlankRequest()
           } else {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
           }
@@ -53,6 +57,12 @@ export class GPU {
         break
       case LCDMode.VBlank:
         if (this.cycles >= GPU.CyclesPerVBlank) {
+          this.registers.lcdStatusRegister.lineYCompareMatching = this.registers.lineYCompareRegister.value === this.registers.lineYRegister.value ? 1 : 0
+
+          if (this.registers.lcdStatusRegister.isLineYCompareMatching() && this.registers.lcdStatusRegister.isLineYCompareMatching()) {
+            interruptRequestRegister.triggerLcdStatRequest()
+          }
+
           this.registers.lineYRegister.value++
 
           if (this.registers.lineYRegister.value === GPU.offscreenHeight) {
@@ -73,6 +83,17 @@ export class GPU {
         break
       case LCDMode.TransferringToLCD:
         if (this.cycles >= GPU.CyclesPerScanlineVram) {
+
+          if (this.registers.lcdStatusRegister.isHBlankInterruptSelected()) {
+            interruptRequestRegister.triggerLcdStatRequest()
+          }
+
+          this.registers.lcdStatusRegister.lineYCompareMatching = this.registers.lineYCompareRegister.value === this.registers.lineYRegister.value ? 1 : 0
+
+          if (this.registers.lcdStatusRegister.isLineYCompareMatching() && this.registers.lcdStatusRegister.isLineYCompareMatching()) {
+            interruptRequestRegister.triggerLcdStatRequest()
+          }
+
           this.registers.lcdStatusRegister.mode = LCDMode.HBlank
 
           this.cycles %= GPU.CyclesPerScanlineVram

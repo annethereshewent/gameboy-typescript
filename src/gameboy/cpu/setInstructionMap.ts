@@ -289,6 +289,8 @@ export function setInstructionMap(this: CPU) {
     cycleTime: 8,
     operation: () => {
       this.registers.HL.value++
+
+      console.log(`HL is now ${this.registers.HL.value}`)
     }
   })
 
@@ -550,7 +552,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD B, E",
     cycleTime: 4,
     operation: () => {
-      this.registers.load(this.registers.B, this.registers.D)
+      this.registers.load(this.registers.B, this.registers.E)
     }
   })
 
@@ -1531,18 +1533,18 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xBE, {
-    name: "CP B",
+    name: "CP (HL)",
     cycleTime: 4,
     operation: () => {
-      this.registers.compare(this.registers.B)
+      this.registers.compareFromRegisterAddr(this.registers.HL)
     }
   })
 
   this.instructionMap.set(0xBF, {
-    name: "CP C",
+    name: "CP A",
     cycleTime: 4,
     operation: () => {
-      this.registers.compare(this.registers.C)
+      this.registers.compare(this.registers.A)
     }
   })
 
@@ -1943,6 +1945,7 @@ export function setInstructionMap(this: CPU) {
     name: "DI",
     cycleTime: 4,
     operation: () => {
+      console.log("interrupts disabled :(")
       this.interruptMasterEnabled = false
     }
   })

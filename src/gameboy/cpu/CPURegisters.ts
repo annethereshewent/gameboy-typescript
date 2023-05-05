@@ -1,4 +1,7 @@
 import { Memory } from "./Memory"
+import { InterruptEnableRegister } from "./memory_registers/InterruptEnableRegister"
+import { InterruptRequestRegister } from "./memory_registers/InterruptRequestRegister"
+import { CPURegister } from "./CPURegister"
 
 export class CPURegisters {
   A: CPURegister
@@ -18,34 +21,46 @@ export class CPURegisters {
   SP: CPURegister
   PC: CPURegister
 
+  interruptEnableRegister: InterruptEnableRegister
+  interruptRequestRegister: InterruptRequestRegister
+
   registerPairs: CPURegister[]
 
   memory: Memory
 
+  registerDataView: DataView
+
   constructor(memory: Memory) {
-    this.A = new CPURegister("A", 1)
-    this.B = new CPURegister("B")
-    this.C = new CPURegister("C", 0x13)
-    this.D = new CPURegister("D")
-    this.E = new CPURegister("E", 0xd8)
-    this.F = new FlagsRegister()
-    this.H = new CPURegister("H")
-    this.L = new CPURegister("L")
+
+    this.registerDataView = new DataView(new ArrayBuffer(12))
+
+    this.A = new CPURegister("A", 0, 1, this.registerDataView, false)
+    this.B = new CPURegister("B", 0, 3, this.registerDataView, false)
+    this.C = new CPURegister("C", 0x13, 2, this.registerDataView, false)
+    this.D = new CPURegister("D", 0, 5, this.registerDataView, false)
+    this.E = new CPURegister("E", 0xd8, 4, this.registerDataView, false)
+    this.F = new FlagsRegister("F", 0, 0, this.registerDataView, false)
+    this.H = new CPURegister("H", 0, 7, this.registerDataView,false)
+    this.L = new CPURegister("L", 0, 6, this.registerDataView, false)
 
 
     // see http://bgb.bircd.org/pandocs.htm#powerupsequence for info on initial register values
-    this.AF = new CPURegister("AF", 0x1B0)
-    this.BC = new CPURegister("BC", 0x13)
-    this.DE = new CPURegister("DE", 0xd8)
-    this.HL = new CPURegister("HL", 0x14d)
+    this.AF = new CPURegister("AF", 0, 0, this.registerDataView, true)
+    this.BC = new CPURegister("BC", 0, 2, this.registerDataView, true)
+    this.DE = new CPURegister("DE", 0, 4, this.registerDataView, true)
+    this.HL = new CPURegister("HL", 0x14d, 6, this.registerDataView, true)
     // stack pointer starts at the top of the stack memory, which is at 0xfffe
-    this.SP = new CPURegister("SP", 0xfffe)
+    this.SP = new CPURegister("SP", 0xfffe, 8, this.registerDataView, true)
     // first 255 (0xFF) instructions in memory are reserved for the gameboy
-    this.PC = new CPURegister("PC", 0x100)
+    this.PC = new CPURegister("PC", 0x100, 10, this.registerDataView, true)
 
     this.registerPairs = [this.AF, this.BC, this.DE, this.HL]
 
     this.memory = memory
+
+    // memory registers
+    this.interruptEnableRegister = new InterruptEnableRegister(memory)
+    this.interruptRequestRegister = new InterruptRequestRegister(memory)
   }
 
 
@@ -96,7 +111,7 @@ export class CPURegisters {
   }
 
   addWithCarryImmediate() {
-    this.A.value = this._add(this.A.value, this.memory.readByte(this.PC.value))
+    this.A.value = this._add(this.A.value, this.memory.readByte(this.PC.value) + (this.F.carry ? 1 : 0))
     this.PC.value++
   }
 
@@ -271,14 +286,19 @@ export class CPURegisters {
   writeToMemory16bit(source: CPURegister) {
     const memoryAddress = this.memory.readWord(this.PC.value)
     this.PC.value += 2
+
+    console.log(`writing to memory address 0x${memoryAddress.toString(16)} value ${source.value}`)
+
     this.memory.writeByte(memoryAddress, source.value)
   }
 
   writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
+    console.log(`writing to memory address 0x${target.value.toString(16)} value ${source.value}`)
     this.memory.writeByte(target.value, source.value)
   }
 
   writeByteIntoRegisterAddress(target: CPURegister) {
+    console.log(`writing to memory address 0x${target.value.toString(16)} value ${this.memory.readByte(this.PC.value)}`)
     this.memory.writeByte(target.value, this.memory.readByte(this.PC.value))
     this.PC.value++
   }
@@ -323,6 +343,12 @@ export class CPURegisters {
     this._subtract(this.A.value, this.memory.readByte(this.PC.value))
 
     this.PC.value++
+  }
+
+  compareFromRegisterAddr(source: CPURegister) {
+    const compareTo = this.memory.readByte(source.value)
+
+    this._subtract(this.A.value, compareTo)
   }
 
   subtractFromMemory(source: CPURegister) {
@@ -511,9 +537,11 @@ export class CPURegisters {
   writeToMemoryRegisterAddrAndDecrementTarget(target: CPURegister, source: CPURegister) {
     this.memory.writeByte(target.value, source.value)
 
+    console.log(`writing to memory address 0x${target.value.toString(16)} value ${source.value}`)
+
     target.value--
 
-    console.log(`register ${target.name}'s value is now ${target.value}`)
+    console.log(`register ${target.name}'s value is now 0x${target.value.toString(16)}`)
   }
 
   decimalAdjustAccumulator() {
@@ -569,6 +597,8 @@ export class CPURegisters {
 
   callFunction() {
     const address = this.memory.readWord(this.PC.value)
+
+    console.log(`calling function at address 0x${address.toString(16)}`)
 
     this.PC.value += 2
 
@@ -657,7 +687,7 @@ const SUBTRACT_FLAG_BYTE_POSITION = 6
 const HALF_CARRY_FLAG_BYTE_POSITION = 5
 const CARRY_FLAG_BYTE_POSITION = 4
 
-class FlagsRegister {
+class FlagsRegister extends CPURegister {
   get zero() {
     return ((this.value >> ZERO_FLAG_BYTE_POSITION) & 1) === 1
   }
@@ -704,18 +734,5 @@ class FlagsRegister {
     } else {
       this.value &= ~(1 << CARRY_FLAG_BYTE_POSITION)
     }
-  }
-
-  // the actual value that translates to the above
-  value = 0
-}
-
-export class CPURegister {
-
-  value: number
-  name: string
-  constructor(name: string, value = 0) {
-    this.value = value
-    this.name = name
   }
 }

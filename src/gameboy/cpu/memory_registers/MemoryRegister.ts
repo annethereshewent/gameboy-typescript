@@ -1,6 +1,6 @@
-import { Memory } from "../../cpu/Memory"
+import { Memory } from "../Memory"
 
-export class GPURegister {
+export class MemoryRegister {
   private address: number
   private memory: Memory
 
