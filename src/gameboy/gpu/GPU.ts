@@ -15,6 +15,8 @@ export class GPU {
   private static ScanlinesPerFrame = 144
   static CyclesPerFrame = (GPU.CyclesPerScanline * GPU.ScanlinesPerFrame) + GPU.CyclesPerVBlank
 
+  cycles = 0
+
   colors = [
     { red: 255, green: 255, blue: 255 },
     { red: 192, green: 192, blue: 192 },
@@ -32,31 +34,49 @@ export class GPU {
     this.registers = new GPURegisters(memory)
   }
 
-  step() {
+  step(cycles: number) {
+    this.cycles += cycles
     switch (this.registers.lcdStatusRegister.mode) {
       case LCDMode.HBlank:
-        this.drawLine()
-        this.registers.lineYRegister.value++
+        if (this.cycles >= GPU.CyclesPerHBlank) {
+          this.drawLine()
+          this.registers.lineYRegister.value++
 
-        if (this.registers.lineYRegister.value === GPU.screenHeight) {
-          this.registers.lcdStatusRegister.mode = LCDMode.VBlank
-        } else {
-          this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
+          if (this.registers.lineYRegister.value === GPU.screenHeight) {
+            this.registers.lcdStatusRegister.mode = LCDMode.VBlank
+          } else {
+            this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
+          }
+
+          this.cycles %= GPU.CyclesPerHBlank
         }
         break
       case LCDMode.VBlank:
-        this.registers.lineYRegister.value++
+        if (this.cycles >= GPU.CyclesPerVBlank) {
+          this.registers.lineYRegister.value++
 
-        if (this.registers.lineYRegister.value === GPU.offscreenHeight) {
-          this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
-          this.registers.lineYRegister.value = 0
+          if (this.registers.lineYRegister.value === GPU.offscreenHeight) {
+            this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
+            this.registers.lineYRegister.value = 0
+          }
+
+          this.cycles %= GPU.CyclesPerVBlank
         }
+
         break
       case LCDMode.SearchingOAM:
-        this.registers.lcdStatusRegister.mode = LCDMode.TransferringToLCD
+        if (this.cycles >= GPU.CyclesPerScanlineOam) {
+          this.registers.lcdStatusRegister.mode = LCDMode.TransferringToLCD
+
+          this.cycles %= GPU.CyclesPerScanlineOam
+        }
         break
       case LCDMode.TransferringToLCD:
-        this.registers.lcdStatusRegister.mode = LCDMode.HBlank
+        if (this.cycles >= GPU.CyclesPerScanlineVram) {
+          this.registers.lcdStatusRegister.mode = LCDMode.HBlank
+
+          this.cycles %= GPU.CyclesPerScanlineVram
+        }
         break
     }
   }

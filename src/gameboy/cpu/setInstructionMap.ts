@@ -1,6 +1,7 @@
 import { CPU } from "./CPU"
 
 export function setInstructionMap(this: CPU) {
+  const { registers } = this
   this.instructionMap.set(0x0, {
     name: "NOP",
     cycleTime: 4,
@@ -259,7 +260,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x20, {
     name: "JR NZ, r8",
-    cycleTime: !this.registers.F.carry ? 12 : 8,
+    get cycleTime() {
+      return registers.F.carry ? 12 : 8
+    },
     operation: () => {
       this.registers.relativeJumpIfNotZero()
     },
@@ -323,7 +326,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x28, {
     name: "JR Z, r8",
-    cycleTime: this.registers.F.zero ? 12 : 8,
+    get cycleTime() {
+      return registers.F.zero ? 12 : 8
+    },
     operation: () => {
       this.registers.relativeJumpIfZero()
     }
@@ -387,7 +392,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x30, {
     name: "JR NC, r8",
-    cycleTime: this.registers.F.carry ? 8 : 12,
+    get cycleTime() {
+      return registers.F.carry ? 8 : 12
+    },
     operation: () => {
       this.registers.relativeJumpIfNotCarry()
     }
@@ -451,7 +458,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x38, {
     name: "JR C, r8",
-    cycleTime: this.registers.F.carry ? 12 : 8,
+    get cycleTime() {
+      return registers.F.carry ? 12 : 8
+    },
     operation: () => {
       this.registers.relativeJumpIfCarry()
     }
@@ -1539,7 +1548,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xC0, {
     name: "RET NZ",
-    cycleTime: this.registers.F.zero ? 20 : 8,
+    get cycleTime() {
+      return registers.F.zero ? 20 : 8
+    },
     operation: () => {
       this.registers.returnFromFunctionIfNotZero()
     }
@@ -1555,7 +1566,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xC2, {
     name: "JP NZ, a16",
-    cycleTime: this.registers.F.zero ? 16 : 12,
+    get cycleTime() {
+      return registers.F.zero ? 16 : 12
+    },
     operation: () => {
       this.registers.jumpIfNotZero()
     }
@@ -1571,7 +1584,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xC4, {
     name: "CALL NZ, a16",
-    cycleTime: this.registers.F.zero ? 24 : 12,
+    get cycleTime() {
+      return registers.F.zero ? 24 : 12
+    },
     operation: () => {
       this.registers.callFunctionIfNotZero()
     }
@@ -1603,7 +1618,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xC8, {
     name: "RET Z",
-    cycleTime: this.registers.F.zero ? 20 : 8,
+    get cycleTime() {
+      return registers.F.zero ? 20 : 8
+    },
     operation: () => {
       this.registers.returnFromFunctionIfZero()
     }
@@ -1619,7 +1636,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xCA, {
     name: "JP Z, a16",
-    cycleTime: this.registers.F.zero ? 16 : 12,
+    get cycleTime() {
+      return registers.F.zero ? 16 : 12
+    },
     operation: () => {
       this.registers.jumpIfZero()
     }
@@ -1632,13 +1651,23 @@ export function setInstructionMap(this: CPU) {
       const cbOpCode = this.memory.readByte(this.registers.PC.value)
       this.registers.PC.value++
 
-      this.cbMap.get(cbOpCode)?.operation()
+      const instruction = this.cbMap.get(cbOpCode)
+
+      if (instruction == null) {
+        throw new Error("CB operation not implemented yet")
+      }
+
+      console.log(`found CB instruction ${instruction.name}`)
+
+      instruction.operation()
     }
   })
 
   this.instructionMap.set(0xCC, {
     name: "CALL Z, a16",
-    cycleTime: this.registers.F.zero ? 24 : 12,
+    get cycleTime() {
+      return registers.F.zero ? 24 : 12
+    },
     operation: () => {
       this.registers.callFunctionIfZero()
     }
@@ -1670,7 +1699,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xD0, {
     name: "RET NC",
-    cycleTime: this.registers.F.carry ? 20 : 8,
+    get cycleTime() {
+      return registers.F.carry ? 20 : 8
+    },
     operation: () => {
       this.registers.returnFromFunctionIfNotCarry()
     }
@@ -1686,7 +1717,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xD2, {
     name: "JP NC, a16",
-    cycleTime: this.registers.F.carry ? 16 : 12,
+    get cycleTime() {
+      return registers.F.carry ? 16 : 12
+    },
     operation: () => {
       this.registers.jumpIfNotCarry()
     }
@@ -1696,7 +1729,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xD4, {
     name: "CALL NC, a16",
-    cycleTime: this.registers.F.carry ? 24 : 12,
+    get cycleTime() {
+      return registers.F.carry ? 24 : 12
+    },
     operation: () => {
       this.registers.callFunctionIfNotCarry()
     }
@@ -1728,7 +1763,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xD8, {
     name: "RET C",
-    cycleTime: this.registers.F.carry ? 20 : 8,
+    get cycleTime() {
+      return registers.F.carry ? 20 : 8
+    },
     operation: () => {
       this.registers.returnFromFunctionIfCarry()
     }
@@ -1745,7 +1782,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xDA, {
     name: "JP C, a16",
-    cycleTime: this.registers.F.carry ? 16 : 12,
+    get cycleTime() {
+      return registers.F.carry ? 16 : 12
+    },
     operation: () => {
       this.registers.jumpIfCarry()
     }
@@ -1755,7 +1794,9 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xDC, {
     name: "CALL C, a16",
-    cycleTime: this.registers.F.carry ? 24 : 12,
+    get cycleTime() {
+      return registers.F.carry ? 24 : 12
+    },
     operation: () => {
       this.registers.callFunctionIfCarry()
     }

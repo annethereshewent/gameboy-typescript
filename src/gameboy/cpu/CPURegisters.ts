@@ -23,18 +23,18 @@ export class CPURegisters {
   memory: Memory
 
   constructor(memory: Memory) {
-    this.A = new CPURegister("A")
+    this.A = new CPURegister("A", 1)
     this.B = new CPURegister("B")
-    this.C = new CPURegister("C")
+    this.C = new CPURegister("C", 0x13)
     this.D = new CPURegister("D")
-    this.E = new CPURegister("E")
+    this.E = new CPURegister("E", 0xd8)
     this.F = new FlagsRegister()
     this.H = new CPURegister("H")
     this.L = new CPURegister("L")
 
 
-    this.AF = new CPURegister("AF", 0x1B0)
     // see http://bgb.bircd.org/pandocs.htm#powerupsequence for info on initial register values
+    this.AF = new CPURegister("AF", 0x1B0)
     this.BC = new CPURegister("BC", 0x13)
     this.DE = new CPURegister("DE", 0xd8)
     this.HL = new CPURegister("HL", 0x14d)
@@ -138,7 +138,7 @@ export class CPURegisters {
   readByte(target: CPURegister) {
     target.value = this.memory.readByte(this.PC.value)
 
-    console.log(`read ${this.memory.readByte(this.PC.value)}`)
+    console.log(`read ${this.memory.readByte(this.PC.value)} at address 0x${this.PC.value.toString(16)}`)
 
     this.PC.value++
   }
@@ -146,7 +146,7 @@ export class CPURegisters {
   loadFromBase(target: CPURegister) {
     const baseAddress = this.memory.readByte(this.PC.value)
 
-    console.log(`reading from 0x${(0xff00 + baseAddress).toString(16)}`)
+    console.log(`reading from 0x${(0xff00 + baseAddress).toString(16)} value ${this.memory.readByte(0xff00 + baseAddress)}`)
 
     this.PC.value++
 
@@ -263,6 +263,8 @@ export class CPURegisters {
   writeToMemory8Bit(source: CPURegister) {
     const baseAddress = this.memory.readByte(this.PC.value)
     this.PC.value++
+
+    console.log(`writing to address 0x${(0xff00 + baseAddress).toString(16)} value ${source.value}`)
     this.memory.writeByte(0xff00 + baseAddress, source.value)
   }
 
@@ -330,6 +332,7 @@ export class CPURegisters {
   }
 
   load(target: CPURegister, source: CPURegister) {
+    console.log(`register ${source.name}'s value is ${source.value}`)
     target.value = source.value
   }
 
@@ -346,6 +349,9 @@ export class CPURegisters {
 
   or(source: CPURegister) {
     this.A.value = this._or(this.A.value, source.value)
+
+    console.log(`register A's value is ${this.A.value.toString(2)}`)
+    console.log(`register ${source.name}'s value is ${source.value.toString(2)}`)
   }
 
   orFromMemory(source: CPURegister) {
@@ -395,7 +401,10 @@ export class CPURegisters {
   }
 
   xor(source: CPURegister) {
+    console.log(`register A's value is ${this.A.value}, register ${source.name}'s value is ${source.value}`)
     this.A.value = this._xor(this.A.value, source.value)
+
+    console.log(`register A's value is now ${this.A.value}`)
   }
 
   xorImmediate() {
@@ -415,6 +424,8 @@ export class CPURegisters {
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) < (target.value & 0x0f)
 
+    console.log(`register ${target.name}'s value is now ${target.value}`)
+
     target.value = newValue
   }
 
@@ -425,7 +436,7 @@ export class CPURegisters {
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (target.value & 0x0f)
 
-    console.log(`register value is now ${newValue}`)
+    console.log(`register ${target.name}'s value is now ${newValue}`)
 
     target.value = newValue
   }
@@ -491,6 +502,7 @@ export class CPURegisters {
   }
 
   writeToMemoryRegisterAddrAndIncrementTarget(target: CPURegister, source: CPURegister) {
+    console.log(`attempting to write to address 0x${target.value.toString(16)}`)
     this.memory.writeByte(target.value, source.value)
 
     target.value++
@@ -500,6 +512,8 @@ export class CPURegisters {
     this.memory.writeByte(target.value, source.value)
 
     target.value--
+
+    console.log(`register ${target.name}'s value is now ${target.value}`)
   }
 
   decimalAdjustAccumulator() {

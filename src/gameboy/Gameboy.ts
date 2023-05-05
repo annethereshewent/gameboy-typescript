@@ -15,7 +15,7 @@ export class Gameboy {
   fps = 0
   cycles = 0
   previousTime = 0
-  iterations = 0
+  frames = 0
 
   context = document.querySelector("canvas")?.getContext('2d')
 
@@ -24,10 +24,7 @@ export class Gameboy {
   }
 
   run() {
-    // debug: run the first couple of instructions to see what happens
-    if (this.iterations !== 10) {
-      requestAnimationFrame((time: number) => this.runFrame(time))
-    }
+    requestAnimationFrame((time: number) => this.runFrame(time))
   }
 
   runFrame(currentTime: number) {
@@ -40,15 +37,20 @@ export class Gameboy {
 
       while (this.cycles <= GPU.CyclesPerFrame) {
         const cycles = this.cpu.step()
-        this.gpu.step()
+        this.gpu.step(cycles)
 
         this.cycles += cycles
       }
 
       this.context?.putImageData(this.gpu.screen, 0, 0)
 
-      this.cycles %= GPU.CyclesPerFrame
-      this.iterations++
+      this.frames++
     }
+
+    if (this.frames !== 60) {
+      requestAnimationFrame((time: number) => this.runFrame(time))
+    }
+
+    this.cycles %= GPU.CyclesPerFrame
   }
 }
