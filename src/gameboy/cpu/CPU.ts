@@ -1,5 +1,5 @@
 import { CPURegisters } from "./CPURegisters"
-import { Instruction } from "./Instruction"
+import { CbInstruction, Instruction } from "./Instruction"
 import { Memory } from "./Memory"
 import { setCbMap } from "./setCbMap"
 import { setInstructionMap } from "./setInstructionMap"
@@ -23,7 +23,7 @@ export class CPU {
   setInstructionMap = setInstructionMap
   setCbMap = setCbMap
   instructionMap: Map<Number, Instruction> = new Map()
-  cbMap: Map<Number, Instruction> = new Map()
+  cbMap: Map<Number, CbInstruction> = new Map()
 
   constructor(memory: Memory) {
     this.registers = new CPURegisters(memory)
@@ -88,9 +88,9 @@ export class CPU {
     this.checkInterrupts()
 
     if (this.isHalted) {
-      this.updateTimers(4)
+      this.updateTimers(1)
 
-      return 4
+      return 1
     }
 
     const opCode = this.memory.readByte(this.registers.PC.value)
@@ -102,11 +102,13 @@ export class CPU {
 
       this.registers.PC.value++
 
-      instruction.operation()
+      const cbCycles = instruction.operation()
 
-      this.updateTimers(instruction.cycleTime)
+      const cycles = (cbCycles != null ? cbCycles : instruction.cycleTime) / 4
 
-      return instruction.cycleTime
+      this.updateTimers(cycles)
+
+      return cycles
     } else {
       throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
     }

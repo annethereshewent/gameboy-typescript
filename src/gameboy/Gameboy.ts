@@ -8,7 +8,7 @@ const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
 
 
-const MAX_FRAMES_TO_RUN = 10 * 60 * 60
+const MAX_FRAMES_TO_RUN = 15 * 60 * 60
 
 export class Gameboy {
 

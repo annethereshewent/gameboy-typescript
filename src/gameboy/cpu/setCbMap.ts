@@ -5,7 +5,7 @@ export function setCbMap(this: CPU) {
     name: "",
     cycleTime: 8,
     operation: () => {
-
+      return 0
     }
   })
 
@@ -14,6 +14,8 @@ export function setCbMap(this: CPU) {
     cycleTime: 8,
     operation: () => {
       this.registers.A.value = this.registers.A.value & ~(0b1)
+
+      return 8
     }
   })
 
@@ -126,6 +128,8 @@ export function setCbMap(this: CPU) {
     cycleTime: 8,
     operation: () => {
       this.registers.A.value |= 1 << 1
+
+      return 8
     }
   })
 
