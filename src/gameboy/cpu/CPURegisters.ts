@@ -36,18 +36,18 @@ export class CPURegisters {
 
     this.A = new CPURegister("A", 0, 1, this.registerDataView, false)
     this.B = new CPURegister("B", 0, 3, this.registerDataView, false)
-    this.C = new CPURegister("C", 0x13, 2, this.registerDataView, false)
+    this.C = new CPURegister("C", 0, 2, this.registerDataView, false)
     this.D = new CPURegister("D", 0, 5, this.registerDataView, false)
-    this.E = new CPURegister("E", 0xd8, 4, this.registerDataView, false)
+    this.E = new CPURegister("E", 0, 4, this.registerDataView, false)
     this.F = new FlagsRegister("F", 0, 0, this.registerDataView, false)
     this.H = new CPURegister("H", 0, 7, this.registerDataView,false)
     this.L = new CPURegister("L", 0, 6, this.registerDataView, false)
 
 
     // see http://bgb.bircd.org/pandocs.htm#powerupsequence for info on initial register values
-    this.AF = new CPURegister("AF", 0, 0, this.registerDataView, true)
-    this.BC = new CPURegister("BC", 0, 2, this.registerDataView, true)
-    this.DE = new CPURegister("DE", 0, 4, this.registerDataView, true)
+    this.AF = new CPURegister("AF", 0x1b0, 0, this.registerDataView, true)
+    this.BC = new CPURegister("BC", 0x13, 2, this.registerDataView, true)
+    this.DE = new CPURegister("DE", 0xd8, 4, this.registerDataView, true)
     this.HL = new CPURegister("HL", 0x14d, 6, this.registerDataView, true)
     // stack pointer starts at the top of the stack memory, which is at 0xfffe
     this.SP = new CPURegister("SP", 0xfffe, 8, this.registerDataView, true)
