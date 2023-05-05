@@ -84,7 +84,7 @@ export class CPU {
     }
   }
 
-  step(): number {
+  step(currentFrame: number): number {
     this.checkInterrupts()
 
     if (this.isHalted) {
@@ -93,11 +93,12 @@ export class CPU {
       return 4
     }
 
-    const instructionAddress = this.memory.readByte(this.registers.PC.value)
+    const opCode = this.memory.readByte(this.registers.PC.value)
 
-    const instruction = this.instructionMap.get(instructionAddress)
+    const instruction = this.instructionMap.get(opCode)
     if (instruction != null) {
-      // console.log(`found instruction ${instruction.name} with code 0x${instructionAddress.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
+
+      // console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
 
       this.registers.PC.value++
 
@@ -107,7 +108,7 @@ export class CPU {
 
       return instruction.cycleTime
     } else {
-      throw new Error(`invalid instruction code: 0x${instructionAddress.toString(16).toUpperCase()}`)
+      throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
     }
   }
 }

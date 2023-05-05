@@ -121,12 +121,12 @@ export function setCbMap(this: CPU) {
   //   }
   // })
 
-  // this.cbMap.set(, {
-  //   name: "",
-  //   cycleTime: 8,
-  //   operation: () => {
-
-  //   }
-  // })
+  this.cbMap.set(0xCF, {
+    name: "SET 1, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.value |= 1 << 1
+    }
+  })
 
 }

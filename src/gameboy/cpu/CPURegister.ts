@@ -19,7 +19,7 @@ export class CPURegister {
     if (!this.is16Bit) {
       return this.dataView.getUint8(this.registerId)
     } else {
-      return this.dataView.getUint16(this.registerId)
+      return this.dataView.getUint16(this.registerId, true)
     }
   }
 
@@ -27,7 +27,7 @@ export class CPURegister {
     if (!this.is16Bit) {
       this.dataView.setUint8(this.registerId, newValue)
     } else {
-      this.dataView.setUint16(this.registerId, newValue)
+      this.dataView.setUint16(this.registerId, newValue, true)
     }
   }
 }

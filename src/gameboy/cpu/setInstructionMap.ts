@@ -1654,7 +1654,7 @@ export function setInstructionMap(this: CPU) {
       const instruction = this.cbMap.get(cbOpCode)
 
       if (instruction == null) {
-        throw new Error("CB operation not implemented yet")
+        throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
       }
 
       instruction.operation()
