@@ -2,6 +2,7 @@ import { Memory } from "./Memory"
 import { InterruptEnableRegister } from "./memory_registers/InterruptEnableRegister"
 import { InterruptRequestRegister } from "./memory_registers/InterruptRequestRegister"
 import { CPURegister } from "./CPURegister"
+import { JoypadRegister } from "./memory_registers/JoypadRegister"
 
 export class CPURegisters {
   A: CPURegister
@@ -23,6 +24,7 @@ export class CPURegisters {
 
   interruptEnableRegister: InterruptEnableRegister
   interruptRequestRegister: InterruptRequestRegister
+  joypadRegister: JoypadRegister
 
   registerPairs: CPURegister[]
 
@@ -61,6 +63,7 @@ export class CPURegisters {
     // memory registers
     this.interruptEnableRegister = new InterruptEnableRegister(memory)
     this.interruptRequestRegister = new InterruptRequestRegister(memory)
+    this.joypadRegister = new JoypadRegister(memory)
   }
 
 
@@ -162,6 +165,14 @@ export class CPURegisters {
     this.PC.value++
 
     target.value = this.memory.readByte(0xff00 + baseAddress)
+  }
+
+  loadFrom16bitAddr(target: CPURegister) {
+    const memoryAddress = this.memory.readWord(this.PC.value)
+
+    this.PC.value += 2
+
+    target.value = this.memory.readByte(memoryAddress)
   }
 
   loadByte(target: CPURegister, source: CPURegister) {

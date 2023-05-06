@@ -41,7 +41,6 @@ export class Memory {
     if (this.isAccessingCartridge(address)) {
       return this.gameDataView.getUint16(address, true)
     }
-
     return this.memoryView.getUint16(address, true)
   }
 

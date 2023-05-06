@@ -1648,16 +1648,7 @@ export function setInstructionMap(this: CPU) {
     name: "PREFIX CB",
     cycleTime: 4,
     operation: () => {
-      const cbOpCode = this.memory.readByte(this.registers.PC.value)
-      this.registers.PC.value++
 
-      const instruction = this.cbMap.get(cbOpCode)
-
-      if (instruction == null) {
-        throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
-      }
-
-      instruction.operation()
     }
   })
 
@@ -1991,10 +1982,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (a16)",
     cycleTime: 16,
     operation: () => {
-      const memoryAddress = this.memory.readWord(this.registers.PC.value)
-      this.registers.PC.value += 2
-
-      this.registers.A.value = this.memory.readByte(memoryAddress)
+      this.registers.loadFrom16bitAddr(this.registers.A)
     }
   })
 

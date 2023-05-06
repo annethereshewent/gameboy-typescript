@@ -5,7 +5,7 @@ export function setCbMap(this: CPU) {
     name: "",
     cycleTime: 8,
     operation: () => {
-      return 0
+      return 8
     }
   })
 
