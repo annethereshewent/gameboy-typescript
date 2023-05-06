@@ -20,8 +20,6 @@ export class CPU {
   isHalted = false
   interruptMasterEnabled = true
 
-  commands: string = ""
-
   setInstructionMap = setInstructionMap
   setCbMap = setCbMap
   instructionMap: Map<Number, Instruction> = new Map()
@@ -55,47 +53,42 @@ export class CPU {
 
 
     if (this.interruptMasterEnabled) {
-      console.log(`checking interrupts`)
       if (interruptEnableRegister.isVBlankInterruptEnabled() && interruptRequestRegister.vBlankInterruptRequest()) {
-        console.log('received vblank interrupt')
         interruptRequestRegister.clearVBlankRequest()
+        this.registers.pushToStack(this.registers.PC.value)
         this.registers.PC.value = VBLANK_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isLCDStatInterruptEnabled() && interruptRequestRegister.lcdStatInterruptRequest()) {
-        console.log('received lcd stat interrupt')
+        this.registers.pushToStack(this.registers.PC.value)
         interruptRequestRegister.clearLcdStatRequest()
         this.registers.PC.value = LCD_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isTimerInterruptEnabled() && interruptRequestRegister.timerInterruptRequest()) {
-        console.log('received timer interrupt')
+        this.registers.pushToStack(this.registers.PC.value)
         interruptRequestRegister.clearTimerRequest()
         this.registers.PC.value = TIMER_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isSerialInterruptEnabled() && interruptRequestRegister.serialInterruptRequest()) {
-        console.log('received serial interrupt')
+        this.registers.pushToStack(this.registers.PC.value)
         interruptRequestRegister.clearSerialRequest()
         this.registers.PC.value = SERIAL_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
       else if (interruptEnableRegister.isJoypadInterruptEnabled() && interruptRequestRegister.joypadInterruptRequest()) {
-        console.log('received joypad interrupt')
+        this.registers.pushToStack(this.registers.PC.value)
         interruptRequestRegister.clearJoypadRequest()
         this.registers.PC.value = JOYPAD_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
       }
     }
-  }
-
-  logToFile() {
-
   }
 
   step(currentFrame: number): number {
@@ -107,43 +100,46 @@ export class CPU {
       return 1
     }
 
-    const opCode = this.memory.readByte(this.registers.PC.value)
+    try {
 
-    const instruction = this.instructionMap.get(opCode)
-    if (instruction != null) {
+      const opCode = this.memory.readByte(this.registers.PC.value)
 
-      // console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16).toUpperCase()} at address 0x${this.registers.PC.value.toString(16).toUpperCase()}`)
-
-      // if (instruction.name.indexOf("LD A") !== -1 || instruction.name.indexOf("LDH A") !== -1) {
-      //  console.log(`just received instruction to load into A. register A's value is now ${this.registers.A.value}`)
-      // }
-
-      this.registers.PC.value++
-
-      instruction.operation()
-
-      let cbCycles = null
-
-      if (instruction.name === "PREFIX CB") {
-        const cbOpCode = this.memory.readByte(this.registers.PC.value)
-        const cbInstruction = this.cbMap.get(cbOpCode)
+      const instruction = this.instructionMap.get(opCode)
+      if (instruction != null) {
+        // if (currentFrame >= 2 && currentFrame <= 3) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16).toUpperCase()} at address ${this.registers.PC.hexValue}`)
+        // }
 
         this.registers.PC.value++
 
-        if (cbInstruction == null) {
-          throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
+        instruction.operation()
+
+        let cbCycles = null
+
+        if (instruction.name === "PREFIX CB") {
+          const cbOpCode = this.memory.readByte(this.registers.PC.value)
+          const cbInstruction = this.cbMap.get(cbOpCode)
+
+          this.registers.PC.value++
+
+          if (cbInstruction == null) {
+            throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
+          }
+
+          cbCycles = cbInstruction.cycleTime
         }
 
-        cbCycles = cbInstruction.operation()
+        const cycles = (cbCycles != null ? cbCycles : instruction.cycleTime) / 4
+
+        this.updateTimers(cycles)
+
+        return cycles
+      } else {
+        throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
       }
-
-      const cycles = (cbCycles != null ? cbCycles : instruction.cycleTime) / 4
-
-      this.updateTimers(cycles)
-
-      return cycles
-    } else {
-      throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
+    } catch (e) {
+      console.log(`execution failed at frame ${currentFrame}`)
+      throw e
     }
   }
 }

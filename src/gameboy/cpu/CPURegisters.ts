@@ -30,7 +30,7 @@ export class CPURegisters {
 
   memory: Memory
 
-  registerDataView: DataView
+  private registerDataView: DataView
 
   constructor(memory: Memory) {
 
@@ -295,13 +295,38 @@ export class CPURegisters {
     this.memory.writeByte(memoryAddress, source.value)
   }
 
+  writeStackPointerToMemory() {
+    const memoryAddress = this.memory.readWord(this.PC.value)
+
+    this.PC.value += 2
+
+    this.memory.writeWord(memoryAddress, this.SP.value)
+  }
+
   writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
-    this.memory.writeByte(target.value, source.value)
+    if (target.is16Bit) {
+      this.memory.writeByte(target.value, source.value)
+    } else {
+      throw new Error(`invalid register selected: ${target.name}; need a 16 bit register.`)
+    }
+  }
+
+  writeToMemoryRegisterAddr8bit(target: CPURegister, source: CPURegister) {
+    if (!target.is16Bit) {
+      this.memory.writeByte(0xff00 + target.value, source.value)
+    } else {
+      throw new Error(`invalid register selected: ${target.name} need an 8 bit register.`)
+    }
   }
 
   writeByteIntoRegisterAddress(target: CPURegister) {
-    this.memory.writeByte(target.value, this.memory.readByte(this.PC.value))
-    this.PC.value++
+    if (target.is16Bit) {
+      this.memory.writeByte(target.value, this.memory.readByte(this.PC.value))
+      this.PC.value++
+    } else {
+      throw new Error(`invalid register selected: ${target.name}; need a 16 bit register.`)
+    }
+
   }
 
   subtract(source: CPURegister) {
@@ -641,7 +666,7 @@ export class CPURegisters {
     }
   }
 
-  private popFromStack(): number {
+  popFromStack(): number {
     const returnVal = this.memory.readWord(this.SP.value)
 
     this.SP.value += 2
@@ -649,7 +674,7 @@ export class CPURegisters {
     return returnVal
   }
 
-  private pushToStack(value: number) {
+  pushToStack(value: number) {
     this.SP.value -= 2
 
     this.memory.writeWord(this.SP.value, value)

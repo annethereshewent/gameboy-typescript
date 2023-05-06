@@ -1,8 +1,8 @@
 export class CPURegister {
 
   name: string
-  registerId: number
-  dataView: DataView
+  private registerId: number
+  private dataView: DataView
   is16Bit: boolean
 
   constructor(name: string, initialValue = 0, id: number, dataView: DataView, is16Bit: boolean) {
@@ -21,6 +21,10 @@ export class CPURegister {
     } else {
       return this.dataView.getUint16(this.registerId, true)
     }
+  }
+
+  get hexValue() {
+    return `0x${this.value.toString(16)}`
   }
 
   set value(newValue: number) {

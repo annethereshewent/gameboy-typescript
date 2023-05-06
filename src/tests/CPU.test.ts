@@ -26,7 +26,7 @@ test("it performs loadFrom16bitAddr properly", () => {
 
   registers.loadFrom16bitAddr(registers.A)
 
-  expect(registers.A.value).toBe(255)
+  expect(registers.A.value).toBe(0xff)
 })
 
 test("it performs loadByte properly", () => {
@@ -50,6 +50,76 @@ test("it performs readByte properly", () => {
   registers.readByte(registers.A)
 
   expect(registers.A.value).toBe(0xab)
+})
+
+test("it performs writeToMemoryRegisterAddr properly", () => {
+  registers.BC.value = 0x8200
+  registers.A.value = 5
+
+  registers.writeToMemoryRegisterAddr(registers.BC, registers.A)
+
+  expect(memory.readByte(0x8200)).toBe(5)
+})
+
+test("it performs writeToMemory16Bit properly", () => {
+  registers.PC.value = 1
+  memory.gameDataView?.setUint16(1, 0x8800, true)
+
+  registers.A.value = 0xff
+
+  registers.writeToMemory16bit(registers.A)
+
+  expect(memory.readByte(0x8800)).toBe(0xff)
+})
+
+test("it performs writeToMemoryRegisterAddrAndIncrementTarget properly", () => {
+  registers.HL.value = 0x8000
+  const oldValue = registers.HL.value
+
+  registers.A.value = 0xaa
+
+  registers.writeToMemoryRegisterAddrAndIncrementTarget(registers.HL, registers.A)
+
+  expect(memory.readByte(oldValue)).toBe(0xaa)
+  expect(registers.HL.value).toBe(oldValue+1)
+})
+
+test("it performs writeToMemoryRegisterAddrAndDecrementTarget properly", () => {
+  registers.HL.value = 0x8800
+  const oldValue = registers.HL.value
+
+  registers.A.value = 0xab
+
+  registers.writeToMemoryRegisterAddrAndDecrementTarget(registers.HL, registers.A)
+
+  expect(memory.readByte(oldValue)).toBe(0xab)
+  expect(registers.HL.value).toBe(oldValue-1)
+})
+
+test("it performs writeByteIntoRegisterAddress properly", () => {
+  registers.HL.value = 0x9000
+
+  registers.PC.value = 1
+
+  memory.gameDataView?.setUint8(1, 0xda)
+
+  registers.writeByteIntoRegisterAddress(registers.HL)
+
+  expect(memory.readByte(registers.HL.value)).toBe(0xda)
+})
+
+test("popping and pushing to stack works as expected", () => {
+  for (let i = 0; i < 5; i++) {
+    registers.pushToStack(i)
+  }
+
+  const stackItems = []
+
+  for (let i = 0; i < 5; i++) {
+    stackItems.push(registers.popFromStack())
+  }
+
+  expect(stackItems).toEqual([4,3,2,1,0])
 })
 
 test("it initializes registers to the proper values", () => {

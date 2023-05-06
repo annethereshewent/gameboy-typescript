@@ -8,7 +8,7 @@ const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
 
 
-const MAX_FRAMES_TO_RUN = 60 * 5
+const MAX_FRAMES_TO_RUN = 60 * 60
 
 export class Gameboy {
 
@@ -57,12 +57,6 @@ export class Gameboy {
     if (this.frames !== MAX_FRAMES_TO_RUN) {
       requestAnimationFrame((time: number) => this.runFrame(time, context))
     } else {
-      const data = new Blob([this.cpu.commands], {type: 'text/plain'})
-
-      const textFile = URL.createObjectURL(data)
-
-      console.log(`successfully saved commands to ${textFile}`)
-
       alert(`finished running ${MAX_FRAMES_TO_RUN} frames successfully!`)
     }
 

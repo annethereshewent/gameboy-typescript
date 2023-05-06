@@ -70,7 +70,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD (a16), SP",
     cycleTime: 20,
     operation: () => {
-      this.registers.writeToMemory16bit(this.registers.SP)
+      this.registers.writeStackPointerToMemory()
     }
   })
 
@@ -1826,10 +1826,10 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xE2, {
-    name: "LD (C), A",
+    name: "LDH (C), A",
     cycleTime: 8,
     operation: () => {
-      this.registers.writeToMemoryRegisterAddr(this.registers.C, this.registers.A)
+      this.registers.writeToMemoryRegisterAddr8bit(this.registers.C, this.registers.A)
     }
   })
 
