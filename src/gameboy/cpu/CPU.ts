@@ -1,3 +1,4 @@
+import { Gameboy } from "../Gameboy"
 import { CPURegisters } from "./CPURegisters"
 import { CbInstruction, Instruction } from "./Instruction"
 import { Memory } from "./Memory"
@@ -51,7 +52,6 @@ export class CPU {
   checkInterrupts() {
     const { interruptRequestRegister, interruptEnableRegister } = this.registers
 
-
     if (this.interruptMasterEnabled) {
       if (interruptEnableRegister.isVBlankInterruptEnabled() && interruptRequestRegister.vBlankInterruptRequest()) {
         interruptRequestRegister.clearVBlankRequest()
@@ -70,6 +70,7 @@ export class CPU {
       else if (interruptEnableRegister.isTimerInterruptEnabled() && interruptRequestRegister.timerInterruptRequest()) {
         this.registers.pushToStack(this.registers.PC.value)
         interruptRequestRegister.clearTimerRequest()
+
         this.registers.PC.value = TIMER_INTERRUPT_ADDRESS
 
         this.interruptMasterEnabled = false
@@ -106,8 +107,8 @@ export class CPU {
 
       const instruction = this.instructionMap.get(opCode)
       if (instruction != null) {
-        // if (currentFrame >= 2 && currentFrame <= 3) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16).toUpperCase()} at address ${this.registers.PC.hexValue}`)
+        // if (currentFrame >= Gameboy.MAX_FRAMES_TO_RUN - 2) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
         // }
 
         this.registers.PC.value++

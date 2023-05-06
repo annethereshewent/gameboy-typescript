@@ -3,6 +3,9 @@ import { InterruptEnableRegister } from "./memory_registers/InterruptEnableRegis
 import { InterruptRequestRegister } from "./memory_registers/InterruptRequestRegister"
 import { CPURegister } from "./CPURegister"
 import { JoypadRegister } from "./memory_registers/JoypadRegister"
+import { FlagsRegister } from "./CPUFlagRegister"
+import { FlagsRegisterPair } from "./FlagsRegisterPair"
+import { Gameboy } from "../Gameboy"
 
 export class CPURegisters {
   A: CPURegister
@@ -14,7 +17,7 @@ export class CPURegisters {
   H: CPURegister
   L: CPURegister
 
-  AF: CPURegister
+  AF: FlagsRegisterPair
   BC: CPURegister
   DE: CPURegister
   HL: CPURegister
@@ -47,7 +50,7 @@ export class CPURegisters {
 
 
     // see http://bgb.bircd.org/pandocs.htm#powerupsequence for info on initial register values
-    this.AF = new CPURegister("AF", 0x1b0, 0, this.registerDataView, true)
+    this.AF = new FlagsRegisterPair("AF", 0x1b0, 0, this.registerDataView, true)
     this.BC = new CPURegister("BC", 0x13, 2, this.registerDataView, true)
     this.DE = new CPURegister("DE", 0xd8, 4, this.registerDataView, true)
     this.HL = new CPURegister("HL", 0x14d, 6, this.registerDataView, true)
@@ -686,60 +689,5 @@ export class CPURegisters {
 
   pushFromRegister(source: CPURegister) {
     this.pushToStack(source.value)
-  }
-}
-
-const ZERO_FLAG_BYTE_POSITION = 7
-const SUBTRACT_FLAG_BYTE_POSITION = 6
-const HALF_CARRY_FLAG_BYTE_POSITION = 5
-const CARRY_FLAG_BYTE_POSITION = 4
-
-class FlagsRegister extends CPURegister {
-  get zero() {
-    return ((this.value >> ZERO_FLAG_BYTE_POSITION) & 1) === 1
-  }
-
-  get subtract() {
-    return ((this.value >> SUBTRACT_FLAG_BYTE_POSITION) & 1) === 1
-  }
-
-  get halfCarry() {
-    return ((this.value >> HALF_CARRY_FLAG_BYTE_POSITION) & 1) === 1
-  }
-
-  get carry() {
-    return ((this.value >> CARRY_FLAG_BYTE_POSITION) & 1) === 1
-  }
-
-  set zero(val: boolean) {
-    if (val) {
-      this.value |= 1 << ZERO_FLAG_BYTE_POSITION
-    } else {
-      this.value &= ~(1 << ZERO_FLAG_BYTE_POSITION)
-    }
-  }
-
-  set subtract(val: boolean) {
-    if (val) {
-      this.value |= 1 << SUBTRACT_FLAG_BYTE_POSITION
-    } else {
-      this.value &= ~(1 << SUBTRACT_FLAG_BYTE_POSITION)
-    }
-  }
-
-  set halfCarry(val: boolean) {
-    if (val) {
-      this.value |= 1 << HALF_CARRY_FLAG_BYTE_POSITION
-    } else {
-      this.value &= ~(1 << HALF_CARRY_FLAG_BYTE_POSITION)
-    }
-  }
-
-  set carry(val: boolean) {
-    if (val) {
-      this.value |= 1 << CARRY_FLAG_BYTE_POSITION
-    } else {
-      this.value &= ~(1 << CARRY_FLAG_BYTE_POSITION)
-    }
   }
 }

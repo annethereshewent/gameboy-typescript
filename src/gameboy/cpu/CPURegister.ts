@@ -1,8 +1,8 @@
 export class CPURegister {
 
   name: string
-  private registerId: number
-  private dataView: DataView
+  registerId: number
+  dataView: DataView
   is16Bit: boolean
 
   constructor(name: string, initialValue = 0, id: number, dataView: DataView, is16Bit: boolean) {
