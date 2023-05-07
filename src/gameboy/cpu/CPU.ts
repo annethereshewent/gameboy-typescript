@@ -102,13 +102,17 @@ export class CPU {
     }
 
     try {
-
       const opCode = this.memory.readByte(this.registers.PC.value)
 
       const instruction = this.instructionMap.get(opCode)
+
       if (instruction != null) {
-        if (Gameboy.frames >= Gameboy.MAX_FRAMES_TO_RUN - 2) {
-          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+        if (Gameboy.shouldOutputLogs()) {
+          for (let i = 0x8000; i <= 0x97ff; i +=2) {
+            const word = this.memory.readWord(i).toString(16)
+            console.log(`0x${i.toString(16)}: 0x${'0'.repeat(4 - word.length) + word}`)
+          }
+          throw new Error("test")
         }
 
         this.registers.PC.value++

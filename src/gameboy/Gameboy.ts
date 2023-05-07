@@ -9,7 +9,7 @@ const INTERVAL = 1000 / MAX_FPS
 
 export class Gameboy {
 
-  static MAX_FRAMES_TO_RUN = 60 * 60
+  static MAX_FRAMES_TO_RUN = 60
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -24,7 +24,7 @@ export class Gameboy {
   // otherwise, logs get polluted with too much data
   // to sift through
   static shouldOutputLogs() {
-    return this.frames >= this.MAX_FRAMES_TO_RUN - 2
+    return this.frames >= this.MAX_FRAMES_TO_RUN - 3
   }
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
