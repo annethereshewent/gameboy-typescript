@@ -3,7 +3,7 @@ import { MemoryRegister } from "../../cpu/memory_registers/MemoryRegister"
 
 export class BackgroundPaletteRegister extends MemoryRegister {
   constructor(memory: Memory) {
-    super(0xff47, memory)
+    super(0xff47, memory, "BackgroundPaletteRegister")
   }
   get color0() {
     return this.value & 0b11

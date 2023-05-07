@@ -9,7 +9,7 @@ const INTERVAL = 1000 / MAX_FPS
 
 export class Gameboy {
 
-  static MAX_FRAMES_TO_RUN = 60 * 60 * 1
+  static MAX_FRAMES_TO_RUN = 60 * 5
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -42,7 +42,7 @@ export class Gameboy {
       this.previousTime = currentTime - (diff % INTERVAL)
 
       while (this.cycles <= GPU.CyclesPerFrame) {
-        const cycles = this.cpu.step(Gameboy.frames)
+        const cycles = this.cpu.step()
         this.gpu.step(cycles)
 
         this.cycles += cycles

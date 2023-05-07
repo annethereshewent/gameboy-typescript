@@ -24,16 +24,16 @@ export class GPURegisters {
     this.memory = memory
 
     this.lcdStatusRegister = new LCDStatusRegister(memory)
-    this.lineYRegister = new MemoryRegister(0xff44, memory)
+    this.lineYRegister = new MemoryRegister(0xff44, memory, "lineYRegister")
     this.lcdControlRegister = new LCDControlRegister(memory)
-    this.scrollYRegister = new MemoryRegister(0xff42, memory)
-    this.scrollXRegister = new MemoryRegister(0xff43, memory)
-    this.lineYCompareRegister = new MemoryRegister(0xff45, memory)
-    this.windowYRegister = new MemoryRegister(0xff4a, memory)
-    this.windowXRegister = new MemoryRegister(0xff4b, memory)
+    this.scrollYRegister = new MemoryRegister(0xff42, memory, "scrollYRegister")
+    this.scrollXRegister = new MemoryRegister(0xff43, memory, "scrollXRegister")
+    this.lineYCompareRegister = new MemoryRegister(0xff45, memory, "lineYCompareRegister")
+    this.windowYRegister = new MemoryRegister(0xff4a, memory, "windowYRegister")
+    this.windowXRegister = new MemoryRegister(0xff4b, memory, "windowXRegister")
     this.backgroundPaletteRegister = new BackgroundPaletteRegister(memory)
-    this.objectPaletteRegister0 = new ObjectPaletteRegister(0xff48, memory)
-    this.objectPaletteRegister1 = new ObjectPaletteRegister(0xff49, memory)
+    this.objectPaletteRegister0 = new ObjectPaletteRegister(0xff48, memory, "objetPaletteRegister0")
+    this.objectPaletteRegister1 = new ObjectPaletteRegister(0xff49, memory, "objectPaletteRegister1")
 
     // default value according to docs
     this.lcdControlRegister.value = 0x83

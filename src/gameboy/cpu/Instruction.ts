@@ -3,7 +3,3 @@ export interface Instruction {
   operation: Function
   cycleTime: number
 }
-
-export interface CbInstruction extends Instruction {
-  operation: () => number
-}

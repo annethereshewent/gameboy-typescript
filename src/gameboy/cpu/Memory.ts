@@ -44,7 +44,7 @@ export class Memory {
     return this.memoryView.getUint16(address, true)
   }
 
-  writeByte(address: number, value: number) {
+  writeByte(address: number, value: number, caller?: string) {
     this.memoryView.setUint8(address, value)
   }
 

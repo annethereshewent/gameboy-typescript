@@ -1,12 +1,16 @@
+import { Gameboy } from "../../Gameboy"
 import { Memory } from "../Memory"
 
 export class MemoryRegister {
-  private address: number
+  address: number
   private memory: Memory
+  child: string
 
-  constructor(address: number, memory: Memory) {
+  constructor(address: number, memory: Memory, child: string) {
     this.address = address
     this.memory = memory
+
+    this.child = child
   }
 
   get value(): number {
@@ -14,24 +18,22 @@ export class MemoryRegister {
   }
 
   set value(newValue: number) {
-    this.memory.writeByte(this.address, newValue)
+    this.memory.writeByte(this.address, newValue, "MemoryRegister")
   }
 
   setBit(pos: number, bitValue: number) {
-    let result = this.resetBit(pos)
+    this.resetBit(pos)
 
     if (bitValue === 1) {
-      result |= (bitValue << pos)
+      this.value |= (bitValue << pos)
     }
-
-    this.value = result
   }
 
   getBit(pos: number): number {
     return (this.value >> pos) & 1
   }
 
-  resetBit(pos: number): number {
-    return this.value & ~(0b1 << pos)
+  resetBit(pos: number) {
+    this.value = this.value & ~(0b1 << pos)
   }
 }

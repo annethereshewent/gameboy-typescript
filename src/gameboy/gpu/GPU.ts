@@ -10,7 +10,7 @@ const CYCLES_IN_OAM = 80
 const CYCLES_IN_VRAM = 172
 
 const CYCLES_PER_SCANLINE = CYCLES_IN_HBLANK + CYCLES_IN_OAM + CYCLES_IN_VRAM
-const CYCLES_IN_VBLANK = CYCLES_PER_SCANLINE * 10
+const CYCLES_IN_VBLANK = 4560
 
 const SCANLINES_PER_FRAME = 144
 
@@ -58,6 +58,7 @@ export class GPU {
 
           if (this.registers.lineYRegister.value === GPU.screenHeight) {
             this.registers.lcdStatusRegister.mode = LCDMode.VBlank
+
             interruptRequestRegister.triggerVBlankRequest()
           } else {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
@@ -94,7 +95,6 @@ export class GPU {
         break
       case LCDMode.TransferringToLCD:
         if (this.cycles >= CYCLES_IN_VRAM) {
-
           if (this.registers.lcdStatusRegister.isHBlankInterruptSelected()) {
             interruptRequestRegister.triggerLcdStatRequest()
           }

@@ -34,4 +34,22 @@ export class CPURegister {
       this.dataView.setUint16(this.registerId, newValue, true)
     }
   }
+
+  setBit(pos: number, bitValue: number) {
+    let result = this.resetBit(pos)
+
+    if (bitValue === 1) {
+      result |= (bitValue << pos)
+    }
+
+    this.value = result
+  }
+
+  getBit(pos: number): number {
+    return (this.value >> pos) & 1
+  }
+
+  resetBit(pos: number): number {
+    return this.value & ~(0b1 << pos)
+  }
 }

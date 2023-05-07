@@ -1,6 +1,6 @@
 import { Gameboy } from "../Gameboy"
 import { CPURegisters } from "./CPURegisters"
-import { CbInstruction, Instruction } from "./Instruction"
+import { Instruction } from "./Instruction"
 import { Memory } from "./Memory"
 import { setCbMap } from "./setCbMap"
 import { setInstructionMap } from "./setInstructionMap"
@@ -24,7 +24,7 @@ export class CPU {
   setInstructionMap = setInstructionMap
   setCbMap = setCbMap
   instructionMap: Map<Number, Instruction> = new Map()
-  cbMap: Map<Number, CbInstruction> = new Map()
+  cbMap: Map<Number, Instruction> = new Map()
 
   constructor(memory: Memory) {
     this.registers = new CPURegisters(memory)
@@ -92,7 +92,7 @@ export class CPU {
     }
   }
 
-  step(currentFrame: number): number {
+  step(): number {
     this.checkInterrupts()
 
     if (this.isHalted) {
@@ -107,9 +107,9 @@ export class CPU {
 
       const instruction = this.instructionMap.get(opCode)
       if (instruction != null) {
-        // if (currentFrame >= Gameboy.MAX_FRAMES_TO_RUN - 2) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
-        // }
+        if (Gameboy.frames >= Gameboy.MAX_FRAMES_TO_RUN - 2) {
+          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+        }
 
         this.registers.PC.value++
 
@@ -121,11 +121,13 @@ export class CPU {
           const cbOpCode = this.memory.readByte(this.registers.PC.value)
           const cbInstruction = this.cbMap.get(cbOpCode)
 
-          this.registers.PC.value++
-
           if (cbInstruction == null) {
             throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
           }
+
+          // console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+
+          this.registers.PC.value++
 
           cbCycles = cbInstruction.cycleTime
         }
@@ -139,7 +141,7 @@ export class CPU {
         throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
       }
     } catch (e) {
-      console.log(`execution failed at frame ${currentFrame}`)
+      console.log(`execution failed at frame ${Gameboy.frames}`)
       throw e
     }
   }

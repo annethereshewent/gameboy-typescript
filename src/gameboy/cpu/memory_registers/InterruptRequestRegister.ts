@@ -3,7 +3,7 @@ import { MemoryRegister } from "./MemoryRegister"
 
 export class InterruptRequestRegister extends MemoryRegister {
   constructor(memory: Memory) {
-    super(0xff0f, memory)
+    super(0xff0f, memory, "InterruptRequestRegister")
   }
   vBlankInterruptRequest() {
     return this.getBit(0)

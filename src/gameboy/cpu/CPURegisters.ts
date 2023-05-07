@@ -202,7 +202,7 @@ export class CPURegisters {
   }
 
   jumpToRegisterAddr() {
-    this.PC.value = this.memory.readWord(this.HL.value)
+    this.PC.value = this.HL.value
   }
 
   jumpIfNotZero() {
@@ -679,7 +679,6 @@ export class CPURegisters {
 
   pushToStack(value: number) {
     this.SP.value -= 2
-
     this.memory.writeWord(this.SP.value, value)
   }
 
@@ -689,5 +688,13 @@ export class CPURegisters {
 
   pushFromRegister(source: CPURegister) {
     this.pushToStack(source.value)
+  }
+
+  swap(target: CPURegister) {
+    const higherBit = (target.value & 1) << 7
+    const lowerBit = target.value & 1
+
+    target.setBit(0, higherBit)
+    target.setBit(7, lowerBit)
   }
 }

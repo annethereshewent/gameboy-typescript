@@ -4,7 +4,7 @@ import { MemoryRegister } from "./MemoryRegister"
 
 export class InterruptEnableRegister extends MemoryRegister {
   constructor(memory: Memory) {
-    super(0xffff, memory)
+    super(0xffff, memory, "InterruptEnableRegister")
   }
   isVBlankInterruptEnabled() {
     return this.getBit(0)

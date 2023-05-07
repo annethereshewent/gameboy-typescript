@@ -3,7 +3,7 @@ import { MemoryRegister } from "../../cpu/memory_registers/MemoryRegister"
 
 export class LCDControlRegister extends MemoryRegister {
   constructor(memory: Memory) {
-    super(0xff40, memory)
+    super(0xff40, memory, "LCDControlRegister")
   }
   isBackgroundOn() {
     return this.getBit(0) === 1

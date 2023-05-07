@@ -5,7 +5,14 @@ export function setCbMap(this: CPU) {
     name: "",
     cycleTime: 8,
     operation: () => {
-      return 8
+    }
+  })
+
+  this.cbMap.set(0x37, {
+    name: "SWAP A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.swap(this.registers.A)
     }
   })
 
@@ -14,18 +21,8 @@ export function setCbMap(this: CPU) {
     cycleTime: 8,
     operation: () => {
       this.registers.A.value = this.registers.A.value & ~(0b1)
-
-      return 8
     }
   })
-
-  // this.cbMap.set(, {
-  //   name: "",
-  //   cycleTime: 8,
-  //   operation: () => {
-
-  //   }
-  // })
 
   // this.cbMap.set(, {
   //   name: "",

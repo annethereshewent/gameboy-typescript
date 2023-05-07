@@ -5,7 +5,7 @@ import { LCDMode } from "./LCDMode"
 export class LCDStatusRegister extends MemoryRegister {
 
   constructor(memory: Memory) {
-    super(0xff41, memory)
+    super(0xff41, memory, "LCDStatusRegister")
   }
   get mode() {
     return this.value & 0b11
@@ -40,7 +40,7 @@ export class LCDStatusRegister extends MemoryRegister {
   }
 
   set lineYCompareMatching(newValue: number) {
-    this.setBit(2, 1)
+    this.setBit(2, newValue)
   }
 
 }
