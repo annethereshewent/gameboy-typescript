@@ -1900,7 +1900,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 28H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x28
+      this.registers.restart(0x28)
     }
   })
 
@@ -1958,7 +1958,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 30H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x30
+      this.registers.restart(0x30)
     }
   })
 
@@ -2008,8 +2008,8 @@ export function setInstructionMap(this: CPU) {
     name: "RST 38H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x38
       throw new Error("shouldn't be getting here")
+      this.registers.restart(0x38)
     }
   })
 }

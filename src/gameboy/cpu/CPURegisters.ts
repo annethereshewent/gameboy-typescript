@@ -677,6 +677,12 @@ export class CPURegisters {
     return returnVal
   }
 
+  restart(address: number) {
+    this.pushToStack(this.PC.value)
+
+    this.PC.value = address
+  }
+
   pushToStack(value: number) {
     this.SP.value -= 2
     this.memory.writeWord(this.SP.value, value)

@@ -25,15 +25,14 @@ export class GPU {
 
   // color is determined by the palette registers
   colors = [
-    // black
-    { red: 0, green: 0, blue: 0 },
-    // gray
-    { red: 96, green: 96, blue: 96 },
-    // light grey
-    { red: 192, green: 192, blue: 192 },
     // white
     { red: 255, green: 255, blue: 255 },
-
+    // light grey
+    { red: 192, green: 192, blue: 192 },
+    // gray
+    { red: 96, green: 96, blue: 96 },
+    // black
+    { red: 0, green: 0, blue: 0 }
   ]
 
   memory: Memory
