@@ -20,7 +20,7 @@ export function setCbMap(this: CPU) {
     name: "RES 0, A",
     cycleTime: 8,
     operation: () => {
-      this.registers.A.value = this.registers.A.value & ~(0b1)
+      this.registers.resetBit(0, this.registers.A)
     }
   })
 

@@ -193,8 +193,12 @@ export class CPURegisters {
   }
 
   loadWord(target: CPURegister) {
-    target.value = this.memory.readWord(this.PC.value)
-    this.PC.value += 2
+    if (target.is16Bit) {
+      target.value = this.memory.readWord(this.PC.value)
+      this.PC.value += 2
+    } else {
+      throw new Error(`invalid register selected: ${target.name}. must be a 16 bit register.`)
+    }
   }
 
   jump() {
@@ -288,14 +292,14 @@ export class CPURegisters {
     const baseAddress = this.memory.readByte(this.PC.value)
     this.PC.value++
 
-    this.memory.writeByte(0xff00 + baseAddress, source.value)
+    this.memory.writeByte(0xff00 + baseAddress, source.value, "writeToMemory8Bit")
   }
 
   writeToMemory16bit(source: CPURegister) {
     const memoryAddress = this.memory.readWord(this.PC.value)
     this.PC.value += 2
 
-    this.memory.writeByte(memoryAddress, source.value)
+    this.memory.writeByte(memoryAddress, source.value, "writeToMemory16bit")
   }
 
   writeStackPointerToMemory() {
@@ -308,7 +312,7 @@ export class CPURegisters {
 
   writeToMemoryRegisterAddr(target: CPURegister, source: CPURegister) {
     if (target.is16Bit) {
-      this.memory.writeByte(target.value, source.value)
+      this.memory.writeByte(target.value, source.value, "writeToMemoryRegisterAddr")
     } else {
       throw new Error(`invalid register selected: ${target.name}; need a 16 bit register.`)
     }
@@ -316,7 +320,7 @@ export class CPURegisters {
 
   writeToMemoryRegisterAddr8bit(target: CPURegister, source: CPURegister) {
     if (!target.is16Bit) {
-      this.memory.writeByte(0xff00 + target.value, source.value)
+      this.memory.writeByte(0xff00 + target.value, source.value, "writeToMemoryRegisterAddr8Bit")
     } else {
       throw new Error(`invalid register selected: ${target.name} need an 8 bit register.`)
     }
@@ -324,7 +328,7 @@ export class CPURegisters {
 
   writeByteIntoRegisterAddress(target: CPURegister) {
     if (target.is16Bit) {
-      this.memory.writeByte(target.value, this.memory.readByte(this.PC.value))
+      this.memory.writeByte(target.value, this.memory.readByte(this.PC.value), "writeByteIntoRegisterAddr")
       this.PC.value++
     } else {
       throw new Error(`invalid register selected: ${target.name}; need a 16 bit register.`)
@@ -545,13 +549,13 @@ export class CPURegisters {
   }
 
   writeToMemoryRegisterAddrAndIncrementTarget(target: CPURegister, source: CPURegister) {
-    this.memory.writeByte(target.value, source.value)
+    this.memory.writeByte(target.value, source.value, "writeToMemoryRegisterAddrAndIncrementTarget")
 
     target.value++
   }
 
   writeToMemoryRegisterAddrAndDecrementTarget(target: CPURegister, source: CPURegister) {
-    this.memory.writeByte(target.value, source.value)
+    this.memory.writeByte(target.value, source.value, "writeToMemoryRegisterAddrAndDecrementTarget")
 
     target.value--
   }
@@ -592,7 +596,7 @@ export class CPURegisters {
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) < (oldValue & 0x0f)
 
-    this.memory.writeByte(target.value, newValue)
+    this.memory.writeByte(target.value, newValue, "incrementMemoryValAtRegisterAddr")
   }
 
   decrementMemoryValAtRegisterAddr(target: CPURegister) {
@@ -604,7 +608,7 @@ export class CPURegisters {
     this.F.halfCarry = (newValue & 0x0f) > (oldValue & 0x0f)
     this.F.carry = newValue > target.value
 
-    this.memory.writeByte(target.value, newValue)
+    this.memory.writeByte(target.value, newValue, "decrementMemoryValAtRegisterAddr")
   }
 
   callFunction() {
@@ -702,5 +706,9 @@ export class CPURegisters {
 
     target.setBit(0, higherBit)
     target.setBit(7, lowerBit)
+  }
+
+  resetBit(bitPos: number, target: CPURegister) {
+    target.value = target.value & ~(0b1 << bitPos)
   }
 }

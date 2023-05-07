@@ -1,4 +1,3 @@
-import { Gameboy } from "../Gameboy"
 import { CPU } from "./CPU"
 
 export function setInstructionMap(this: CPU) {

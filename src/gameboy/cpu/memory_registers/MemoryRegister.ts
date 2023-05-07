@@ -1,4 +1,3 @@
-import { Gameboy } from "../../Gameboy"
 import { Memory } from "../Memory"
 
 export class MemoryRegister {
