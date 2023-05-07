@@ -39,7 +39,6 @@ test("it performs loadByte properly", () => {
 
 
   expect(registers.A.value).toBe(0xf9)
-
 })
 
 test("it performs readByte properly", () => {
@@ -114,6 +113,34 @@ test("it performs swap properly", () => {
   registers.swap(registers.A)
 
   expect(registers.A.value).toBe(0b01101111)
+})
+
+test("it performs resetBit properly", () => {
+  registers.A.value = 0b11011011
+
+  registers.resetBit(3, registers.A)
+
+  expect(registers.A.value).toBe(0b11010011)
+})
+
+test("it performs loadWord properly", () => {
+  memory.gameDataView?.setUint16(1, 0xf0f0)
+
+  registers.PC.value = 1
+
+  registers.loadWord(registers.BC)
+
+  expect(registers.BC.value).toBe(0xf0f0)
+})
+
+test("it performs writeStackPointerToMemory properly", () => {
+  memory.gameDataView?.setUint16(1, 0x8080)
+
+  registers.PC.value = 1
+
+  registers.writeStackPointerToMemory()
+
+  expect(memory.readWord(0x8080)).toBe(registers.SP.value)
 })
 
 test("popping and pushing to stack works as expected", () => {
