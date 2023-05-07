@@ -13,7 +13,6 @@ const SERIAL_INTERRUPT_ADDRESS = 0x58
 const JOYPAD_INTERRUPT_ADDRESS = 0x60
 
 export class CPU {
-
   memory: Memory
   registers: CPURegisters
 
@@ -108,11 +107,7 @@ export class CPU {
 
       if (instruction != null) {
         if (Gameboy.shouldOutputLogs()) {
-          for (let i = 0x8000; i <= 0x97ff; i +=2) {
-            const word = this.memory.readWord(i).toString(16)
-            console.log(`0x${i.toString(16)}: 0x${'0'.repeat(4 - word.length) + word}`)
-          }
-          throw new Error("test")
+          // console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
         }
 
         this.registers.PC.value++

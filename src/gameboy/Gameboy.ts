@@ -24,7 +24,7 @@ export class Gameboy {
   // otherwise, logs get polluted with too much data
   // to sift through
   static shouldOutputLogs() {
-    return this.frames >= this.MAX_FRAMES_TO_RUN - 3
+    return this.frames >= this.MAX_FRAMES_TO_RUN - 2
   }
 
   loadCartridge(arrayBuffer: ArrayBuffer) {

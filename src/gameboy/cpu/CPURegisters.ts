@@ -697,7 +697,7 @@ export class CPURegisters {
   }
 
   swap(target: CPURegister) {
-    const higherBit = (target.value & 1) << 7
+    const higherBit = (target.value >> 7) & 1
     const lowerBit = target.value & 1
 
     target.setBit(0, higherBit)

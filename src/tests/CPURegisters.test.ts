@@ -108,6 +108,14 @@ test("it performs writeByteIntoRegisterAddress properly", () => {
   expect(memory.readByte(registers.HL.value)).toBe(0xda)
 })
 
+test("it performs swap properly", () => {
+  registers.A.value = 0b11101110
+
+  registers.swap(registers.A)
+
+  expect(registers.A.value).toBe(0b01101111)
+})
+
 test("popping and pushing to stack works as expected", () => {
   for (let i = 0; i < 5; i++) {
     registers.pushToStack(i)
