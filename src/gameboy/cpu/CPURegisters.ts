@@ -271,7 +271,6 @@ export class CPURegisters {
       this.PC.value++
       this.PC.value += jumpDistance
     } else {
-      console.log('zero')
       this.PC.value++
     }
   }
