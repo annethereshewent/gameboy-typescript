@@ -5,7 +5,6 @@ import { CPURegister } from "./CPURegister"
 import { JoypadRegister } from "./memory_registers/JoypadRegister"
 import { FlagsRegister } from "./CPUFlagRegister"
 import { FlagsRegisterPair } from "./FlagsRegisterPair"
-import { Gameboy } from "../Gameboy"
 
 export class CPURegisters {
   A: CPURegister
@@ -102,6 +101,14 @@ export class CPURegisters {
     this.PC.value++
 
     target.value = this._add(target.value, value)
+  }
+
+  addImmediateSigned(target: CPURegister) {
+    if (target.is16Bit) {
+      target.value = target.value + this.memory.readSignedByte(this.PC.value)
+    } else {
+      throw new Error(`invalid register selected: ${target.name}. Must be a 16 bit register`)
+    }
   }
 
   addFromRegisterAddr(target: CPURegister, source: CPURegister) {
@@ -264,6 +271,7 @@ export class CPURegisters {
       this.PC.value++
       this.PC.value += jumpDistance
     } else {
+      console.log('zero nigga')
       this.PC.value++
     }
   }

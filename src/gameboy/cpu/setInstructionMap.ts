@@ -1612,7 +1612,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 00H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x0
+      this.registers.restart(0)
     }
   })
 
@@ -1682,7 +1682,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 08H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x8
+      this.registers.restart(0x8)
     }
   })
 
@@ -1746,7 +1746,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 10H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x10
+      this.registers.restart(0x10)
     }
   })
 
@@ -1805,7 +1805,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 18H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x18
+      this.registers.restart(0x18)
     }
   })
 
@@ -1856,7 +1856,7 @@ export function setInstructionMap(this: CPU) {
     name: "RST 20H",
     cycleTime: 16,
     operation: () => {
-      this.registers.PC.value = 0x20
+      this.registers.restart(0x20)
     }
   })
 
@@ -1864,7 +1864,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD SP, r8",
     cycleTime: 16,
     operation: () => {
-      this.registers.addImmediate(this.registers.SP)
+      this.registers.addImmediateSigned(this.registers.SP)
     }
   })
 

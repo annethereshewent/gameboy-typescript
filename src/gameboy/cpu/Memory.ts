@@ -1,3 +1,5 @@
+import { Gameboy } from "../Gameboy"
+
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
   memoryView = new DataView(this.memoryBuffer)
@@ -21,6 +23,7 @@ export class Memory {
     if (this.isAccessingCartridge(address)) {
       return this.gameDataView.getUint8(address)
     }
+
     return this.memoryView.getUint8(address)
   }
 
@@ -46,6 +49,15 @@ export class Memory {
 
   writeByte(address: number, value: number, caller?: string) {
     this.memoryView.setUint8(address, value)
+    // if (Gameboy.shouldOutputLogs() && address >= 0x8000 && address  <= 0x8fff) {
+    //   const byte = this.readByte(address).toString(16)
+    //   console.log(`0x${address.toString(16)}: 0x${byte}`)
+    // }
+
+    // if (address === 0xff40) {
+    //   console.log(`caller is ${caller}`)
+    //   console.log(`writing to LCD control register, isLCDControllerOn = ${(value >> 7) & 1}`)
+    // }
   }
 
   writeWord(address: number, value: number) {
