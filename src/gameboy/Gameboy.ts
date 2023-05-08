@@ -7,9 +7,28 @@ const memory = new Memory()
 const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
 
+enum GamepadButtons {
+  A,
+  B,
+  X,
+  Y,
+  LB,
+  RB,
+  LT,
+  RT,
+  Select,
+  Start,
+  L3,
+  R3,
+  Up,
+  Down,
+  Left,
+  Right
+}
+
 export class Gameboy {
 
-  static MAX_FRAMES_TO_RUN = 60
+  static MAX_FRAMES_TO_RUN = 60 * 60 * 30
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -40,6 +59,48 @@ export class Gameboy {
     }
   }
 
+  handleInput() {
+    const { joypadRegister } = this.cpu.registers
+    const gamepad = navigator.getGamepads()[0]
+
+    if (gamepad != null) {
+      if (joypadRegister.isPollingDirections) {
+
+        if (gamepad.buttons[GamepadButtons.Left].pressed || gamepad.axes[0] < -0.2) {
+          console.log("you're pressing left!")
+          joypadRegister.isPressingLeft = true
+        }
+        if (gamepad.buttons[GamepadButtons.Right] || gamepad.axes[0] > 0.2) {
+          console.log("youre pressing right!")
+          joypadRegister.isPressingRight = true
+        }
+        if (gamepad.buttons[GamepadButtons.Up] || gamepad.axes[1] < -0.2) {
+          joypadRegister.isPressingUp = true
+        }
+        if (gamepad.buttons[GamepadButtons.Down] || gamepad.axes[1] > 0.2) {
+          joypadRegister.isPressingDown = true
+        }
+      } else if (joypadRegister.isPollingActions) {
+        if (gamepad.buttons[GamepadButtons.A].pressed) {
+          console.log('youre pressing A!')
+          joypadRegister.isPressingA = true
+        }
+        if (gamepad.buttons[GamepadButtons.B].pressed) {
+          console.log("you're pressing B!")
+          joypadRegister.isPressingB = true
+        }
+        if (gamepad.buttons[GamepadButtons.Select].pressed) {
+          console.log("you're pressing Select!")
+          joypadRegister.isPressingSelect = true
+        }
+        if (gamepad.buttons[GamepadButtons.Start].pressed) {
+          console.log("you're pressing start!")
+          joypadRegister.isPressingStart = true
+        }
+      }
+    }
+  }
+
   runFrame(currentTime: number, context: CanvasRenderingContext2D) {
     const diff = currentTime - this.previousTime
 
@@ -54,6 +115,8 @@ export class Gameboy {
 
         this.cycles += cycles
       }
+
+      this.handleInput()
 
       context.putImageData(this.gpu.screen, 0, 0)
 

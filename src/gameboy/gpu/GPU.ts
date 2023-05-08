@@ -35,6 +35,28 @@ export class GPU {
     // black
     { red: 0, green: 0, blue: 0 },
   ]
+  // dark mode
+  // colors = [
+  //   // black
+  //   { red: 0, green: 0, blue: 0 },
+  //   // gray
+  //   { red: 96, green: 96, blue: 96 },
+  //   // light grey
+  //   { red: 192, green: 192, blue: 192 },
+  //   // white
+  //   { red: 255, green: 255, blue: 255 },
+  // ]
+  // original green colors
+  // colors = [
+  //   // lightest green
+  //   { red: 155, green: 188, blue: 15 },
+  //   // light green
+  //   { red: 139, green: 172, blue: 15 },
+  //   // green
+  //   { red: 48, green: 98, blue: 48 },
+  //   // dark green
+  //   { red: 15, green: 56, blue: 15 },
+  // ]
 
   memory: Memory
   registers: GPURegisters
@@ -95,7 +117,9 @@ export class GPU {
       case LCDMode.TransferringToLCD:
         if (this.cycles >= CYCLES_IN_VRAM) {
           this.drawLine()
-          if (this.registers.lcdStatusRegister.isHBlankInterruptSelected()) {
+          const { lcdStatusRegister } = this.registers
+
+          if (lcdStatusRegister.isHBlankInterruptSelected() || lcdStatusRegister.isVBlankInterruptSelected() || lcdStatusRegister.isOamInterruptSelected()) {
             interruptRequestRegister.triggerLcdStatRequest()
           }
 
