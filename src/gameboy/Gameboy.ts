@@ -24,7 +24,7 @@ export class Gameboy {
   // otherwise, logs get polluted with too much data
   // to sift through
   static shouldOutputLogs() {
-    return this.frames >= this.MAX_FRAMES_TO_RUN - 2
+    return this.frames >= this.MAX_FRAMES_TO_RUN - 5
   }
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
@@ -68,7 +68,7 @@ export class Gameboy {
     if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN) {
       requestAnimationFrame((time: number) => this.runFrame(time, context))
     } else {
-      alert(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
+      console.log(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
     }
 
 
