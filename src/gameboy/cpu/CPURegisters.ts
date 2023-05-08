@@ -5,6 +5,7 @@ import { CPURegister } from "./CPURegister"
 import { JoypadRegister } from "./memory_registers/JoypadRegister"
 import { FlagsRegister } from "./CPUFlagRegister"
 import { FlagsRegisterPair } from "./FlagsRegisterPair"
+import { Gameboy } from "../Gameboy"
 
 export class CPURegisters {
   A: CPURegister
@@ -27,8 +28,6 @@ export class CPURegisters {
   interruptEnableRegister: InterruptEnableRegister
   interruptRequestRegister: InterruptRequestRegister
   joypadRegister: JoypadRegister
-
-  registerPairs: CPURegister[]
 
   memory: Memory
 
@@ -57,8 +56,6 @@ export class CPURegisters {
     this.SP = new CPURegister("SP", 0xfffe, 8, this.registerDataView, true)
     // first 255 (0xFF) instructions in memory are reserved for the gameboy
     this.PC = new CPURegister("PC", 0x100, 10, this.registerDataView, true)
-
-    this.registerPairs = [this.AF, this.BC, this.DE, this.HL]
 
     this.memory = memory
 
@@ -496,8 +493,8 @@ export class CPURegisters {
   }
 
   add16Bit(target: CPURegister, source: CPURegister) {
-    if (!this.registerPairs.includes(target) || !this.registerPairs.includes(source)) {
-      throw new Error("Invalid register pairs")
+    if (!target.is16Bit || !source.is16Bit) {
+      throw new Error(`Invalid registers: ${target.name} and ${source.name}`)
     }
 
     const newValue = (target.value + source.value) & 0xffff
@@ -523,7 +520,7 @@ export class CPURegisters {
 
   rotateLeftCarry() {
     const bit7 = this.A.value >> 7
-    const result = (this.A.value << 1) + (this.F.carry ? 1 : 0)
+    const result = ((this.A.value << 1) + (this.F.carry ? 1 : 0)) & 0xff
 
     this.F.carry = bit7 === 1
     this.F.halfCarry = false
@@ -531,6 +528,106 @@ export class CPURegisters {
     this.F.zero = false
 
     this.A.value = result
+  }
+
+  rotateRegisterLeft(target: CPURegister) {
+    const bit7 = (target.value >> 7) & 1
+    target.value = (target.value << 1) + bit7
+
+    this.F.zero = target.value === 0
+    this.F.carry = bit7 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+  }
+
+  rotateRegisterLeftCarry(target: CPURegister) {
+    const bit7 = target.value >> 7
+    const result = ((target.value << 1) + (this.F.carry ? 1 : 0)) & 0xff
+
+    this.F.carry = bit7 === 1
+    this.F.halfCarry = false
+    this.F.subtract = false
+    this.F.zero = result === 0
+
+    target.value = result
+  }
+
+  rotateAtRegisterAddrLeftCarry() {
+    const byte = this.memory.readByte(this.HL.value)
+
+    const bit7 = byte >> 7
+    const result = ((byte << 1) + (this.F.carry ? 1 : 0)) & 0xff
+
+    this.F.carry = bit7 === 1
+    this.F.halfCarry = false
+    this.F.subtract = false
+    this.F.zero = result === 0
+
+    this.memory.writeByte(this.HL.value, result)
+  }
+
+  rotateRegisterRight(target: CPURegister) {
+    const bit0 = target.value & 1
+    target.value = (target.value >> 1) + (bit0 << 7)
+
+    this.F.zero = target.value === 0
+    this.F.carry = bit0 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+  }
+
+  rotateRegisterRightCarry(target: CPURegister) {
+    const bit0 = target.value & 1
+
+    this.F.carry = bit0 === 1
+    this.F.zero = false
+    this.F.halfCarry = false
+    this.F.subtract = false
+
+    target.value = (target.value >> 1) + ((this.F.carry ? 1 : 0) << 7)
+  }
+
+  rotateAtRegisterAddrRightCarry() {
+    const byte = this.memory.readByte(this.HL.value)
+
+    const bit0 = byte & 1
+
+    this.F.carry = bit0 === 1
+    this.F.zero = false
+    this.F.halfCarry = false
+    this.F.subtract = false
+
+    const newValue = (byte >> 1) + ((this.F.carry ? 1 : 0) << 7)
+
+    this.memory.writeByte(this.HL.value, newValue)
+  }
+
+  rotateValueAtRegisterAddrLeft() {
+    const byte = this.memory.readByte(this.HL.value)
+
+    const bit7 = (byte >> 7) & 1
+    const newValue = (byte << 1) + bit7
+
+    this.F.zero = newValue === 0
+    this.F.carry = bit7 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+
+    this.memory.writeByte(this.HL.value, newValue)
+  }
+
+  rotateValueAtRegisterAddrRight() {
+    const byte = this.memory.readByte(this.HL.value)
+
+    const bit0 = byte & 1
+    const newValue = (byte >> 1) + (bit0 << 7)
+
+    this.F.zero = newValue === 0
+    this.F.carry = bit0 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+
+    this.memory.writeByte(this.HL.value, newValue)
   }
 
   rotateRight() {
@@ -715,7 +812,126 @@ export class CPURegisters {
     target.setBit(7, lowerBit)
   }
 
+  swapAtRegisterAddr() {
+    let byte = this.memory.readByte(this.HL.value)
+
+    const higherBit = (byte >> 7) & 1
+    const lowerBit = byte & 1
+
+    byte |= higherBit
+    byte |= lowerBit << 7
+
+    this.memory.writeByte(this.HL.value, byte)
+  }
+
+  testBit(bitPos: number, target: CPURegister) {
+    const bit = (target.value >> bitPos) & 1
+
+    this.F.zero = bit === 0
+    this.F.halfCarry = true
+    this.F.subtract = false
+  }
+
+  testBitAtRegisterAddr(bitPos: number) {
+    const byteToTest = this.memory.readByte(this.HL.value)
+
+    const bit = (byteToTest >> bitPos) & 1
+
+    this.F.zero = bit === 0
+    this.F.halfCarry = true
+    this.F.subtract = false
+  }
+
   resetBit(bitPos: number, target: CPURegister) {
     target.value = target.value & ~(0b1 << bitPos)
+  }
+
+  resetBitAtRegisterAddr(bitPos: number) {
+    let result = this.memory.readByte(this.HL.value)
+
+    result = result & ~(0b1 << bitPos)
+
+    this.memory.writeByte(this.HL.value, result)
+  }
+
+  shiftLeft(target: CPURegister) {
+    const bit7 = (target.value >> 7) & 1
+    target.value = (target.value << 1) & 0xff
+
+    this.F.carry = bit7 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+    this.F.zero = target.value === 0
+  }
+
+  shiftLeftAtRegisterAddr() {
+    let result = this.memory.readByte(this.HL.value)
+
+    const bit7 = (result >> 7) & 1
+    result = (result << 1) & 0xff
+
+    this.F.carry = bit7 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+    this.F.zero = result === 0
+  }
+
+  shiftRight(target: CPURegister) {
+    const bit7 = target.value >> 7
+    const bit0 = target.value & 1
+    target.value = (target.value >> 1) & 0xff
+
+    target.setBit(7, bit7)
+
+    this.F.carry = bit0 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+    this.F.zero = target.value === 0
+  }
+
+  shiftRightCarry(target: CPURegister) {
+    const bit0 = target.value & 1
+
+    target.value = (target.value >> 1) & 0xff
+
+    target.setBit(7, 0)
+
+    this.F.carry = bit0 === 1
+    this.F.zero = target.value === 0
+    this.F.subtract = false
+    this.F.halfCarry = false
+  }
+
+  shiftRightCarryAtRegisterAddr() {
+    let result = this.memory.readByte(this.HL.value)
+
+    const bit0 = result & 1
+
+    result = (result >> 1) & 0xff
+
+    // reset bit 7
+    // TODO: move all bit operation methods to own class
+    result = result & ~(0b1 << 7)
+
+    this.F.carry = bit0 === 1
+    this.F.zero = result === 0
+    this.F.subtract = false
+    this.F.halfCarry = false
+  }
+
+  shiftRightAtRegisterAddr() {
+    let result = this.memory.readByte(this.HL.value)
+
+    const bit7 = result >> 7
+    const bit0 = result & 1
+
+    result = (result >> 1) & 0xff
+
+    result |= bit7 << 7
+
+    this.F.carry = bit0 === 1
+    this.F.subtract = false
+    this.F.halfCarry = false
+    this.F.zero = result === 0
   }
 }

@@ -51,6 +51,12 @@ export class CPU {
   checkInterrupts() {
     const { interruptRequestRegister, interruptEnableRegister } = this.registers
 
+    const hasInterrupts = interruptEnableRegister.value & interruptRequestRegister.value
+
+    if (hasInterrupts > 0) {
+      this.isHalted = false
+    }
+
     if (this.interruptMasterEnabled) {
       if (interruptEnableRegister.isVBlankInterruptEnabled() && interruptRequestRegister.vBlankInterruptRequest()) {
         interruptRequestRegister.clearVBlankRequest()
@@ -106,9 +112,9 @@ export class CPU {
       const instruction = this.instructionMap.get(opCode)
 
       if (instruction != null) {
-        if (Gameboy.shouldOutputLogs()) {
-          // console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
-        }
+        // if (Gameboy.shouldOutputLogs()) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+        // }
 
         this.registers.PC.value++
 
@@ -123,8 +129,9 @@ export class CPU {
           if (cbInstruction == null) {
             throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
           }
-
-          // console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+          // if (Gameboy.shouldOutputLogs()) {
+          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+          // }
 
           this.registers.PC.value++
 

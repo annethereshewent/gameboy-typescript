@@ -176,7 +176,7 @@ export class GPU {
 
       const adjustment = this.getYCoordinateForTile(tileMapIndex)
 
-      const yPosInTile = lineYRegister.value - adjustment
+      const yPosInTile = lineYRegister.value % 8
 
       const tileBytePosition  = yPosInTile * 2
 
@@ -214,15 +214,6 @@ export class GPU {
     this.screen.data[pos + 1] = g
     this.screen.data[pos + 2] = b
     this.screen.data[pos + 3] = alpha
-  }
-
-  private getYCoordinateForTile(tile: number) {
-    const tileSize = 8
-    const backgroundNumberOfTilesPerSide = 32
-
-    const posY = Math.floor(tile / backgroundNumberOfTilesPerSide)
-
-    return posY * tileSize
   }
 
   getBit(value: number, pos: number): number {

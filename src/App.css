@@ -38,6 +38,7 @@
 }
 
 canvas {
-  width: 30%;
+  margin: 120px auto;
+  width: 25%;
   image-rendering: pixelated;
 }
