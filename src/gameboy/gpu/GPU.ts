@@ -174,8 +174,6 @@ export class GPU {
     while (x < GPU.screenWidth) {
       const tileMapIndex = (Math.floor(lineYRegister.value / 8) * 32 + Math.floor(x / 8))
 
-      const adjustment = this.getYCoordinateForTile(tileMapIndex)
-
       const yPosInTile = lineYRegister.value % 8
 
       const tileBytePosition  = yPosInTile * 2
