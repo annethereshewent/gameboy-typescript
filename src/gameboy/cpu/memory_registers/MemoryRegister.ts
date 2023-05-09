@@ -3,13 +3,13 @@ import { Memory } from "../Memory"
 export class MemoryRegister {
   address: number
   private memory: Memory
-  child: string
+  type?: string
 
-  constructor(address: number, memory: Memory, child: string) {
+  constructor(address: number, memory: Memory, type?: string) {
     this.address = address
     this.memory = memory
 
-    this.child = child
+    this.type = type
   }
 
   get value(): number {

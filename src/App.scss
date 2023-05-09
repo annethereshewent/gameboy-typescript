@@ -1,5 +1,5 @@
 .App {
-  text-align: center;
+
 }
 
 .App-logo {
@@ -39,6 +39,22 @@
 
 canvas {
   margin: 120px auto;
-  width: 25%;
+  width: 50%;
   image-rendering: pixelated;
+}
+
+.gameboy {
+  width: 50%;
+  margin: auto;
+}
+
+.register-data {
+  width: 50%;
+  margin: auto;
+  .register-table {
+    td {
+      border: 1px solid gray;
+      border-collapse: collapse;
+    }
+  }
 }

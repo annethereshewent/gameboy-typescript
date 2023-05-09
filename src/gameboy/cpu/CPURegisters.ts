@@ -5,7 +5,8 @@ import { CPURegister } from "./CPURegister"
 import { JoypadRegister } from "./memory_registers/JoypadRegister"
 import { FlagsRegister } from "./CPUFlagRegister"
 import { FlagsRegisterPair } from "./FlagsRegisterPair"
-import { Gameboy } from "../Gameboy"
+import { MemoryRegister } from "./memory_registers/MemoryRegister"
+import { TimerControlRegister } from "./memory_registers/TimerControlRegister"
 
 export class CPURegisters {
   A: CPURegister
@@ -28,6 +29,10 @@ export class CPURegisters {
   interruptEnableRegister: InterruptEnableRegister
   interruptRequestRegister: InterruptRequestRegister
   joypadRegister: JoypadRegister
+  dividerRegister: MemoryRegister
+  timerCounterRegister: MemoryRegister
+  timerModuloRegister: MemoryRegister
+  timerControlRegister: TimerControlRegister
 
   memory: Memory
 
@@ -63,6 +68,10 @@ export class CPURegisters {
     this.interruptEnableRegister = new InterruptEnableRegister(memory)
     this.interruptRequestRegister = new InterruptRequestRegister(memory)
     this.joypadRegister = new JoypadRegister(memory)
+    this.dividerRegister = new MemoryRegister(0xff0f, memory)
+    this.timerCounterRegister = new MemoryRegister(0xff05, memory)
+    this.timerModuloRegister = new MemoryRegister(0xff06, memory)
+    this.timerControlRegister = new TimerControlRegister(memory)
   }
 
 
@@ -115,7 +124,7 @@ export class CPURegisters {
   }
 
   addWithCarry(source: CPURegister) {
-    const value = source.value + (this.F.carry ? 1 : 0)
+    const value = (source.value + (this.F.carry ? 1 : 0)) & 0xff
 
     this.A.value = this._add(this.A.value, value)
   }
@@ -584,7 +593,7 @@ export class CPURegisters {
     this.F.halfCarry = false
     this.F.subtract = false
 
-    target.value = (target.value >> 1) + ((this.F.carry ? 1 : 0) << 7)
+    target.value = ((target.value >> 1) & 0xff) + ((this.F.carry ? 1 : 0) << 7)
   }
 
   rotateAtRegisterAddrRightCarry() {
@@ -728,24 +737,32 @@ export class CPURegisters {
   callFunctionIfNotZero() {
     if (!this.F.zero) {
       this.callFunction()
+    } else {
+      this.PC.value += 2
     }
   }
 
   callFunctionIfZero() {
     if (this.F.zero) {
       this.callFunction()
+    } else {
+      this.PC.value += 2
     }
   }
 
   callFunctionIfNotCarry() {
     if (!this.F.carry) {
       this.callFunction()
+    } else {
+      this.PC.value += 2
     }
   }
 
   callFunctionIfCarry() {
     if (this.F.carry) {
       this.callFunction()
+    } else {
+      this.PC.value += 2
     }
   }
 

@@ -25,6 +25,9 @@ export class CPU {
   instructionMap: Map<Number, Instruction> = new Map()
   cbMap: Map<Number, Instruction> = new Map()
 
+  counter = 0
+  timerCycles = 0
+
   constructor(memory: Memory) {
     this.registers = new CPURegisters(memory)
     this.memory = memory
@@ -45,6 +48,36 @@ export class CPU {
   }
 
   updateTimers(cycles: number) {
+    const {
+      timerControlRegister,
+      dividerRegister,
+      timerCounterRegister,
+      interruptRequestRegister,
+      timerModuloRegister
+     } = this.registers
+
+    this.counter = (this.counter + cycles) & 0xff
+
+    const msb = (this.counter >> 8) & 0xff
+
+    dividerRegister.value = msb
+
+    if (!timerControlRegister.isTimerEnabled()) {
+      return
+    }
+
+    this.timerCycles += (cycles / 4)
+
+    if (this.timerCycles >= timerControlRegister.getClockFrequency()) {
+      // if overflow happens
+      if (timerCounterRegister.value + 1 > 0xff) {
+        interruptRequestRegister.triggerTimerRequest()
+        timerCounterRegister.value = timerModuloRegister.value
+      }
+
+      timerCounterRegister.value++
+      this.timerCycles = 0
+    }
 
   }
 
@@ -112,9 +145,9 @@ export class CPU {
       const instruction = this.instructionMap.get(opCode)
 
       if (instruction != null) {
-        // if (Gameboy.shouldOutputLogs()) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
-        // }
+        if (Gameboy.shouldOutputLogs()) {
+         console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+        }
 
         this.registers.PC.value++
 
@@ -129,20 +162,20 @@ export class CPU {
           if (cbInstruction == null) {
             throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
           }
-          // if (Gameboy.shouldOutputLogs()) {
-          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
-          // }
+          if (Gameboy.shouldOutputLogs()) {
+            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+          }
 
           this.registers.PC.value++
 
           cbCycles = cbInstruction.cycleTime
         }
 
-        const cycles = (cbCycles != null ? cbCycles : instruction.cycleTime) / 4
+        const cycles = (cbCycles != null ? cbCycles : instruction.cycleTime)
 
         this.updateTimers(cycles)
 
-        return cycles
+        return cycles / 4
       } else {
         throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
       }

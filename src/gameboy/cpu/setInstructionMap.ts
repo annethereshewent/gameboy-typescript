@@ -1046,7 +1046,7 @@ export function setInstructionMap(this: CPU) {
     name: "ADD A, C",
     cycleTime: 4,
     operation: () => {
-      this.registers.add(this.registers.A, this.registers.B)
+      this.registers.add(this.registers.A, this.registers.C)
     }
   })
 

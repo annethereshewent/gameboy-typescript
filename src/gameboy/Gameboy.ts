@@ -1,4 +1,5 @@
 import { CPU } from "./cpu/CPU"
+import { CPURegisters } from "./cpu/CPURegisters"
 import { Memory } from "./cpu/Memory"
 import { GPU } from "./gpu/GPU"
 
@@ -28,7 +29,13 @@ enum GamepadButtons {
 
 export class Gameboy {
 
-  static MAX_FRAMES_TO_RUN = 60 * 60
+  setRegisters?: (registers: CPURegisters) => void
+
+  constructor(setRegisters?: (registerData: CPURegisters) => void) {
+    this.setRegisters = setRegisters
+  }
+
+  static MAX_FRAMES_TO_RUN = 60 * 30
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -70,14 +77,16 @@ export class Gameboy {
           console.log("you're pressing left!")
           joypadRegister.isPressingLeft = true
         }
-        if (gamepad.buttons[GamepadButtons.Right] || gamepad.axes[0] > 0.2) {
+        if (gamepad.buttons[GamepadButtons.Right].pressed || gamepad.axes[0] > 0.2) {
           console.log("youre pressing right!")
           joypadRegister.isPressingRight = true
         }
-        if (gamepad.buttons[GamepadButtons.Up] || gamepad.axes[1] < -0.2) {
+        if (gamepad.buttons[GamepadButtons.Up].pressed || gamepad.axes[1] < -0.2) {
+          console.log("you're pressing up!")
           joypadRegister.isPressingUp = true
         }
-        if (gamepad.buttons[GamepadButtons.Down] || gamepad.axes[1] > 0.2) {
+        if (gamepad.buttons[GamepadButtons.Down].pressed || gamepad.axes[1] > 0.2) {
+          console.log("you're pressing down!")
           joypadRegister.isPressingDown = true
         }
       } else if (joypadRegister.isPollingActions) {
@@ -122,18 +131,21 @@ export class Gameboy {
 
       Gameboy.frames++
 
-      if (Gameboy.frames % (60*60) === 0) {
-        console.log(`${Gameboy.frames / (60 * 60)} minute(s) elapsed`)
+       // update registers every 2 seconds
+      if (Gameboy.frames % (60*2) === 0 && this.setRegisters != null) {
+        const { registers } = this.cpu
+        this.setRegisters(registers)
       }
+      this.cycles %= GPU.CyclesPerFrame
     }
-    this.cycles %= GPU.CyclesPerFrame
 
-    // if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN) {
-    requestAnimationFrame((time: number) => this.runFrame(time, context))
-    // } else {
-    //   console.log(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
-    // }
-
-
+    if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN) {
+      requestAnimationFrame((time: number) => this.runFrame(time, context))
+    } else {
+      if (this.setRegisters != null) {
+        this.setRegisters(this.cpu.registers)
+      }
+      console.log(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
+    }
   }
 }
