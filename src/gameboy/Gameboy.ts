@@ -128,11 +128,11 @@ export class Gameboy {
     }
     this.cycles %= GPU.CyclesPerFrame
 
-    if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN) {
-      requestAnimationFrame((time: number) => this.runFrame(time, context))
-    } else {
-      console.log(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
-    }
+    // if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN) {
+    requestAnimationFrame((time: number) => this.runFrame(time, context))
+    // } else {
+    //   console.log(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
+    // }
 
 
   }

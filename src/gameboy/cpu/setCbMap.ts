@@ -1280,11 +1280,379 @@ export function setCbMap(this: CPU) {
     }
   })
 
+  this.cbMap.set(0xa0, {
+    name: "RES 4, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.B)
+    }
+  })
+
+  this.cbMap.set(0xa1, {
+    name: "RES 4, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.C)
+    }
+  })
+
+  this.cbMap.set(0xa2, {
+    name: "RES 4, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.D)
+    }
+  })
+
+  this.cbMap.set(0xa3, {
+    name: "RES 4, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.E)
+    }
+  })
+
+  this.cbMap.set(0xa4, {
+    name: "RES 4, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.H)
+    }
+  })
+
+  this.cbMap.set(0xa5, {
+    name: "RES 4, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.L)
+    }
+  })
+
+  this.cbMap.set(0xa6, {
+    name: "RES 4, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.resetBitAtRegisterAddr(4)
+    }
+  })
+
+  this.cbMap.set(0xa7, {
+    name: "RES 4, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(4, this.registers.A)
+    }
+  })
+
+  this.cbMap.set(0xa8, {
+    name: "RES 5, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.B)
+    }
+  })
+
+  this.cbMap.set(0xa9, {
+    name: "RES 5, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.C)
+    }
+  })
+
+  this.cbMap.set(0xaa, {
+    name: "RES 5, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.D)
+    }
+  })
+
+  this.cbMap.set(0xab, {
+    name: "RES 5, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.E)
+    }
+  })
+
+  this.cbMap.set(0xac, {
+    name: "RES 5, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.H)
+    }
+  })
+
+  this.cbMap.set(0xad, {
+    name: "RES 5, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.L)
+    }
+  })
+
+  this.cbMap.set(0xae, {
+    name: "RES 5, (HL)",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBitAtRegisterAddr(5)
+    }
+  })
+
+  this.cbMap.set(0xaf, {
+    name: "RES 5, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(5, this.registers.A)
+    }
+  })
+
+  this.cbMap.set(0xb0 , {
+    name: "RES 6, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.B)
+    }
+  })
+
+  this.cbMap.set(0xb1 , {
+    name: "RES 6, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.C)
+    }
+  })
+
+  this.cbMap.set(0xb2 , {
+    name: "RES 6, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.D)
+    }
+  })
+
+  this.cbMap.set(0xb3 , {
+    name: "RES 6, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.E)
+    }
+  })
+
+  this.cbMap.set(0xb4, {
+    name: "RES 6, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.H)
+    }
+  })
+
+  this.cbMap.set(0xb5, {
+    name: "RES 6, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.L)
+    }
+  })
+
   this.cbMap.set(0xb6, {
     name: "RES 6, (HL)",
     cycleTime: 16,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(6)
+    }
+  })
+
+  this.cbMap.set(0xb7, {
+    name: "RES 6, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(6, this.registers.A)
+    }
+  })
+
+  this.cbMap.set(0xb8 , {
+    name: "RES 7, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.B)
+    }
+  })
+
+  this.cbMap.set(0xb9, {
+    name: "RES 7, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.C)
+    }
+  })
+
+  this.cbMap.set(0xba, {
+    name: "RES 7, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.D)
+    }
+  })
+
+  this.cbMap.set(0xbb, {
+    name: "RES 7, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.E)
+    }
+  })
+
+  this.cbMap.set(0xbc, {
+    name: "RES 7 H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.H)
+    }
+  })
+
+  this.cbMap.set(0xbd, {
+    name: "RES 7, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.L)
+    }
+  })
+
+  this.cbMap.set(0xbe, {
+    name: "RES 7, (HL) ",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.resetBitAtRegisterAddr(7)
+    }
+  })
+
+  this.cbMap.set(0xbf, {
+    name: "RES 7, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.resetBit(7, this.registers.A)
+    }
+  })
+
+  this.cbMap.set(0xc0, {
+    name: "SET 0, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc1, {
+    name: "SET 0, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc2, {
+    name: "SET 0, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc3, {
+    name: "SET 0, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc4, {
+    name: "SET 0, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc5, {
+    name: "SET 0, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc6, {
+    name: "SET 0, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(0)
+    }
+  })
+
+  this.cbMap.set(0xc7, {
+    name: "SET 0, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(0, 1)
+    }
+  })
+
+  this.cbMap.set(0xc8, {
+    name: "SET 1, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(1, 1)
+    }
+  })
+
+  this.cbMap.set(0xc9, {
+    name: "SET 1, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(1, 1)
+    }
+  })
+
+  this.cbMap.set(0xca, {
+    name: "SET 1, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(1, 1)
+    }
+  })
+
+  this.cbMap.set(0xcb, {
+    name: "SET 1, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(1, 1)
+    }
+  })
+
+  this.cbMap.set(0xcc, {
+    name: "SET 1, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(1, 1)
+    }
+  })
+
+  this.cbMap.set(0xcd, {
+    name: "SET 1, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(1, 1)
+    }
+  })
+
+  this.cbMap.set(0xce, {
+    name: "SET 1, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(1)
     }
   })
 
@@ -1296,4 +1664,387 @@ export function setCbMap(this: CPU) {
     }
   })
 
+  this.cbMap.set(0xd0, {
+    name: "SET 2, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd1, {
+    name: "SET 2, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd2, {
+    name: "SET 2, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd3, {
+    name: "SET 2, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd4, {
+    name: "SET 2, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd5, {
+    name: "SET 2, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd6, {
+    name: "SET 2, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(2)
+    }
+  })
+
+  this.cbMap.set(0xd7, {
+    name: "SET 2, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(2, 1)
+    }
+  })
+
+  this.cbMap.set(0xd8, {
+    name: "SET 3, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xd9, {
+    name: "SET 3, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xda, {
+    name: "SET 3, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xdb, {
+    name: "SET 3, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xdc, {
+    name: "SET 3, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xdd, {
+    name: "SET 3, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xde, {
+    name: "SET 3, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(3)
+    }
+  })
+
+  this.cbMap.set(0xdf, {
+    name: "SET 3, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(3, 1)
+    }
+  })
+
+  this.cbMap.set(0xe0, {
+    name: "SET 4, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe1, {
+    name: "SET 4, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe2, {
+    name: "SET 4, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe3, {
+    name: "SET 4, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe4, {
+    name: "SET 4, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe5, {
+    name: "SET 4, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe6, {
+    name: "SET 4, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(4)
+    }
+  })
+
+  this.cbMap.set(0xe7, {
+    name: "SET 4, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(4, 1)
+    }
+  })
+
+  this.cbMap.set(0xe8, {
+    name: "SET 5, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(5, 1)
+    }
+  })
+
+  this.cbMap.set(0xe9, {
+    name: "SET 5, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(5,1)
+    }
+  })
+
+  this.cbMap.set(0xea, {
+    name: "SET 5, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(5, 1)
+    }
+  })
+
+  this.cbMap.set(0xeb, {
+    name: "SET 5, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(5, 1)
+    }
+  })
+
+  this.cbMap.set(0xec, {
+    name: "SET 5, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(5, 1)
+    }
+  })
+
+  this.cbMap.set(0xed, {
+    name: "SET 5, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(5, 1)
+    }
+  })
+
+  this.cbMap.set(0xee, {
+    name: "SET 5, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(5)
+    }
+  })
+
+  this.cbMap.set(0xef, {
+    name: "SET 5, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(5, 1)
+    }
+  })
+
+  this.cbMap.set(0xf0, {
+    name: "SET 6, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf1, {
+    name: "SET 6, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf2, {
+    name: "SET 6, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf3, {
+    name: "SET 6, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf4, {
+    name: "set 6, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf5, {
+    name: "SET 6, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf6, {
+    name: "SET 6, (HL)",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(6)
+    }
+  })
+
+  this.cbMap.set(0xf7, {
+    name: "SET 6, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(6, 1)
+    }
+  })
+
+  this.cbMap.set(0xf8, {
+    name: "SET 7, B",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.B.setBit(7, 1)
+    }
+  })
+
+  this.cbMap.set(0xf9, {
+    name: "SET 7, C",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.C.setBit(7, 1)
+    }
+  })
+
+  this.cbMap.set(0xfa, {
+    name: "SET 7, D",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.D.setBit(7, 1)
+    }
+  })
+
+  this.cbMap.set(0xfb, {
+    name: "SET 7, E",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.E.setBit(7, 1)
+    }
+  })
+
+  this.cbMap.set(0xfc, {
+    name: "SET 7, H",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.H.setBit(7, 1)
+    }
+  })
+
+  this.cbMap.set(0xfd, {
+    name: "SET 7, L",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.L.setBit(7, 1)
+    }
+  })
+
+  this.cbMap.set(0xfe, {
+    name: "SET 7, (HL)",
+    cycleTime: 16,
+    operation: () => {
+      this.registers.setBitAtRegisterAddress(7)
+    }
+  })
+
+  this.cbMap.set(0xff, {
+    name: "SET 7, A",
+    cycleTime: 8,
+    operation: () => {
+      this.registers.A.setBit(7, 1)
+    }
+  })
 }

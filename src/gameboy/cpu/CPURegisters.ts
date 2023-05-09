@@ -874,6 +874,8 @@ export class CPURegisters {
     this.F.subtract = false
     this.F.halfCarry = false
     this.F.zero = result === 0
+
+    this.memory.writeByte(this.HL.value, result)
   }
 
   shiftRight(target: CPURegister) {
@@ -917,6 +919,8 @@ export class CPURegisters {
     this.F.zero = result === 0
     this.F.subtract = false
     this.F.halfCarry = false
+
+    this.memory.writeByte(this.HL.value, result)
   }
 
   shiftRightAtRegisterAddr() {
@@ -933,5 +937,15 @@ export class CPURegisters {
     this.F.subtract = false
     this.F.halfCarry = false
     this.F.zero = result === 0
+
+    this.memory.writeByte(this.HL.value, result)
+  }
+
+  setBitAtRegisterAddress(bitPos: number) {
+    let result = this.memory.readByte(this.HL.value)
+
+    result |= 1 << bitPos
+
+    this.memory.writeByte(this.HL.value, result)
   }
 }
