@@ -57,6 +57,10 @@ export class CPURegisters {
     this.BC = new CPURegister("BC", 0x13, 2, this.registerDataView, true)
     this.DE = new CPURegister("DE", 0xd8, 4, this.registerDataView, true)
     this.HL = new CPURegister("HL", 0x14d, 6, this.registerDataView, true)
+    // this.AF = new FlagsRegisterPair("AF", 0x1180, 0, this.registerDataView, true)
+    // this.BC = new CPURegister("BC", 0x0, 2, this.registerDataView, true)
+    // this.DE = new CPURegister("DE", 0xff56, 4, this.registerDataView, true)
+    // this.HL = new CPURegister("HL", 0x0, 6, this.registerDataView, true)
     // stack pointer starts at the top of the stack memory, which is at 0xfffe
     this.SP = new CPURegister("SP", 0xfffe, 8, this.registerDataView, true)
     // first 255 (0xFF) instructions in memory are reserved for the gameboy
@@ -112,6 +116,7 @@ export class CPURegisters {
   addImmediateSigned(target: CPURegister) {
     if (target.is16Bit) {
       target.value = target.value + this.memory.readSignedByte(this.PC.value)
+      this.PC.value++
     } else {
       throw new Error(`invalid register selected: ${target.name}. Must be a 16 bit register`)
     }
@@ -123,14 +128,25 @@ export class CPURegisters {
     target.value = this._add(target.value, value)
   }
 
-  addWithCarry(source: CPURegister) {
-    const value = (source.value + (this.F.carry ? 1 : 0)) & 0xff
+  private _addWithCarry(a: number, b: number) {
+    const carry = this.F.carry ? 1 : 0
 
-    this.A.value = this._add(this.A.value, value)
+    const result = (a + b + carry) & 0xff
+
+    this.F.carry = result < a + carry
+    this.F.subtract = false
+    this.F.halfCarry = ((a & 0x0f) + (b & 0x0f) + carry) > 0xf
+    this.F.zero = result === 0
+
+    return result
+  }
+
+  addWithCarry(source: CPURegister) {
+    this.A.value = this._addWithCarry(this.A.value, source.value)
   }
 
   addWithCarryImmediate() {
-    this.A.value = this._add(this.A.value, this.memory.readByte(this.PC.value) + (this.F.carry ? 1 : 0))
+    this.A.value = this._addWithCarry(this.A.value, this.memory.readByte(this.PC.value))
     this.PC.value++
   }
 
@@ -151,9 +167,9 @@ export class CPURegisters {
   }
 
   addWithCarryFromMemory(source: CPURegister) {
-    const value = this.memory.readByte(source.value) + (this.F.carry ? 1 : 0)
+    const value = this.memory.readByte(source.value)
 
-    this.A.value = this._add(this.A.value, value)
+    this.A.value = this._addWithCarry(this.A.value, value)
   }
 
   complementCarryFlag() {
@@ -359,24 +375,35 @@ export class CPURegisters {
     this.PC.value++
   }
 
-  subtractWithCarry(source: CPURegister) {
-    const value = source.value - (this.F.carry ? 1 : 0)
+  private _subtractWithCarry(a: number, b: number) {
+    const carry = this.F.carry ? 1 : 0
+    const result = (a - b - carry) & 0xff
 
-    this.A.value = this._subtract(this.A.value, value)
+
+    this.F.subtract = true
+    this.F.carry = result > a - carry
+    this.F.halfCarry = (a & 0xf) - (b & 0xf) - carry < 0
+    this.F.zero = result === 0
+
+    return result
+  }
+
+  subtractWithCarry(source: CPURegister) {
+    this.A.value = this._subtractWithCarry(this.A.value, source.value)
   }
 
   subtractWithCarryFromMemory(source: CPURegister) {
-    const value = this.memory.readByte(source.value) - (this.F.carry ? 1 : 0)
+    const value = this.memory.readByte(source.value)
 
-    this.A.value = this._subtract(this.A.value, value)
+    this.A.value = this._subtractWithCarry(this.A.value, value)
   }
 
   subtractWithCarryImmediate() {
-    const value = this.memory.readByte(this.PC.value) - (this.F.carry ? 1 : 0)
+    const value = this.memory.readByte(this.PC.value)
 
     this.PC.value++
 
-    this.A.value = this._subtract(this.A.value, value)
+    this.A.value = this._subtractWithCarry(this.A.value, value)
   }
 
   compare(source: CPURegister) {
@@ -652,13 +679,14 @@ export class CPURegisters {
 
   rotateRightCarry() {
     const bit0 = this.A.value & 1
+    const carry = this.F.carry ? 1 : 0
 
     this.F.carry = bit0 === 1
     this.F.zero = false
     this.F.halfCarry = false
     this.F.subtract = false
 
-    this.A.value = (this.A.value >> 1) + ((this.F.carry ? 1 : 0) << 7)
+    this.A.value = (this.A.value >> 1) + (carry << 7)
   }
 
   writeToMemoryRegisterAddrAndIncrementTarget(target: CPURegister, source: CPURegister) {
@@ -810,6 +838,7 @@ export class CPURegisters {
 
   pushToStack(value: number) {
     this.SP.value -= 2
+    console.log(`SP is now ${this.SP.hexValue}`)
     this.memory.writeWord(this.SP.value, value)
   }
 

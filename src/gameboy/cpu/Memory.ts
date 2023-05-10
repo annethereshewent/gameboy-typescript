@@ -48,16 +48,10 @@ export class Memory {
   }
 
   writeByte(address: number, value: number, caller?: string) {
+    // if (address === 0xd800) {
+    //   console.log(`writing 0x${value.toString(16)} to address 0xd800`)
+    // }
     this.memoryView.setUint8(address, value)
-    // if (Gameboy.shouldOutputLogs() && address >= 0x8000 && address  <= 0x8fff) {
-    //   const byte = this.readByte(address).toString(16)
-    //   console.log(`0x${address.toString(16)}: 0x${byte}`)
-    // }
-
-    // if (address === 0xff40) {
-    //   console.log(`caller is ${caller}`)
-    //   console.log(`writing to LCD control register, isLCDControllerOn = ${(value >> 7) & 1}`)
-    // }
   }
 
   writeWord(address: number, value: number) {

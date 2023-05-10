@@ -5,7 +5,7 @@ export class CPURegister {
   dataView: DataView
   is16Bit: boolean
 
-  constructor(name: string, initialValue = 0, id: number, dataView: DataView, is16Bit: boolean) {
+  constructor(name: string, initialValue: number, id: number, dataView: DataView, is16Bit: boolean) {
     this.name = name
     this.registerId = id
 
@@ -33,6 +33,10 @@ export class CPURegister {
     } else {
       this.dataView.setUint16(this.registerId, newValue, true)
     }
+
+    // if (this.name === "A") {
+    //   console.log(`register A's value is now ${this.hexValue}`)
+    // }
   }
 
   setBit(pos: number, bitValue: number) {

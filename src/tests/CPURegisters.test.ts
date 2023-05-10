@@ -123,6 +123,14 @@ test("it performs resetBit properly", () => {
   expect(registers.A.value).toBe(0b11010011)
 })
 
+test("it performs setBit properly", () => {
+  registers.A.value = 0b11011001
+
+  registers.A.setBit(2, 1)
+
+  expect(registers.A.value).toBe(0b11011101)
+})
+
 test("it performs loadWord properly", () => {
   memory.gameDataView?.setUint16(1, 0xf0f0)
 
@@ -141,6 +149,44 @@ test("it performs writeStackPointerToMemory properly", () => {
   registers.writeStackPointerToMemory()
 
   expect(memory.readWord(0x8080)).toBe(registers.SP.value)
+})
+
+test("it performs rotateRight properly", () => {
+  registers.A.value = 0b11100011
+
+  registers.rotateRight()
+
+  expect(registers.A.value).toBe(0b11110001)
+})
+
+test("it performs rotateRightCarry properly", () => {
+  registers.A.value = 0b10101011
+
+  registers.F.carry = true
+
+  registers.rotateRightCarry()
+
+  expect(registers.A.value).toBe(0b11010101)
+})
+
+test("it performs rotateRegisterRight properly", () => {
+  registers.D.value = 0b10101011
+
+  registers.rotateRegisterRight(registers.D)
+
+  expect(registers.D.value).toBe(0b11010101)
+})
+
+test("it performs addWithCarry properly", () => {
+  registers.A.value = 254
+  registers.D.value = 1
+
+  registers.F.carry = true
+
+  registers.addWithCarry(registers.D)
+
+  expect(registers.F.carry).toBe(true)
+  expect(registers.A.value).toBe(0)
 })
 
 test("popping and pushing to stack works as expected", () => {
