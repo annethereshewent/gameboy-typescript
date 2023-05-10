@@ -146,11 +146,12 @@ export class CPU {
       const instruction = this.instructionMap.get(opCode)
 
       if (instruction != null) {
-        // if (Gameboy.shouldOutputLogs()) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+        const previousAddress = this.registers.PC.hexValue
+        this.registers.PC.value++
+         // if (Gameboy.shouldOutputLogs()) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
         // }
 
-        this.registers.PC.value++
 
         instruction.operation()
 
@@ -163,11 +164,14 @@ export class CPU {
           if (cbInstruction == null) {
             throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
           }
+          const previousAddress = this.registers.PC.hexValue
+          this.registers.PC.value++
+
           // if (Gameboy.shouldOutputLogs()) {
-          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}`)
           // }
 
-          this.registers.PC.value++
+          cbInstruction.operation()
 
           cbCycles = cbInstruction.cycleTime
         }

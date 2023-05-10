@@ -2,7 +2,7 @@ import { CPU } from "./CPU"
 
 export function setInstructionMap(this: CPU) {
 
-  const { registers } = this
+  const { registers, memory } = this
 
   this.instructionMap.set(0x0, {
     name: "NOP",
@@ -13,7 +13,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x1, {
-    name: "LD BC, d16",
+    get name() {
+      return `LD BC, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.loadWord(this.registers.BC)
@@ -53,7 +55,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x6, {
-    name: "LD B, d8",
+    get name() {
+      return `LD B, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () =>  {
       this.registers.readByte(this.registers.B)
@@ -69,7 +73,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x8, {
-    name: "LD (a16), SP",
+    get name() {
+      return `LD (0x${memory.readWord(registers.PC.value).toString(16)}), SP`
+    },
     cycleTime: 20,
     operation: () => {
       this.registers.writeStackPointerToMemory()
@@ -117,7 +123,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xE, {
-    name: "LD C, d8",
+    get name() {
+      return `LD C, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.readByte(this.registers.C)
@@ -141,7 +149,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x11, {
-    name: "LD DE, d16",
+    get name() {
+      return `LD DE, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.loadWord(this.registers.DE)
@@ -181,7 +191,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x16, {
-    name: "LD D, d8",
+    get name() {
+      return `LD D, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.readByte(this.registers.D)
@@ -197,7 +209,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x18, {
-    name: "JR r8",
+    get name() {
+      return `JR 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.relativeJump()
@@ -245,7 +259,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x1E, {
-    name: "LD E, d8",
+    get name() {
+      return `LD E, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.readByte(this.registers.E)
@@ -261,7 +277,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x20, {
-    name: "JR NZ, r8",
+    get name() {
+      return `JR NZ, 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return !registers.F.zero ? 12 : 8
     },
@@ -271,7 +289,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x21, {
-    name: "LD HL, d16",
+    get name() {
+      return `LD HL, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.loadWord(this.registers.HL)
@@ -311,7 +331,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x26, {
-    name: "LD H, d8",
+    get name() {
+      return `LD H, ${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.readByte(this.registers.H)
@@ -327,7 +349,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x28, {
-    name: "JR Z, r8",
+    get name() {
+      return `JR Z, 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     get cycleTime() {
       return registers.F.zero ? 12 : 8
     },
@@ -377,7 +401,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x2E, {
-    name: "LD L, d8",
+    get name() {
+      return `LD L, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.readByte(this.registers.L)
@@ -393,7 +419,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x30, {
-    name: "JR NC, r8",
+    get name() {
+      return `JR NC, 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     get cycleTime() {
       return !registers.F.carry ? 12 : 8
     },
@@ -403,7 +431,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x31, {
-    name: "LD SP, d16",
+    get name() {
+      return `LD SP, 0x${memory.readWord(registers.PC.value)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.loadWord(this.registers.SP)
@@ -443,7 +473,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x36, {
-    name: "LD (HL), d8",
+    get name() {
+      return `LD (HL), 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.writeByteIntoRegisterAddress(this.registers.HL)
@@ -459,7 +491,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x38, {
-    name: "JR C, r8",
+    get name() {
+      return `JR C, 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return registers.F.carry ? 12 : 8
     },
@@ -509,7 +543,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0x3E, {
-    name: "LD A, d8",
+    get name() {
+      return `LD A, ${memory.readByte(registers.PC.value)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.readByte(this.registers.A)
@@ -1567,7 +1603,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xC2, {
-    name: "JP NZ, a16",
+    get name() {
+      return `JP NZ, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return !registers.F.zero ? 16 : 12
     },
@@ -1577,7 +1615,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xC3, {
-    name: "JP a16",
+    get name() {
+      return  `JP 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     cycleTime: 16,
     operation: () => {
       this.registers.jump()
@@ -1585,7 +1625,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xC4, {
-    name: "CALL NZ, a16",
+    get name() {
+      return `CALL NZ, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return !registers.F.zero ? 24 : 12
     },
@@ -1603,7 +1645,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xC6, {
-    name: "ADD A, d8",
+    get name() {
+      return `ADD A, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.addImmediate(this.registers.A)
@@ -1637,7 +1681,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xCA, {
-    name: "JP Z, a16",
+    get name() {
+      return `JP Z, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return registers.F.zero ? 16 : 12
     },
@@ -1655,7 +1701,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xCC, {
-    name: "CALL Z, a16",
+    get name() {
+      return `CALL Z, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return registers.F.zero ? 24 : 12
     },
@@ -1665,7 +1713,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xCD, {
-    name: "CALL a16",
+    get name() {
+      return `CALL 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     cycleTime: 24,
     operation: () => {
       this.registers.callFunction()
@@ -1673,7 +1723,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0XCE, {
-    name: "ADC A, d8",
+    get name() {
+      return `ADC A, 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.addWithCarryImmediate()
@@ -1707,7 +1759,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xD2, {
-    name: "JP NC, a16",
+    get name() {
+      return `JP NC 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return !registers.F.carry ? 16 : 12
     },
@@ -1719,7 +1773,9 @@ export function setInstructionMap(this: CPU) {
   // 0xD3 has no instruction
 
   this.instructionMap.set(0xD4, {
-    name: "CALL NC, a16",
+    get name() {
+      return `CALL NC, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return !registers.F.carry ? 24 : 12
     },
@@ -1737,7 +1793,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xD6, {
-    name: "SUB d8",
+    get name() {
+      return `SUB 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.subtractImmediate()
@@ -1772,7 +1830,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xDA, {
-    name: "JP C, a16",
+    get name() {
+      return `JP C, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return registers.F.carry ? 16 : 12
     },
@@ -1784,7 +1844,9 @@ export function setInstructionMap(this: CPU) {
   // 0xDB has no instruction
 
   this.instructionMap.set(0xDC, {
-    name: "CALL C, a16",
+    get name() {
+      return `CALL C, 0x${memory.readWord(registers.PC.value).toString(16)}`
+    },
     get cycleTime()  {
       return registers.F.carry ? 24 : 12
     },
@@ -1796,7 +1858,9 @@ export function setInstructionMap(this: CPU) {
   // 0xDD has no instruction
 
   this.instructionMap.set(0xDE, {
-    name: "SBC A, d8",
+    get name() {
+      return `SBC A, ${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.subtractWithCarryImmediate()
@@ -1812,7 +1876,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xE0, {
-    name: "LDH (a8), A",
+    get name() {
+      return `LDH (0xff00 + 0x${memory.readByte(registers.PC.value).toString(16)}), A`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.writeToMemory8Bit(this.registers.A)
@@ -1847,7 +1913,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xE6, {
-    name: "AND d8",
+    get name() {
+      return `AND 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.andImmediate()
@@ -1863,7 +1931,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xE8, {
-    name: "ADD SP, r8",
+    get name() {
+      return `ADD SP, 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 16,
     operation: () => {
       this.registers.addImmediateSigned(this.registers.SP)
@@ -1879,7 +1949,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xEA, {
-    name: "LD (a16), A",
+    get name() {
+      return `LD (${memory.readWord(registers.PC.value).toString(16)}), A`
+    },
     cycleTime: 16,
     operation: () => {
       this.registers.writeToMemory16bit(this.registers.A)
@@ -1891,7 +1963,9 @@ export function setInstructionMap(this: CPU) {
   // 0xED has no instruction
 
   this.instructionMap.set(0xEE, {
-    name: "XOR d8",
+    get name() {
+      return `XOR 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.xorImmediate()
@@ -1907,7 +1981,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xF0, {
-    name: "LDH A, (a8)",
+    get name() {
+      return `LDH A, (0x${memory.readByte(registers.PC.value).toString(16)})`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.loadFromBase(this.registers.A)
@@ -1949,7 +2025,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xF6, {
-    name: "OR d8",
+    get name() {
+      return `OR ${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.orImmediate()
@@ -1965,7 +2043,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xF8, {
-    name: "LD HL, SP + r8",
+    get name() {
+      return `LD HL, SP + 0x${memory.readSignedByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 12,
     operation: () => {
       this.registers.loadHLStackPointer()
@@ -1981,7 +2061,9 @@ export function setInstructionMap(this: CPU) {
   })
 
   this.instructionMap.set(0xFA, {
-    name: "LD A, (a16)",
+    get name() {
+      return `LD A, (${memory.readWord(registers.PC.value).toString(16)})`
+    },
     cycleTime: 16,
     operation: () => {
       this.registers.loadFrom16bitAddr(this.registers.A)
@@ -1999,7 +2081,9 @@ export function setInstructionMap(this: CPU) {
   // 0xFC has no instruction
   // 0xFD has no instruction
   this.instructionMap.set(0xFE, {
-    name: "CP d8",
+    get name() {
+      return `CP 0x${memory.readByte(registers.PC.value).toString(16)}`
+    },
     cycleTime: 8,
     operation: () => {
       this.registers.compareImmediate()
