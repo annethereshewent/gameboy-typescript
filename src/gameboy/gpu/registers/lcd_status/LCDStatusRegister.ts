@@ -6,6 +6,8 @@ export class LCDStatusRegister extends MemoryRegister {
 
   constructor(memory: Memory) {
     super(0xff41, memory, "LCDStatusRegister")
+
+    this.value = 0x83
   }
   get mode() {
     return this.value & 0b11

@@ -44,7 +44,7 @@ export class CPU {
 
   initialize() {
     this.memory.reset()
-    this.registers = new CPURegisters(this.memory)
+    this.registers.initialize()
     Gameboy.frames = 0
   }
 
@@ -169,11 +169,11 @@ export class CPU {
 
           this.registers.PC.value++
 
-          cbCycles = typeof cbInstruction.cycleTime === 'number' ? cbInstruction.cycleTime : cbInstruction.cycleTime()
+          cbCycles = cbInstruction.cycleTime
         }
         let cycles = 0
         if (cbCycles == null) {
-          cycles = typeof instruction.cycleTime === 'number'? instruction.cycleTime : instruction.cycleTime()
+          cycles = instruction.cycleTime
         } else {
           cycles = cbCycles
         }

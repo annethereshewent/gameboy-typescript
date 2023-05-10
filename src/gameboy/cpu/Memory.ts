@@ -11,9 +11,7 @@ export class Memory {
   }
 
   reset() {
-    this.memoryBuffer = new ArrayBuffer(0x10000)
-    this.memoryView = new DataView(this.memoryBuffer)
-    this.memoryBytes = new Uint8Array(this.memoryBuffer)
+    this.memoryBytes.fill(0, 0, this.memoryBytes.length - 1)
   }
 
   readByte(address: number): number {

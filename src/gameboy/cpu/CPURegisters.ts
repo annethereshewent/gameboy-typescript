@@ -78,6 +78,16 @@ export class CPURegisters {
     this.timerControlRegister = new TimerControlRegister(memory)
   }
 
+  initialize() {
+    this.AF.value = 0x1b0
+    this.BC.value = 0x13
+    this.DE.value = 0xd8
+    this.HL.value = 0x14d
+    this.SP.value = 0xfffe
+    this.PC.value = 0x100
+
+    this.joypadRegister.value = 0xff
+  }
 
   add(target: CPURegister, source: CPURegister) {
     target.value = this._add(target.value, source.value)
