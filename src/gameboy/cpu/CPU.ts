@@ -45,6 +45,7 @@ export class CPU {
   initialize() {
     this.memory.reset()
     this.registers = new CPURegisters(this.memory)
+    Gameboy.frames = 0
   }
 
   updateTimers(cycles: number) {
@@ -145,9 +146,9 @@ export class CPU {
       const instruction = this.instructionMap.get(opCode)
 
       if (instruction != null) {
-        if (Gameboy.shouldOutputLogs()) {
-          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
-        }
+        // if (Gameboy.shouldOutputLogs()) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+        // }
 
         this.registers.PC.value++
 
@@ -162,16 +163,20 @@ export class CPU {
           if (cbInstruction == null) {
             throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
           }
-          if (Gameboy.shouldOutputLogs()) {
-            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
-          }
+          // if (Gameboy.shouldOutputLogs()) {
+          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${this.registers.PC.hexValue}`)
+          // }
 
           this.registers.PC.value++
 
-          cbCycles = cbInstruction.cycleTime
+          cbCycles = typeof cbInstruction.cycleTime === 'number' ? cbInstruction.cycleTime : cbInstruction.cycleTime()
         }
-
-        const cycles = (cbCycles != null ? cbCycles : instruction.cycleTime)
+        let cycles = 0
+        if (cbCycles == null) {
+          cycles = typeof instruction.cycleTime === 'number'? instruction.cycleTime : instruction.cycleTime()
+        } else {
+          cycles = cbCycles
+        }
 
         this.updateTimers(cycles)
 

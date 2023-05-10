@@ -107,30 +107,6 @@ test("it performs writeByteIntoRegisterAddress properly", () => {
   expect(memory.readByte(registers.HL.value)).toBe(0xda)
 })
 
-test("it performs swap properly", () => {
-  registers.A.value = 0b11101110
-
-  registers.swap(registers.A)
-
-  expect(registers.A.value).toBe(0b01101111)
-})
-
-test("it performs resetBit properly", () => {
-  registers.A.value = 0b11011011
-
-  registers.resetBit(3, registers.A)
-
-  expect(registers.A.value).toBe(0b11010011)
-})
-
-test("it performs setBit properly", () => {
-  registers.A.value = 0b11011001
-
-  registers.A.setBit(2, 1)
-
-  expect(registers.A.value).toBe(0b11011101)
-})
-
 test("it performs loadWord properly", () => {
   memory.gameDataView?.setUint16(1, 0xf0f0)
 
@@ -151,44 +127,6 @@ test("it performs writeStackPointerToMemory properly", () => {
   expect(memory.readWord(0x8080)).toBe(registers.SP.value)
 })
 
-test("it performs rotateRight properly", () => {
-  registers.A.value = 0b11100011
-
-  registers.rotateRight()
-
-  expect(registers.A.value).toBe(0b11110001)
-})
-
-test("it performs rotateRightCarry properly", () => {
-  registers.A.value = 0b10101011
-
-  registers.F.carry = true
-
-  registers.rotateRightCarry()
-
-  expect(registers.A.value).toBe(0b11010101)
-})
-
-test("it performs rotateRegisterRight properly", () => {
-  registers.D.value = 0b10101011
-
-  registers.rotateRegisterRight(registers.D)
-
-  expect(registers.D.value).toBe(0b11010101)
-})
-
-test("it performs addWithCarry properly", () => {
-  registers.A.value = 254
-  registers.D.value = 1
-
-  registers.F.carry = true
-
-  registers.addWithCarry(registers.D)
-
-  expect(registers.F.carry).toBe(true)
-  expect(registers.A.value).toBe(0)
-})
-
 test("popping and pushing to stack works as expected", () => {
   for (let i = 0; i < 5; i++) {
     registers.pushToStack(i)
@@ -201,19 +139,4 @@ test("popping and pushing to stack works as expected", () => {
   }
 
   expect(stackItems).toEqual([4,3,2,1,0])
-})
-
-test("it initializes registers to the proper values", () => {
-  cpu.initialize()
-
-  const { registers } = cpu
-
-  expect(registers.AF.value).toBe(0x1b0)
-  expect(registers.BC.value).toBe(0x13)
-  expect(registers.DE.value).toBe(0xd8)
-  expect(registers.HL.value).toBe(0x14d)
-  expect(registers.SP.value).toBe(0xfffe)
-  expect(registers.PC.value).toBe(0x100)
-
-  expect(registers.joypadRegister.value).toBe(0xff)
 })

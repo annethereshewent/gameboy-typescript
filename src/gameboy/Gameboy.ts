@@ -35,7 +35,7 @@ export class Gameboy {
     this.setRegisters = setRegisters
   }
 
-  static MAX_FRAMES_TO_RUN = 60 * 10
+  static MAX_FRAMES_TO_RUN = 60 * 60
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -50,8 +50,7 @@ export class Gameboy {
   // otherwise, logs get polluted with too much data
   // to sift through
   static shouldOutputLogs() {
-    // return this.frames >= this.MAX_FRAMES_TO_RUN - 5
-    return false
+    return this.frames >= this.MAX_FRAMES_TO_RUN - 5
   }
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
@@ -142,18 +141,8 @@ export class Gameboy {
     if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN && cycles !== -1) {
       requestAnimationFrame((time: number) => this.runFrame(time, context))
     } else {
-      // if (this.setRegisters != null) {
-      //   this.setRegisters(this.cpu.registers)
-      // }
-      console.log(`finished running ${Gameboy.MAX_FRAMES_TO_RUN} frames successfully!`)
-
-      const { registers } = this.cpu
-
-      const registerPairs = [registers.AF, registers.BC, registers.DE, registers.HL, registers.SP, registers.PC]
-
-      for (const registerPair of registerPairs) {
-        console.log(`${registerPair.name}: ${registerPair.hexValue}`)
-      }
+      console.log(`finished running ${Gameboy.frames} frames successfully!`)
+      this.cpu.registers.outputState()
     }
   }
 }

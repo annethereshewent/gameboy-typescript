@@ -1,3 +1,5 @@
+import { Gameboy } from "../Gameboy"
+
 export class CPURegister {
 
   name: string
@@ -33,10 +35,6 @@ export class CPURegister {
     } else {
       this.dataView.setUint16(this.registerId, newValue, true)
     }
-
-    // if (this.name === "A") {
-    //   console.log(`register A's value is now ${this.hexValue}`)
-    // }
   }
 
   setBit(pos: number, bitValue: number) {

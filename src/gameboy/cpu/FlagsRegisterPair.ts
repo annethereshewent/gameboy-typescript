@@ -11,4 +11,8 @@ export class FlagsRegisterPair extends CPURegister {
   get value() {
     return this.dataView.getUint16(this.registerId, true)
   }
+
+  get hexValue() {
+    return `0x${this.value.toString(16)}`
+  }
 }

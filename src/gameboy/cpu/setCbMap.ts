@@ -1268,7 +1268,7 @@ export function setCbMap(this: CPU) {
     name: "RES 3, (HL)",
     cycleTime: 16,
     operation: () => {
-      this.registers.resetBit(3, this.registers.HL)
+      this.registers.resetBitAtRegisterAddr(3)
     }
   })
 

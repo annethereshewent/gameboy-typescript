@@ -614,13 +614,14 @@ export class CPURegisters {
 
   rotateRegisterRightCarry(target: CPURegister) {
     const bit0 = target.value & 1
+    const carry = this.F.carry ? 1 : 0
 
     this.F.carry = bit0 === 1
     this.F.zero = false
     this.F.halfCarry = false
     this.F.subtract = false
 
-    target.value = ((target.value >> 1) & 0xff) + ((this.F.carry ? 1 : 0) << 7)
+    target.value = ((target.value >> 1) & 0xff) + (carry << 7)
   }
 
   rotateAtRegisterAddrRightCarry() {
@@ -838,7 +839,6 @@ export class CPURegisters {
 
   pushToStack(value: number) {
     this.SP.value -= 2
-    console.log(`SP is now ${this.SP.hexValue}`)
     this.memory.writeWord(this.SP.value, value)
   }
 
@@ -942,8 +942,6 @@ export class CPURegisters {
 
     target.value = (target.value >> 1) & 0xff
 
-    target.setBit(7, 0)
-
     this.F.carry = bit0 === 1
     this.F.zero = target.value === 0
     this.F.subtract = false
@@ -993,5 +991,17 @@ export class CPURegisters {
     result |= 1 << bitPos
 
     this.memory.writeByte(this.HL.value, result)
+  }
+
+  outputState() {
+    console.log('register state:')
+    console.log({
+      AF: this.AF.hexValue,
+      BC: this.BC.hexValue,
+      DE: this.DE.hexValue,
+      HL: this.HL.hexValue,
+      PC: this.PC.hexValue,
+      SP: this.SP.hexValue
+    })
   }
 }
