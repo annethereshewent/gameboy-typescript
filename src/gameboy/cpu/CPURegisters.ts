@@ -28,7 +28,6 @@ export class CPURegisters {
 
   interruptEnableRegister: InterruptEnableRegister
   interruptRequestRegister: InterruptRequestRegister
-  joypadRegister: JoypadRegister
   dividerRegister: MemoryRegister
   timerCounterRegister: MemoryRegister
   timerModuloRegister: MemoryRegister
@@ -71,7 +70,6 @@ export class CPURegisters {
     // memory registers
     this.interruptEnableRegister = new InterruptEnableRegister(memory)
     this.interruptRequestRegister = new InterruptRequestRegister(memory)
-    this.joypadRegister = new JoypadRegister(memory)
     this.dividerRegister = new MemoryRegister(0xff0f, memory)
     this.timerCounterRegister = new MemoryRegister(0xff05, memory)
     this.timerModuloRegister = new MemoryRegister(0xff06, memory)
@@ -85,8 +83,6 @@ export class CPURegisters {
     this.HL.value = 0x14d
     this.SP.value = 0xfffe
     this.PC.value = 0x100
-
-    this.joypadRegister.value = 0xff
   }
 
   add(target: CPURegister, source: CPURegister) {

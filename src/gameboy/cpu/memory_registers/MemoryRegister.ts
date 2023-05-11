@@ -1,3 +1,4 @@
+import { getBit, resetBit, setBit } from "../../misc/BitOperations"
 import { Memory } from "../Memory"
 
 export class MemoryRegister {
@@ -20,19 +21,15 @@ export class MemoryRegister {
     this.memory.writeByte(this.address, newValue, "MemoryRegister")
   }
 
-  setBit(pos: number, bitValue: number) {
-    this.resetBit(pos)
-
-    if (bitValue === 1) {
-      this.value |= (bitValue << pos)
-    }
+  protected setBit(pos: number, bitValue: number) {
+    this.value = setBit(this.value, pos, bitValue)
   }
 
-  getBit(pos: number): number {
-    return (this.value >> pos) & 1
+  protected getBit(pos: number): number {
+    return getBit(this.value, pos)
   }
 
-  resetBit(pos: number) {
-    this.value = this.value & ~(0b1 << pos)
+  protected resetBit(pos: number) {
+    this.value = resetBit(this.value, pos)
   }
 }

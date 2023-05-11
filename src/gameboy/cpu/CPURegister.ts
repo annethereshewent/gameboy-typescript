@@ -48,10 +48,6 @@ export class CPURegister {
     this.value = result
   }
 
-  getBit(pos: number): number {
-    return (this.value >> pos) & 1
-  }
-
   resetBit(pos: number): number {
     return this.value & ~(0b1 << pos)
   }

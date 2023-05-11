@@ -1,4 +1,7 @@
 import { Gameboy } from "../Gameboy"
+import { JoypadRegister, joypadRegister } from "./memory_registers/JoypadRegister"
+
+const JOYPAD_REGISTER_ADDRESS = 0xff00
 
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
@@ -20,6 +23,9 @@ export class Memory {
     }
     if (this.isAccessingCartridge(address)) {
       return this.gameDataView.getUint8(address)
+    }
+    if (address === JOYPAD_REGISTER_ADDRESS) {
+      return joypadRegister.getInput()
     }
 
     return this.memoryView.getUint8(address)
@@ -46,6 +52,10 @@ export class Memory {
   }
 
   writeByte(address: number, value: number, caller?: string) {
+    if (address === JOYPAD_REGISTER_ADDRESS) {
+      joypadRegister.value = value
+      return
+    }
     this.memoryView.setUint8(address, value)
    }
 

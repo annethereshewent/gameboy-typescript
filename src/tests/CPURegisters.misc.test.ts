@@ -17,6 +17,4 @@ test("it initializes registers to the proper values", () => {
   expect(registers.HL.value).toBe(0x14d)
   expect(registers.SP.value).toBe(0xfffe)
   expect(registers.PC.value).toBe(0x100)
-
-  expect(registers.joypadRegister.value).toBe(0xff)
 })

@@ -1,6 +1,7 @@
 import { CPU } from "./cpu/CPU"
 import { CPURegisters } from "./cpu/CPURegisters"
 import { Memory } from "./cpu/Memory"
+import { joypadRegister } from "./cpu/memory_registers/JoypadRegister"
 import { GPU } from "./gpu/GPU"
 
 const memory = new Memory()
@@ -61,49 +62,36 @@ export class Gameboy {
   }
 
   handleInput() {
-    const { joypadRegister } = this.cpu.registers
+
     const gamepad = navigator.getGamepads()[0]
 
     if (gamepad != null) {
-      if (joypadRegister.isPollingDirections) {
-        if (gamepad.buttons[GamepadButtons.Left].pressed || gamepad.axes[0] < -0.2) {
-          console.log("you're pressing left!")
-          joypadRegister.isPressingLeft = true
-        }
-        if (gamepad.buttons[GamepadButtons.Right].pressed || gamepad.axes[0] > 0.2) {
-          console.log("youre pressing right!")
-          joypadRegister.isPressingRight = true
-        }
-        if (gamepad.buttons[GamepadButtons.Up].pressed || gamepad.axes[1] < -0.2) {
-          console.log("you're pressing up!")
-          joypadRegister.isPressingUp = true
-        }
-        if (gamepad.buttons[GamepadButtons.Down].pressed || gamepad.axes[1] > 0.2) {
-          console.log("you're pressing down!")
-          joypadRegister.isPressingDown = true
-        }
+      if (gamepad.buttons[GamepadButtons.Left].pressed || gamepad.axes[0] < -0.1) {
+        joypadRegister.isPressingLeft = true
       }
-      if (joypadRegister.isPollingActions) {
-        if (gamepad.buttons[GamepadButtons.A].pressed) {
-          console.log('youre pressing A!')
-          joypadRegister.isPressingA = true
-        }
-        if (gamepad.buttons[GamepadButtons.B].pressed) {
-          console.log("you're pressing B!")
-          joypadRegister.isPressingB = true
-        }
-        if (gamepad.buttons[GamepadButtons.Select].pressed) {
-          console.log("you're pressing Select!")
-          joypadRegister.isPressingSelect = true
-        }
-        if (gamepad.buttons[GamepadButtons.Start].pressed) {
-          console.log("you're pressing start!")
-          joypadRegister.isPressingStart = true
-        }
+      if (gamepad.buttons[GamepadButtons.Right].pressed || gamepad.axes[0] > 0.1) {
+        joypadRegister.isPressingRight = true
+      }
+      if (gamepad.buttons[GamepadButtons.Up].pressed || gamepad.axes[1] < -0.1) {
+        joypadRegister.isPressingUp = true
+      }
+      if (gamepad.buttons[GamepadButtons.Down].pressed || gamepad.axes[1] > 0.1) {
+        joypadRegister.isPressingDown = true
+      }
+
+      if (gamepad.buttons[GamepadButtons.A].pressed) {
+        joypadRegister.isPressingA = true
+      }
+      if (gamepad.buttons[GamepadButtons.B].pressed) {
+        joypadRegister.isPressingB = true
+      }
+      if (gamepad.buttons[GamepadButtons.Select].pressed) {
+        joypadRegister.isPressingSelect = true
+      }
+      if (gamepad.buttons[GamepadButtons.Start].pressed) {
+        joypadRegister.isPressingStart = true
       }
     }
-
-
   }
 
   runFrame(currentTime: number, context: CanvasRenderingContext2D) {

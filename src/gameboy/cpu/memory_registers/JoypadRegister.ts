@@ -1,85 +1,49 @@
-import { Memory } from "../Memory";
-import { MemoryRegister } from "./MemoryRegister"
+import { getBit, setBit } from "../../misc/BitOperations"
 
-export class JoypadRegister extends MemoryRegister {
-  constructor(memory: Memory) {
-    super(0xff00, memory, "JoypadRegister")
+export class JoypadRegister {
+  value = 0xff
 
-    this.value = 0xff
-  }
+  isPressingDown = false
+  isPressingUp = false
+  isPressingLeft = false
+  isPressingRight = false
+  isPressingA = false
+  isPressingB = false
+  isPressingStart = false
+  isPressingSelect = false
 
-  set isPressingUp(val: boolean) {
-    if (val) {
-      this.resetBit(2)
-    } else {
-      this.setBit(2, 1)
+  getInput() {
+    if (this.isCheckingDirections) {
+      this.setBit(0, this.isPressingRight ? 0 : 1)
+      this.setBit(1, this.isPressingLeft ? 0 : 1)
+      this.setBit(2, this.isPressingUp ? 0 : 1)
+      this.setBit(3, this.isPressingDown ? 0 : 1)
     }
-  }
-
-  set isPressingDown(val: boolean) {
-    if (val) {
-      this.resetBit(3)
-    } else {
-      this.setBit(3, 1)
-
+    if (this.isCheckingButtons) {
+      this.setBit(0, this.isPressingA ? 0 : 1)
+      this.setBit(1, this.isPressingB ? 0 : 1)
+      this.setBit(2, this.isPressingSelect ? 0 : 1)
+      this.setBit(3, this.isPressingStart ? 0 : 1)
     }
+
+    return this.value
   }
 
-  set isPressingLeft(val: boolean) {
-    if (val) {
-      this.resetBit(1)
-    } else {
-      this.setBit(1, 1)
-    }
-  }
-
-  set isPressingRight(val: boolean) {
-    if (val) {
-      this.resetBit(0)
-
-    } else {
-      this.setBit(0, 1)
-    }
-  }
-
-  set isPressingStart(val: boolean) {
-    if (val) {
-      this.resetBit(3)
-    } else {
-      this.setBit(3, 1)
-    }
-  }
-
-  set isPressingSelect(val: boolean) {
-    if (val) {
-      this.resetBit(4)
-    } else {
-      this.setBit(4, 1)
-    }
-  }
-
-  set isPressingA(val: boolean) {
-    if (val) {
-      this.resetBit(0)
-
-    } else {
-      this.setBit(0, 1)
-    }
-  }
-
-  set isPressingB(val: boolean) {
-    if (val) {
-      this.resetBit(1)
-    } else {
-      this.setBit(1, 1)
-    }
-  }
-
-  get isPollingDirections() {
+  get isCheckingDirections() {
     return !this.getBit(4)
   }
 
-  get isPollingActions() {
+  get isCheckingButtons() {
     return !this.getBit(5)
   }
+
+  private setBit(pos: number, bitValue: number) {
+    this.value = setBit(this.value, pos, bitValue)
+  }
+
+  private getBit(pos: number) {
+    return getBit(this.value, pos)
+  }
 }
+
+export const joypadRegister = new JoypadRegister()
