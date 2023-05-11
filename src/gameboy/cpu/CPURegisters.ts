@@ -145,7 +145,7 @@ export class CPURegisters {
 
     this.F.carry = result < a + carry
     this.F.subtract = false
-    this.F.halfCarry = ((a & 0x0f) + (b & 0x0f) + carry) > 0xf
+    this.F.halfCarry = ((a & 0x0f) + (b & 0x0f) + carry) > 0x0f
     this.F.zero = result === 0
 
     return result
