@@ -131,6 +131,7 @@ export class CPU {
     }
   }
 
+  // TODO: refactor this
   step(): number {
     this.checkInterrupts()
 
@@ -147,11 +148,16 @@ export class CPU {
 
       if (instruction != null) {
         const previousAddress = this.registers.PC.hexValue
-        this.registers.PC.value++
-         // if (Gameboy.shouldOutputLogs()) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
+
+        // if (this.registers.PC.value === 0x29dc) {
+        //   console.log('breaking at address 0x29dc')
+        //   return -1
         // }
 
+        this.registers.PC.value++
+        // if (Gameboy.shouldOutputLogs()) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
+        // }
 
         instruction.operation()
 

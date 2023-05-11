@@ -544,7 +544,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x3E, {
     get name() {
-      return `LD A, ${memory.readByte(registers.PC.value)}`
+      return `LD A, 0x${memory.readByte(registers.PC.value).toString(16)}`
     },
     cycleTime: 8,
     operation: () => {
@@ -2062,7 +2062,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xFA, {
     get name() {
-      return `LD A, (${memory.readWord(registers.PC.value).toString(16)})`
+      return `LD A, (0x${memory.readWord(registers.PC.value).toString(16)})`
     },
     cycleTime: 16,
     operation: () => {
