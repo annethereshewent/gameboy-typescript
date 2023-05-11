@@ -1,5 +1,3 @@
-import { Gameboy } from "../Gameboy"
-
 export class CPURegister {
 
   name: string
@@ -35,6 +33,9 @@ export class CPURegister {
     } else {
       this.dataView.setUint16(this.registerId, newValue, true)
     }
+    // if (this.name !== 'PC') {
+    //   console.log(`${this.name} is now 0x${this.value.toString(16)}`)
+    // }
   }
 
   setBit(pos: number, bitValue: number) {

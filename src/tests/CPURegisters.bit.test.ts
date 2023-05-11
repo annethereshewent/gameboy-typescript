@@ -32,6 +32,24 @@ test("it performs setBit properly", () => {
   expect(registers.A.value).toBe(0b11011101)
 })
 
+test("it performs rotateLeft properly", () => {
+  registers.A.value = 0b10101011
+
+  registers.rotateLeft()
+
+  expect(registers.A.value).toBe(0b01010111)
+})
+
+test("it performs rotateLeftCarry properly", () => {
+  registers.A.value = 0b10101011
+
+  registers.F.carry = false
+
+  registers.rotateLeftCarry()
+
+  expect(registers.A.value).toBe(0b01010110)
+})
+
 test("it performs rotateRight properly", () => {
   registers.A.value = 0b11100011
 

@@ -565,8 +565,9 @@ export class CPURegisters {
   }
 
   rotateLeftCarry() {
+    const carry = this.F.carry ? 1 : 0
     const bit7 = this.A.value >> 7
-    const result = ((this.A.value << 1) + (this.F.carry ? 1 : 0)) & 0xff
+    const result = ((this.A.value << 1) + carry) & 0xff
 
     this.F.carry = bit7 === 1
     this.F.halfCarry = false

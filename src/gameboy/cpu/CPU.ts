@@ -136,7 +136,7 @@ export class CPU {
     this.checkInterrupts()
 
     if (this.isHalted) {
-      this.updateTimers(1)
+      this.updateTimers(4)
 
       return 1
     }
@@ -155,9 +155,9 @@ export class CPU {
         // }
 
         this.registers.PC.value++
-        // if (Gameboy.shouldOutputLogs()) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
-        // }
+        if (Gameboy.shouldOutputLogs()) {
+          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
+        }
 
         instruction.operation()
 
@@ -173,9 +173,9 @@ export class CPU {
           const previousAddress = this.registers.PC.hexValue
           this.registers.PC.value++
 
-          // if (Gameboy.shouldOutputLogs()) {
-          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}`)
-          // }
+          if (Gameboy.shouldOutputLogs()) {
+            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}`)
+          }
 
           cbInstruction.operation()
 
@@ -190,7 +190,9 @@ export class CPU {
 
         this.updateTimers(cycles)
 
-        return cycles / 4
+        cycles = cycles / 4
+
+        return cycles
       } else {
         throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
       }

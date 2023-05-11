@@ -36,6 +36,24 @@ expect(registers.F.halfCarry).toBe(true)
 expect(registers.F.zero).toBe(true)
 })
 
+test("it performs addWithCarryImmediate properly", () => {
+  registers.PC.value = 0x100
+  memory.gameDataView?.setUint8(0x100, 1)
+
+  registers.F.carry = true
+
+  registers.A.value = 254
+
+  registers.addWithCarryImmediate()
+
+
+  expect(registers.A.value).toBe(0)
+  expect(registers.F.carry).toBe(true)
+  expect(registers.F.subtract).toBe(false)
+  expect(registers.F.halfCarry).toBe(true)
+  expect(registers.F.zero).toBe(true)
+})
+
 test("it performs subtractWithCarry properly", () => {
 registers.A.value = 1
 registers.B.value = 1

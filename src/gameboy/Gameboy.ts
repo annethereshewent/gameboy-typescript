@@ -29,13 +29,7 @@ enum GamepadButtons {
 
 export class Gameboy {
 
-  setRegisters?: (registers: CPURegisters) => void
-
-  constructor(setRegisters?: (registerData: CPURegisters) => void) {
-    this.setRegisters = setRegisters
-  }
-
-  static MAX_FRAMES_TO_RUN = 60 * 60
+  static MAX_FRAMES_TO_RUN = 60*60
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -72,7 +66,6 @@ export class Gameboy {
 
     if (gamepad != null) {
       if (joypadRegister.isPollingDirections) {
-
         if (gamepad.buttons[GamepadButtons.Left].pressed || gamepad.axes[0] < -0.2) {
           console.log("you're pressing left!")
           joypadRegister.isPressingLeft = true
@@ -89,7 +82,8 @@ export class Gameboy {
           console.log("you're pressing down!")
           joypadRegister.isPressingDown = true
         }
-      } else if (joypadRegister.isPollingActions) {
+      }
+      if (joypadRegister.isPollingActions) {
         if (gamepad.buttons[GamepadButtons.A].pressed) {
           console.log('youre pressing A!')
           joypadRegister.isPressingA = true
@@ -108,6 +102,8 @@ export class Gameboy {
         }
       }
     }
+
+
   }
 
   runFrame(currentTime: number, context: CanvasRenderingContext2D) {

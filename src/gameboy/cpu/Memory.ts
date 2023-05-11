@@ -46,11 +46,8 @@ export class Memory {
   }
 
   writeByte(address: number, value: number, caller?: string) {
-    // if (address === 0xd800) {
-    //   console.log(`writing 0x${value.toString(16)} to address 0xd800`)
-    // }
     this.memoryView.setUint8(address, value)
-  }
+   }
 
   writeWord(address: number, value: number) {
     this.memoryView.setUint16(address, value, true)

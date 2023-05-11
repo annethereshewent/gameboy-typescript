@@ -1,11 +1,8 @@
-import React, { useState } from 'react'
 import './App.scss'
 import JSZip from 'jszip'
 import { Gameboy } from './gameboy/Gameboy'
-import { CPURegisters } from './gameboy/cpu/CPURegisters'
 function App() {
-  const [cpuRegisters, setRegisters] = useState<CPURegisters>()
-  const gameboy = new Gameboy(setRegisters)
+  const gameboy = new Gameboy()
 
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -34,51 +31,6 @@ function App() {
 
   return (
     <div className="App">
-      {cpuRegisters != null &&
-        (<div className="register-data">
-          <p>Register Data:</p>
-          <table className="register-table">
-            <tbody>
-              <tr>
-                <td>Register A:</td>
-                <td>0x{cpuRegisters.A.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register B:</td>
-                <td>0x{cpuRegisters.B.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register C:</td>
-                <td>0x{cpuRegisters.C.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register D:</td>
-                <td>0x{cpuRegisters.D.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register E:</td>
-                <td>0x{cpuRegisters.E.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register H:</td>
-                <td>0x{cpuRegisters.H.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register L:</td>
-                <td>0x{cpuRegisters.L.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register SP:</td>
-                <td>0x{cpuRegisters.SP.value.toString(16)}</td>
-              </tr>
-              <tr>
-                <td>Register F:</td>
-                <td>0x{cpuRegisters.F.value.toString(16)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
       <div className="gameboy">
         <input type="file" onChange={handleFileChange} />
         <canvas width="160" height="144"></canvas>
