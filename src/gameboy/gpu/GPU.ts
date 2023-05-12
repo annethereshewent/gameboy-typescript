@@ -22,6 +22,9 @@ export class GPU {
 
   static CyclesPerFrame = (CYCLES_PER_SCANLINE * SCANLINES_PER_FRAME) + CYCLES_IN_VBLANK
 
+
+  numWindowLines = 0
+
   cycles = 0
 
   // color is determined by the palette registers
@@ -101,6 +104,7 @@ export class GPU {
           if (this.registers.lineYRegister.value === GPU.offscreenHeight) {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
             this.registers.lineYRegister.value = 0
+            this.numWindowLines = 0
           }
 
           this.cycles %= CYCLES_PER_SCANLINE
@@ -161,7 +165,7 @@ export class GPU {
   }
 
   drawBackgroundLine() {
-    const { lineYRegister, lcdControlRegister } = this.registers
+    const { lineYRegister, lcdControlRegister, scrollXRegister, scrollYRegister } = this.registers
     const tileDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
 
     const offset = tileDataAddress === 0x8800 ? 128 : 0
@@ -172,13 +176,15 @@ export class GPU {
 
     let x = 0
     while (x < GPU.screenWidth) {
-      const tileMapIndex = (Math.floor(lineYRegister.value / 8) * 32 + Math.floor(x / 8))
+      const scrolledX = scrollXRegister.value + x
+      const scrolledY = scrollYRegister.value = lineYRegister.value
+      const tileMapIndex = (Math.floor(scrolledY / 8) * 32 + Math.floor(scrolledX / 8))
 
-      const yPosInTile = lineYRegister.value % 8
+      const yPosInTile = scrolledY % 8
 
       const tileBytePosition  = yPosInTile * 2
 
-      // we need to multiply by 16 since it takes 16 bytes to represent one tile
+      // we need to multiply by 16 since it takes 16 bytes to represent one tile.
       // you need two bytes to represent one row of a tile. 16 bytes total for all 8 rows.
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
       const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
@@ -202,7 +208,64 @@ export class GPU {
   }
 
   drawWindowLine() {
+    const {
+      lineYRegister,
+      lcdControlRegister,
+      windowXRegister,
+      windowYRegister
+    } = this.registers
 
+    // no need to render anything if we're not at a line where the window starts
+    if (lineYRegister.value < windowYRegister.value) {
+      return
+    }
+
+    const windowDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
+    const tileMapAddress = lcdControlRegister.windowTileMapArea()
+
+    const memoryRead = (address: number) => windowDataAddress === 0x8800 ? this.memory.readSignedByte(address) : this.memory.readByte(address)
+
+    const paletteColors = this.registers.backgroundPaletteRegister.colors
+
+
+    let x = 0
+
+    // per gameboy docs, windowXRegister value always starts at 7, so we want to adjust for that
+    let adjustedWindowX = windowXRegister.value - 7
+
+    const offset = windowDataAddress === 0x8800 ? 128 : 0
+
+    while (x < GPU.screenWidth) {
+      if (x < adjustedWindowX) {
+        continue
+      }
+      const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(this.numWindowLines) / 8) * 32
+
+      // numWindowLines drawn keeps track of where we are in the window rendering, otherwise
+      // it would be very hard to keep track of where wer are in the window rendering
+      const yPosInTile = this.numWindowLines % 8
+
+      const tileBytePosition = yPosInTile * 2
+
+      const tileByteIndex = memoryRead(tileMapAddress + tileMapIndex) + offset
+      // see drawBackground line for explanation.
+      const tileLineAddress = windowDataAddress + (tileByteIndex * 16) + tileBytePosition
+
+      const lowerByte = this.memory.readByte(tileLineAddress)
+      const upperByte = this.memory.readByte(tileLineAddress + 1)
+
+      for (let i = 7; i >= 0; i--) {
+        const lowerBit = this.getBit(lowerByte, i)
+        const upperBit = this.getBit(upperByte, i) << 1
+
+        const colorIndex = paletteColors[lowerBit + upperBit]
+
+        const color = this.colors[colorIndex]
+
+        this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+      }
+    }
+    this.numWindowLines++
   }
 
   drawPixel(x: number, y: number, r: number, g: number, b: number, alpha: number = 0xff) {

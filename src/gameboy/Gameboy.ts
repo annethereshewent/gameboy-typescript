@@ -30,7 +30,7 @@ enum GamepadButtons {
 
 export class Gameboy {
 
-  static MAX_FRAMES_TO_RUN = 60*60
+  static MAX_FRAMES_TO_RUN = 60 * 60
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
