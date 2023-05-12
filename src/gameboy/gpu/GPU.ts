@@ -161,6 +161,15 @@ export class GPU {
   }
 
   drawSpriteLine() {
+    // per https://gbdev.io/pandocs/OAM.html, sprite Y's position has an offset of 16, and sprite X
+    // has an offset of 8. So whatever value the registers have, you subtract either 8 or 16 to
+    // get the actual position on the screen.
+    const spriteXOffset = -8
+    const spriteYOffset = -16
+
+    // per docs above, only 10 sprites can be visible per scan line
+    const maxObjectsPerLine = 10
+
 
   }
 
@@ -241,8 +250,6 @@ export class GPU {
       }
       const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(this.numWindowLines) / 8) * 32
 
-      // numWindowLines drawn keeps track of where we are in the window rendering, otherwise
-      // it would be very hard to keep track of where wer are in the window rendering
       const yPosInTile = this.numWindowLines % 8
 
       const tileBytePosition = yPosInTile * 2
@@ -263,8 +270,14 @@ export class GPU {
         const color = this.colors[colorIndex]
 
         this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+        x++
       }
     }
+
+    // numWindowLines drawn keeps track of where we are in the window rendering
+    // since the window can start at any position, but the first tile of the window
+    // always starts at the top of the map regardless of where the window is on the
+    // screen. hence why we need windowLinesDrawn.
     this.numWindowLines++
   }
 
