@@ -56,11 +56,10 @@ export class Memory {
       joypadRegister.setValue(value)
       return
     }
+    this.memoryView.setUint8(address, value)
     if (address === DMA_TRANSFER_ADDRESS) {
       this.doDmaTransfer(value)
-      return
     }
-    this.memoryView.setUint8(address, value)
    }
 
   writeWord(address: number, value: number) {
