@@ -67,7 +67,7 @@ export class CPU {
       return
     }
 
-    this.timerCycles += (cycles / 4)
+    this.timerCycles += cycles
 
     if (this.timerCycles >= timerControlRegister.getClockFrequency()) {
       // if overflow happens
