@@ -52,13 +52,13 @@ export class Memory {
     return this.memoryView.getUint16(address, true)
   }
 
-  writeByte(address: number, value: number, caller?: string) {
+  writeByte(address: number, value: number, caller?: string, canOverrideDivReg: boolean = false) {
     if (address === JOYPAD_REGISTER_ADDRESS) {
       joypadRegister.value = value
       return
     }
 
-    if (address === DIVIDER_REGISTER_ADDRESS) {
+    if (address === DIVIDER_REGISTER_ADDRESS && !canOverrideDivReg) {
       this.memoryView.setUint8(address, 0)
       return
     }

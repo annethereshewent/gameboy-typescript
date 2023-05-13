@@ -3,7 +3,7 @@ import { Memory } from "../Memory"
 
 export class MemoryRegister {
   address: number
-  private memory: Memory
+  protected memory: Memory
   type?: string
 
   constructor(address: number, memory: Memory, type?: string) {

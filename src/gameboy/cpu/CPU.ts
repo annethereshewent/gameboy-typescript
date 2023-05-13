@@ -63,7 +63,7 @@ export class CPU {
 
     const msb = (this.counter >> 8) & 0xff
 
-    dividerRegister.value = msb
+    dividerRegister.overrideValue = msb
 
     if (!timerControlRegister.isTimerEnabled()) {
       return
@@ -79,7 +79,7 @@ export class CPU {
       }
 
       timerCounterRegister.value++
-      this.timerCycles = 0
+      this.timerCycles -= timerControlRegister.getClockFrequency()
     }
 
   }

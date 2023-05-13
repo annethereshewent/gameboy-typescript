@@ -6,6 +6,7 @@ import { FlagsRegister } from "./CPUFlagRegister"
 import { FlagsRegisterPair } from "./FlagsRegisterPair"
 import { MemoryRegister } from "./memory_registers/MemoryRegister"
 import { TimerControlRegister } from "./memory_registers/TimerControlRegister"
+import { DividerRegister } from "./memory_registers/dividerRegister"
 
 export class CPURegisters {
   A: CPURegister
@@ -27,7 +28,7 @@ export class CPURegisters {
 
   interruptEnableRegister: InterruptEnableRegister
   interruptRequestRegister: InterruptRequestRegister
-  dividerRegister: MemoryRegister
+  dividerRegister: DividerRegister
   timerCounterRegister: MemoryRegister
   timerModuloRegister: MemoryRegister
   timerControlRegister: TimerControlRegister
@@ -65,7 +66,7 @@ export class CPURegisters {
     // memory registers
     this.interruptEnableRegister = new InterruptEnableRegister(memory)
     this.interruptRequestRegister = new InterruptRequestRegister(memory)
-    this.dividerRegister = new MemoryRegister(0xff04, memory)
+    this.dividerRegister = new DividerRegister(memory)
     this.timerCounterRegister = new MemoryRegister(0xff05, memory)
     this.timerModuloRegister = new MemoryRegister(0xff06, memory)
     this.timerControlRegister = new TimerControlRegister(memory)
