@@ -6,7 +6,7 @@ import { FlagsRegister } from "./CPUFlagRegister"
 import { FlagsRegisterPair } from "./FlagsRegisterPair"
 import { MemoryRegister } from "./memory_registers/MemoryRegister"
 import { TimerControlRegister } from "./memory_registers/TimerControlRegister"
-import { DividerRegister } from "./memory_registers/dividerRegister"
+import { DividerRegister } from "./memory_registers/DividerRegister"
 
 export class CPURegisters {
   A: CPURegister
