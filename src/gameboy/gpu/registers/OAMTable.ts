@@ -40,6 +40,10 @@ export class OAMEntry {
     return this.memory.readByte(this.address + 3)
   }
 
+  get paletteNumber() {
+    return getBit(this.attributeFlags, 4)
+  }
+
   get isXFlipped() {
     return getBit(this.attributeFlags, 5)
   }

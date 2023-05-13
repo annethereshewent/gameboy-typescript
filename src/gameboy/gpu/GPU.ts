@@ -224,7 +224,10 @@ export class GPU {
         const lowerBit = this.getBit(lowerByte, bitPos)
         const upperBit = this.getBit(upperByte, bitPos) << 1
 
-        const colorIndex = this.registers.backgroundPaletteRegister.colors[lowerBit + upperBit]
+
+        const paletteColors = sprite.paletteNumber === 0 ? this.registers.objectPaletteRegister0.colors : this.registers.objectPaletteRegister1.colors
+
+        const colorIndex = paletteColors[lowerBit + upperBit]
 
         const color = this.colors[colorIndex]
 
