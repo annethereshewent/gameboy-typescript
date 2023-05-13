@@ -19,8 +19,8 @@ test('it performs memory operations properly', () => {
 test("it performs loadFrom16bitAddr properly", () => {
 
   registers.A.value = 0
-  memory.gameDataView?.setUint16(1, 0xff00, true)
-  memory.writeByte(0xff00, 0xff)
+  memory.gameDataView?.setUint16(1, 0xc058, true)
+  memory.writeByte(0xc058, 0xff)
 
   registers.PC.value = 1
 
@@ -31,9 +31,9 @@ test("it performs loadFrom16bitAddr properly", () => {
 
 test("it performs loadByte properly", () => {
   registers.A.value = 0
-  registers.BC.value = 0xff00
+  registers.BC.value = 0xc059
 
-  memory.writeByte(0xff00, 0xf9)
+  memory.writeByte(0xc059, 0xf9)
 
   registers.loadByte(registers.A, registers.BC)
 

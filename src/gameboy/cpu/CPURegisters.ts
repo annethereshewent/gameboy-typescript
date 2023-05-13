@@ -213,7 +213,18 @@ export class CPURegisters {
   }
 
   loadByte(target: CPURegister, source: CPURegister) {
+    if (!source.is16Bit) {
+      throw new Error(`Register is not 16 bit: ${source.name}`)
+    }
     target.value = this.memory.readByte(source.value)
+  }
+
+  loadByte8Bit(target: CPURegister, source: CPURegister) {
+    if (source.is16Bit) {
+      throw new Error(`Register is not 8 bit: ${source.name}`)
+    }
+
+    target.value = this.memory.readByte(0xff00 + source.value)
   }
 
   loadByteAndIncrementSource(target: CPURegister, source: CPURegister) {
@@ -857,23 +868,28 @@ export class CPURegisters {
   }
 
   swap(target: CPURegister) {
-    const higherBit = (target.value >> 7) & 1
-    const lowerBit = target.value & 1
+    const lowerNibble = target.value & 0b1111
+    const upperNibble = target.value >> 4
 
-    target.setBit(0, higherBit)
-    target.setBit(7, lowerBit)
+    target.value = (lowerNibble << 4) + upperNibble
+
   }
 
   swapAtRegisterAddr() {
     let byte = this.memory.readByte(this.HL.value)
 
-    const higherBit = (byte >> 7) & 1
-    const lowerBit = byte & 1
+    // const higherBit = (byte >> 7) & 1
+    // const lowerBit = byte & 1
 
-    byte |= higherBit
-    byte |= lowerBit << 7
+    // byte |= higherBit
+    // byte |= lowerBit << 7
 
-    this.memory.writeByte(this.HL.value, byte)
+    const lowerNibble = byte & 0b1111
+    const upperNibble = byte >> 4
+
+    const result = (lowerNibble << 4) + upperNibble
+
+    this.memory.writeByte(this.HL.value, result)
   }
 
   testBit(bitPos: number, target: CPURegister) {

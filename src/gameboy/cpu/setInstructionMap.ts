@@ -2002,7 +2002,7 @@ export function setInstructionMap(this: CPU) {
     name: "LD A, (C)",
     cycleTime: 8,
     operation: () => {
-      this.registers.loadByte(this.registers.A, this.registers.C)
+      this.registers.loadByte8Bit(this.registers.A, this.registers.C)
     }
   })
 

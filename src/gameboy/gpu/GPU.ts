@@ -1,4 +1,3 @@
-import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { resetBit } from "../misc/BitOperations"
@@ -26,6 +25,9 @@ export class GPU {
 
 
   numWindowLines = 0
+
+  windowPixelsDrawn: boolean[] = []
+  backgroundPixelsDrawn: boolean[] = []
 
   cycles = 0
 
@@ -227,14 +229,21 @@ export class GPU {
         const color = this.colors[colorIndex]
 
         // TODO: add check to see if sprite is behind background
+        const windowVisible = this.windowPixelsDrawn[spriteX + i]
+        const backgroundVisible = this.backgroundPixelsDrawn[spriteX + i]
 
-        this.drawPixel(spriteX + i, lineYRegister.value, color.red, color.green, color.blue)
+        const isPixelBehindBackground = sprite.bgAndWindowOverObj === 1 && (backgroundVisible || windowVisible)
+
+        if (!isPixelBehindBackground) {
+          this.drawPixel(spriteX + i, lineYRegister.value, color.red, color.green, color.blue)
+        }
       }
     }
 
   }
 
   drawBackgroundLine() {
+    this.backgroundPixelsDrawn = []
     const { lineYRegister, lcdControlRegister, scrollXRegister, scrollYRegister } = this.registers
     const tileDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
 
@@ -266,9 +275,13 @@ export class GPU {
         const lowerBit = this.getBit(lowerByte, i)
         const upperBit = this.getBit(upperByte, i) << 1
 
-        const colorIndex = paletteColors[lowerBit + upperBit]
+        const paletteIndex = lowerBit + upperBit
+
+        const colorIndex = paletteColors[paletteIndex]
 
         const color = this.colors[colorIndex]
+
+        this.backgroundPixelsDrawn.push(paletteIndex !== 0)
 
         this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
         x++
@@ -277,6 +290,7 @@ export class GPU {
   }
 
   drawWindowLine() {
+    this.windowPixelsDrawn = []
     const {
       lineYRegister,
       lcdControlRegister,
@@ -306,6 +320,7 @@ export class GPU {
 
     while (x < GPU.screenWidth) {
       if (x < adjustedWindowX) {
+        this.windowPixelsDrawn.push(false)
         continue
       }
       const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(this.numWindowLines) / 8) * 32
@@ -327,9 +342,12 @@ export class GPU {
         const lowerBit = this.getBit(lowerByte, i)
         const upperBit = this.getBit(upperByte, i) << 1
 
-        const colorIndex = paletteColors[lowerBit + upperBit]
+        const paletteIndex = lowerBit + upperBit
+        const colorIndex = paletteColors[paletteIndex]
 
         const color = this.colors[colorIndex]
+
+        this.windowPixelsDrawn.push(paletteIndex !== 0)
 
         this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
         x++

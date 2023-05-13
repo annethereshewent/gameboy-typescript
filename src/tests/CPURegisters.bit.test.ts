@@ -9,11 +9,11 @@ const { registers } = cpu
 
 
 test("it performs swap properly", () => {
-  registers.A.value = 0b11101110
+  registers.A.value = 0b11001110
 
   registers.swap(registers.A)
 
-  expect(registers.A.value).toBe(0b01101111)
+  expect(registers.A.value).toBe(0b11101100)
 })
 
 test("it performs resetBit properly", () => {

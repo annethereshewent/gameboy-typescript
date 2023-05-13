@@ -1,5 +1,4 @@
-import { Gameboy } from "../Gameboy"
-import { JoypadRegister, joypadRegister } from "./memory_registers/JoypadRegister"
+import { joypadRegister } from "./memory_registers/JoypadRegister"
 
 const JOYPAD_REGISTER_ADDRESS = 0xff00
 const DMA_TRANSFER_ADDRESS = 0xff46
@@ -61,7 +60,6 @@ export class Memory {
       this.doDmaTransfer(value)
       return
     }
-
     this.memoryView.setUint8(address, value)
    }
 

@@ -1,6 +1,5 @@
 import { CPU } from "./cpu/CPU"
 import { Memory } from "./cpu/Memory"
-import { joypadRegister } from "./cpu/memory_registers/JoypadRegister"
 import { GPU } from "./gpu/GPU"
 import { Joypad } from "./joypad/Joypad"
 
