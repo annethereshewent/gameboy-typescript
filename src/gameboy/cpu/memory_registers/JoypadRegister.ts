@@ -17,8 +17,8 @@ export class JoypadRegister {
 
 
   setValue(value: number) {
-    this.isCheckingDirections = getBit(value, 4) === 1
-    this.isCheckingButtons = getBit(value, 5) === 1
+    this.isCheckingDirections = getBit(value, 4) === 0
+    this.isCheckingButtons = getBit(value, 5) === 0
   }
 
   getInput() {
@@ -27,7 +27,8 @@ export class JoypadRegister {
       this.setBit(1, this.isPressingLeft ? 0 : 1)
       this.setBit(2, this.isPressingUp ? 0 : 1)
       this.setBit(3, this.isPressingDown ? 0 : 1)
-    } else if (this.isCheckingButtons) {
+    }
+    if (this.isCheckingButtons) {
       this.setBit(0, this.isPressingA ? 0 : 1)
       this.setBit(1, this.isPressingB ? 0 : 1)
       this.setBit(2, this.isPressingSelect ? 0 : 1)
