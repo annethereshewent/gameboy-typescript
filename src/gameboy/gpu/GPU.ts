@@ -191,8 +191,8 @@ export class GPU {
 
       return intersection >= 0 && intersection <= lcdControlRegister.objSize() - 1
     })
-    .slice(0, maxObjectsPerLine)
     .sort((a, b) => a.xPosition - b.xPosition)
+    .slice(0, maxObjectsPerLine)
 
     for (const sprite of availableSprites) {
       const spriteX = sprite.xPosition - 8
