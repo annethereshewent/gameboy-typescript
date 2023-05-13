@@ -1,36 +1,17 @@
 import { CPU } from "./cpu/CPU"
-import { CPURegisters } from "./cpu/CPURegisters"
 import { Memory } from "./cpu/Memory"
 import { joypadRegister } from "./cpu/memory_registers/JoypadRegister"
 import { GPU } from "./gpu/GPU"
+import { Joypad } from "./joypad/Joypad"
 
 const memory = new Memory()
 
 const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
+const MAX_FRAMES_TO_RUN = 60 * 60
 
-enum GamepadButtons {
-  A,
-  B,
-  X,
-  Y,
-  LB,
-  RB,
-  LT,
-  RT,
-  Select,
-  Start,
-  L3,
-  R3,
-  Up,
-  Down,
-  Left,
-  Right
-}
 
 export class Gameboy {
-
-  static MAX_FRAMES_TO_RUN = 60 * 60
 
   cpu = new CPU(memory)
   gpu = new GPU(memory)
@@ -45,7 +26,8 @@ export class Gameboy {
   // otherwise, logs get polluted with too much data
   // to sift through
   static shouldOutputLogs() {
-    return this.frames >= this.MAX_FRAMES_TO_RUN - 5
+    // return this.frames >= MAX_FRAMES_TO_RUN - 5
+    return false
   }
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
@@ -58,39 +40,6 @@ export class Gameboy {
       requestAnimationFrame((time: number) => this.runFrame(time, context))
     } else {
       throw new Error("canvas context is null!")
-    }
-  }
-
-  handleInput() {
-
-    const gamepad = navigator.getGamepads()[0]
-
-    if (gamepad != null) {
-      if (gamepad.buttons[GamepadButtons.Left].pressed || gamepad.axes[0] < -0.1) {
-        joypadRegister.isPressingLeft = true
-      }
-      if (gamepad.buttons[GamepadButtons.Right].pressed || gamepad.axes[0] > 0.1) {
-        joypadRegister.isPressingRight = true
-      }
-      if (gamepad.buttons[GamepadButtons.Up].pressed || gamepad.axes[1] < -0.1) {
-        joypadRegister.isPressingUp = true
-      }
-      if (gamepad.buttons[GamepadButtons.Down].pressed || gamepad.axes[1] > 0.1) {
-        joypadRegister.isPressingDown = true
-      }
-
-      if (gamepad.buttons[GamepadButtons.A].pressed) {
-        joypadRegister.isPressingA = true
-      }
-      if (gamepad.buttons[GamepadButtons.B].pressed) {
-        joypadRegister.isPressingB = true
-      }
-      if (gamepad.buttons[GamepadButtons.Select].pressed) {
-        joypadRegister.isPressingSelect = true
-      }
-      if (gamepad.buttons[GamepadButtons.Start].pressed) {
-        joypadRegister.isPressingStart = true
-      }
     }
   }
 
@@ -113,7 +62,7 @@ export class Gameboy {
         }
       }
 
-      this.handleInput()
+      Joypad.handleInput()
 
       context.putImageData(this.gpu.screen, 0, 0)
 
@@ -122,11 +71,11 @@ export class Gameboy {
       this.cycles %= GPU.CyclesPerFrame
     }
 
-    if (Gameboy.frames !== Gameboy.MAX_FRAMES_TO_RUN && cycles !== -1) {
+    // if (Gameboy.frames !== MAX_FRAMES_TO_RUN && cycles !== -1) {
       requestAnimationFrame((time: number) => this.runFrame(time, context))
-    } else {
-      console.log(`finished running ${Gameboy.frames} frames successfully!`)
-      this.cpu.registers.outputState()
-    }
+    // } else {
+    //   console.log(`finished running ${Gameboy.frames} frames successfully!`)
+    //   this.cpu.registers.outputState()
+    // }
   }
 }

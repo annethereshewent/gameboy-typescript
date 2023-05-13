@@ -6,6 +6,8 @@ export class FlagsRegisterPair extends CPURegister {
     const clearFlags = 0b1111111111110000
 
     this.dataView.setUint16(this.registerId, newVal & clearFlags, true)
+
+    // console.log(`AF = 0x${(newVal & clearFlags).toString(16)}`)
   }
 
   get value() {

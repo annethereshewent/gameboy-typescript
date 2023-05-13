@@ -138,7 +138,7 @@ export class CPURegisters {
 
     const result = (a + b + carry) & 0xff
 
-    this.F.carry = result < a + carry
+    this.F.carry = a + b + carry > 0xff
     this.F.subtract = false
     this.F.halfCarry = ((a & 0x0f) + (b & 0x0f) + carry) > 0x0f
     this.F.zero = result === 0
@@ -386,7 +386,7 @@ export class CPURegisters {
 
 
     this.F.subtract = true
-    this.F.carry = result > a - carry
+    this.F.carry =  a - b - carry < 0
     this.F.halfCarry = (a & 0xf) - (b & 0xf) - carry < 0
     this.F.zero = result === 0
 

@@ -34,7 +34,7 @@ export class CPURegister {
       this.dataView.setUint16(this.registerId, newValue, true)
     }
     // if (this.name !== 'PC') {
-    //   console.log(`${this.name} is now 0x${this.value.toString(16)}`)
+    //   console.log(`${this.name} = 0x${this.value.toString(16)}`)
     // }
   }
 

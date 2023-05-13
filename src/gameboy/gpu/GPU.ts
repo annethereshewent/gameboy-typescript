@@ -1,7 +1,9 @@
 import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
+import { resetBit } from "../misc/BitOperations"
 import { GPURegisters } from "./registers/GPURegisters"
+import { OAMTable } from "./registers/OAMTable"
 import { LCDMode } from "./registers/lcd_status/LCDMode"
 
 
@@ -38,7 +40,7 @@ export class GPU {
     // black
     { red: 0, green: 0, blue: 0 },
   ]
-  // dark mode
+  // inverted mode
   // colors = [
   //   // black
   //   { red: 0, green: 0, blue: 0 },
@@ -66,9 +68,12 @@ export class GPU {
 
   screen = new ImageData(GPU.screenWidth, GPU.screenHeight)
 
+  oamTable: OAMTable
+
   constructor(memory: Memory) {
     this.memory = memory
     this.registers = new GPURegisters(memory)
+    this.oamTable = new OAMTable(memory)
   }
 
   step(cycles: number) {
@@ -161,15 +166,71 @@ export class GPU {
   }
 
   drawSpriteLine() {
-    // per https://gbdev.io/pandocs/OAM.html, sprite Y's position has an offset of 16, and sprite X
-    // has an offset of 8. So whatever value the registers have, you subtract either 8 or 16 to
-    // get the actual position on the screen.
-    const spriteXOffset = -8
-    const spriteYOffset = -16
-
-    // per docs above, only 10 sprites can be visible per scan line
+    // per docs https://gbdev.io/pandocs/OAM.html, only 10 sprites can be visible per scan line
     const maxObjectsPerLine = 10
 
+    const { lineYRegister, lcdControlRegister } = this.registers
+
+    // per the docs above, tilemap for sprites is located at 0x8000-0x8fff
+    const tileMapStartAddress = 0x8000
+
+    // these are sprites that are available to be drawn at current lineY
+    const availableSprites = this.oamTable.entries.filter((entry) => {
+      // per https://gbdev.io/pandocs/OAM.html, sprite Y's position has an offset of 16, and sprite X
+      // has an offset of 8. So whatever value the registers have, subtract either 8 or 16 to
+      // get the actual position on the screen.
+      const yPos = entry.yPosition - 16
+
+      let intersection = lineYRegister.value - yPos
+
+      if (entry.isYFlipped) {
+        intersection = lcdControlRegister.objSize() - 1 - intersection
+      }
+
+      return intersection >= 0 && intersection <= lcdControlRegister.objSize() - 1
+    })
+    .slice(0, maxObjectsPerLine)
+    .sort((a, b) => a.xPosition - b.xPosition)
+
+    for (const sprite of availableSprites) {
+      const spriteX = sprite.xPosition - 8
+      const spriteY = sprite.yPosition - 16
+
+
+      // this tells us where in the sprite tile the y-coordinate is in.
+      let intersection = lineYRegister.value - spriteY
+
+      // start from the bottom of the sprite tile if flipped
+      if (sprite.isYFlipped) {
+        intersection = lcdControlRegister.objSize() - 1 - intersection
+      }
+      const tileIndex = lcdControlRegister.objSize() === 16 ? resetBit(sprite.tileIndex, 7) : sprite.tileIndex
+
+      const tileBytePosition = intersection * 2
+      const tileStartIndex = tileIndex * 16 // 16 bytes per tile, takes 2 bits to encode one line, 8 lines total
+
+      const tileAddress = tileMapStartAddress + tileBytePosition + tileStartIndex
+
+      // finally get upper and lower bytes and render the sprite
+      const lowerByte = this.memory.readByte(tileAddress)
+      const upperByte = this.memory.readByte(tileAddress+1)
+
+
+      for (let i = 7; i >= 0; i--) {
+        const bitPos = sprite.isXFlipped ? i : 7 - i
+
+        const lowerBit = this.getBit(lowerByte, bitPos)
+        const upperBit = this.getBit(upperByte, bitPos) << 1
+
+        const colorIndex = this.registers.backgroundPaletteRegister.colors[lowerBit + upperBit]
+
+        const color = this.colors[colorIndex]
+
+        // TODO: add check to see if sprite is behind background
+
+        this.drawPixel(spriteX + i, lineYRegister.value, color.red, color.green, color.blue)
+      }
+    }
 
   }
 
@@ -198,7 +259,6 @@ export class GPU {
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
       const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
 
-      // get the upper and lower bytes of the tile
       const lowerByte = this.memory.readByte(tileLineAddress)
       const upperByte = this.memory.readByte(tileLineAddress + 1)
 
@@ -252,10 +312,12 @@ export class GPU {
 
       const yPosInTile = this.numWindowLines % 8
 
+      // 2 bytes are needed to represent one line in a tile
       const tileBytePosition = yPosInTile * 2
 
       const tileByteIndex = memoryRead(tileMapAddress + tileMapIndex) + offset
-      // see drawBackground line for explanation.
+
+      // 2 bytes are needed to represent one line in a tile, 8 lines total means 16 bytes to represent one tile.
       const tileLineAddress = windowDataAddress + (tileByteIndex * 16) + tileBytePosition
 
       const lowerByte = this.memory.readByte(tileLineAddress)

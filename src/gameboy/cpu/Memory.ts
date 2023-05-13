@@ -2,6 +2,7 @@ import { Gameboy } from "../Gameboy"
 import { JoypadRegister, joypadRegister } from "./memory_registers/JoypadRegister"
 
 const JOYPAD_REGISTER_ADDRESS = 0xff00
+const DMA_TRANSFER_ADDRESS = 0xff46
 
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
@@ -53,9 +54,14 @@ export class Memory {
 
   writeByte(address: number, value: number, caller?: string) {
     if (address === JOYPAD_REGISTER_ADDRESS) {
-      joypadRegister.value = value
+      joypadRegister.setValue(value)
       return
     }
+    if (address === DMA_TRANSFER_ADDRESS) {
+      this.doDmaTransfer(value)
+      return
+    }
+
     this.memoryView.setUint8(address, value)
    }
 
@@ -65,5 +71,14 @@ export class Memory {
 
   isAccessingCartridge(address: number): boolean {
     return address <= 0x7FFF || (address >= 0xA000 && address <= 0xBFFF)
+  }
+
+  // see http://www.codeslinger.co.uk/pages/projects/gameboy/dma.html
+  doDmaTransfer(value: number) {
+    const address = value << 8
+
+    for (let i = 0; i < 0xa0; i++) {
+      this.writeByte(0xFE00+i, this.readByte(address+i))
+    }
   }
 }
