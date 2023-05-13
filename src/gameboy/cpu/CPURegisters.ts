@@ -55,10 +55,6 @@ export class CPURegisters {
     this.BC = new CPURegister("BC", 0x13, 2, this.registerDataView, true)
     this.DE = new CPURegister("DE", 0xd8, 4, this.registerDataView, true)
     this.HL = new CPURegister("HL", 0x14d, 6, this.registerDataView, true)
-    // this.AF = new FlagsRegisterPair("AF", 0x1180, 0, this.registerDataView, true)
-    // this.BC = new CPURegister("BC", 0x0, 2, this.registerDataView, true)
-    // this.DE = new CPURegister("DE", 0xff56, 4, this.registerDataView, true)
-    // this.HL = new CPURegister("HL", 0x0, 6, this.registerDataView, true)
     // stack pointer starts at the top of the stack memory, which is at 0xfffe
     this.SP = new CPURegister("SP", 0xfffe, 8, this.registerDataView, true)
     // first 255 (0xFF) instructions in memory are reserved for the gameboy
@@ -119,12 +115,23 @@ export class CPURegisters {
   }
 
   addImmediateSigned(target: CPURegister) {
-    if (target.is16Bit) {
-      target.value = target.value + this.memory.readSignedByte(this.PC.value)
-      this.PC.value++
-    } else {
+    if (!target.is16Bit) {
       throw new Error(`invalid register selected: ${target.name}. Must be a 16 bit register`)
     }
+
+    const signedByte = this.memory.readSignedByte(this.PC.value)
+
+    this.PC.value++
+
+    const distanceFromWrappingBit3 = 0xf - (this.SP.value & 0x000f)
+    const distanceFromWrappingBit7 = 0xff - (this.SP.value & 0x00ff)
+
+    this.F.carry = (signedByte & 0xff) > distanceFromWrappingBit7
+    this.F.halfCarry = (signedByte & 0x0f) > distanceFromWrappingBit3
+    this.F.zero = false
+    this.F.subtract = false
+
+    this.SP.value += signedByte
   }
 
   addFromRegisterAddr(target: CPURegister, source: CPURegister) {
@@ -552,7 +559,6 @@ export class CPURegisters {
     const newValue = (target.value + source.value) & 0xffff
 
     this.F.subtract = false
-    this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0xfff) < (target.value & 0xfff)
     this.F.carry = newValue < target.value
 
@@ -595,7 +601,9 @@ export class CPURegisters {
 
   rotateRegisterLeftCarry(target: CPURegister) {
     const bit7 = target.value >> 7
-    const result = ((target.value << 1) + (this.F.carry ? 1 : 0)) & 0xff
+    const carry = this.F.carry ? 1 : 0
+
+    const result = ((target.value << 1) + carry) & 0xff
 
     this.F.carry = bit7 === 1
     this.F.halfCarry = false
@@ -633,12 +641,14 @@ export class CPURegisters {
     const bit0 = target.value & 1
     const carry = this.F.carry ? 1 : 0
 
+    target.value = ((target.value >> 1) & 0xff) + (carry << 7)
+
     this.F.carry = bit0 === 1
-    this.F.zero = false
+    this.F.zero = target.value === 0
     this.F.halfCarry = false
     this.F.subtract = false
 
-    target.value = ((target.value >> 1) & 0xff) + (carry << 7)
+
   }
 
   rotateAtRegisterAddrRightCarry() {
@@ -646,12 +656,14 @@ export class CPURegisters {
 
     const bit0 = byte & 1
 
+    const newValue = (byte >> 1) + ((this.F.carry ? 1 : 0) << 7)
+
     this.F.carry = bit0 === 1
-    this.F.zero = false
+    this.F.zero = newValue === 0
     this.F.halfCarry = false
     this.F.subtract = false
 
-    const newValue = (byte >> 1) + ((this.F.carry ? 1 : 0) << 7)
+
 
     this.memory.writeByte(this.HL.value, newValue)
   }
@@ -765,7 +777,6 @@ export class CPURegisters {
     this.F.subtract = true
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (oldValue & 0x0f)
-    this.F.carry = newValue > target.value
 
     this.memory.writeByte(target.value, newValue, "decrementMemoryValAtRegisterAddr")
   }
@@ -873,21 +884,24 @@ export class CPURegisters {
 
     target.value = (lowerNibble << 4) + upperNibble
 
+    this.F.zero = target.value === 0
+    this.F.carry = false
+    this.F.subtract = false
+    this.F.halfCarry = false
   }
 
   swapAtRegisterAddr() {
     let byte = this.memory.readByte(this.HL.value)
 
-    // const higherBit = (byte >> 7) & 1
-    // const lowerBit = byte & 1
-
-    // byte |= higherBit
-    // byte |= lowerBit << 7
-
     const lowerNibble = byte & 0b1111
     const upperNibble = byte >> 4
 
     const result = (lowerNibble << 4) + upperNibble
+
+    this.F.zero = result === 0
+    this.F.carry = false
+    this.F.subtract = false
+    this.F.halfCarry = false
 
     this.memory.writeByte(this.HL.value, result)
   }
