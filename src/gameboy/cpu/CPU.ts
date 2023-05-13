@@ -55,9 +55,9 @@ export class CPU {
       timerCounterRegister,
       interruptRequestRegister,
       timerModuloRegister
-     } = this.registers
+    } = this.registers
 
-    this.counter = (this.counter + cycles) & 0xff
+    this.counter = (this.counter + cycles) & 0xffff
 
     const msb = (this.counter >> 8) & 0xff
 
@@ -149,11 +149,6 @@ export class CPU {
       if (instruction != null) {
         const previousAddress = this.registers.PC.hexValue
 
-        // if (this.registers.PC.value === 0x29dc) {
-        //   console.log('breaking at address 0x29dc')
-        //   return -1
-        // }
-
         this.registers.PC.value++
         if (Gameboy.shouldOutputLogs()) {
           console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
@@ -168,7 +163,7 @@ export class CPU {
           const cbInstruction = this.cbMap.get(cbOpCode)
 
           if (cbInstruction == null) {
-            throw new Error(`CB operation not implemented yet: 0x${cbOpCode.toString(16)}`)
+            throw new Error(`Invalid CB op code: 0x${cbOpCode.toString(16)}`)
           }
           const previousAddress = this.registers.PC.hexValue
           this.registers.PC.value++

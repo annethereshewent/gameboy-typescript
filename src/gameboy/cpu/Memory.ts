@@ -2,6 +2,7 @@ import { joypadRegister } from "./memory_registers/JoypadRegister"
 
 const JOYPAD_REGISTER_ADDRESS = 0xff00
 const DMA_TRANSFER_ADDRESS = 0xff46
+const DIVIDER_REGISTER_ADDRESS = 0xff04
 
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
@@ -56,7 +57,14 @@ export class Memory {
       joypadRegister.setValue(value)
       return
     }
+
+    if (address === DIVIDER_REGISTER_ADDRESS) {
+      this.memoryView.setUint8(address, 0)
+      return
+    }
+
     this.memoryView.setUint8(address, value)
+
     if (address === DMA_TRANSFER_ADDRESS) {
       this.doDmaTransfer(value)
     }

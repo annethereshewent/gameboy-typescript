@@ -65,7 +65,7 @@ export class CPURegisters {
     // memory registers
     this.interruptEnableRegister = new InterruptEnableRegister(memory)
     this.interruptRequestRegister = new InterruptRequestRegister(memory)
-    this.dividerRegister = new MemoryRegister(0xff0f, memory)
+    this.dividerRegister = new MemoryRegister(0xff04, memory)
     this.timerCounterRegister = new MemoryRegister(0xff05, memory)
     this.timerModuloRegister = new MemoryRegister(0xff06, memory)
     this.timerControlRegister = new TimerControlRegister(memory)

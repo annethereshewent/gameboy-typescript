@@ -7,7 +7,7 @@ const memory = new Memory()
 
 const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
-const MAX_FRAMES_TO_RUN = 60 * 60
+const MAX_FRAMES_TO_RUN = 10
 
 
 export class Gameboy {
@@ -25,7 +25,7 @@ export class Gameboy {
   // otherwise, logs get polluted with too much data
   // to sift through
   static shouldOutputLogs() {
-    // return this.frames >= MAX_FRAMES_TO_RUN - 5
+    // return this.frames >= MAX_FRAMES_TO_RUN - 10
     return false
   }
 

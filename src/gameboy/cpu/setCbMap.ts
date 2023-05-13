@@ -1394,7 +1394,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xae, {
     name: "RES 5, (HL)",
-    cycleTime: 8,
+    cycleTime: 16,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(5)
     }
@@ -1970,7 +1970,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xf6, {
     name: "SET 6, (HL)",
-    cycleTime: 8,
+    cycleTime: 16,
     operation: () => {
       this.registers.setBitAtRegisterAddress(6)
     }
