@@ -217,15 +217,13 @@ export class GPU {
       const lowerByte = this.memory.readByte(tileAddress)
       const upperByte = this.memory.readByte(tileAddress+1)
 
+      const paletteColors = sprite.paletteNumber === 0 ? this.registers.objectPaletteRegister0.colors : this.registers.objectPaletteRegister1.colors
 
       for (let i = 7; i >= 0; i--) {
         const bitPos = sprite.isXFlipped ? i : 7 - i
 
         const lowerBit = this.getBit(lowerByte, bitPos)
         const upperBit = this.getBit(upperByte, bitPos) << 1
-
-
-        const paletteColors = sprite.paletteNumber === 0 ? this.registers.objectPaletteRegister0.colors : this.registers.objectPaletteRegister1.colors
 
         const colorIndex = paletteColors[lowerBit + upperBit]
 
