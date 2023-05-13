@@ -1,7 +1,7 @@
 import { getBit, setBit } from "../../misc/BitOperations"
 
 export class JoypadRegister {
-  private value = 0xff
+  value = 0xff
 
   isPressingDown = false
   isPressingUp = false
@@ -12,13 +12,12 @@ export class JoypadRegister {
   isPressingStart = false
   isPressingSelect = false
 
-  isCheckingDirections = false
-  isCheckingButtons = false
+  get isCheckingDirections() {
+    return getBit(this.value, 4) === 0
+  }
 
-
-  setValue(value: number) {
-    this.isCheckingDirections = getBit(value, 4) === 0
-    this.isCheckingButtons = getBit(value, 5) === 0
+  get isCheckingButtons() {
+    return getBit(this.value, 5) === 0
   }
 
   getInput() {

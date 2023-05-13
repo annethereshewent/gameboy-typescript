@@ -54,7 +54,7 @@ export class Memory {
 
   writeByte(address: number, value: number, caller?: string) {
     if (address === JOYPAD_REGISTER_ADDRESS) {
-      joypadRegister.setValue(value)
+      joypadRegister.value = value
       return
     }
 

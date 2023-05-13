@@ -57,7 +57,9 @@ export class CPU {
       timerModuloRegister
     } = this.registers
 
-    this.counter = (this.counter + cycles) & 0xffff
+    const mCycles = cycles / 4
+
+    this.counter = (this.counter + mCycles) & 0xffff
 
     const msb = (this.counter >> 8) & 0xff
 
