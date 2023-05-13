@@ -12,6 +12,8 @@ export class Memory {
 
   loadCartridge(gameDataView: DataView) {
     this.gameDataView = gameDataView
+
+    console.log(this.gameDataView.getUint8(0x147))
   }
 
   reset() {

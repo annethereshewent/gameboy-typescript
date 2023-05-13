@@ -225,7 +225,9 @@ export class GPU {
         const lowerBit = this.getBit(lowerByte, bitPos)
         const upperBit = this.getBit(upperByte, bitPos) << 1
 
-        const colorIndex = paletteColors[lowerBit + upperBit]
+        const paletteIndex = lowerBit + upperBit
+
+        const colorIndex = paletteColors[paletteIndex]
 
         const color = this.colors[colorIndex]
 
@@ -233,9 +235,8 @@ export class GPU {
         const windowVisible = this.windowPixelsDrawn[spriteX + i]
         const backgroundVisible = this.backgroundPixelsDrawn[spriteX + i]
 
-        const isPixelBehindBackground = sprite.bgAndWindowOverObj === 1 && (backgroundVisible || windowVisible)
-
-        if (!isPixelBehindBackground) {
+        // per https://gbdev.io/pandocs/Tile_Data.html, when palette index is 0 (color 0), that means transparent
+        if (paletteIndex !== 0 && !(sprite.bgAndWindowOverObj === 1 && (backgroundVisible || windowVisible))) {
           this.drawPixel(spriteX + i, lineYRegister.value, color.red, color.green, color.blue)
         }
       }
@@ -322,6 +323,7 @@ export class GPU {
     while (x < GPU.screenWidth) {
       if (x < adjustedWindowX) {
         this.windowPixelsDrawn.push(false)
+        x++
         continue
       }
       const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(this.numWindowLines) / 8) * 32
