@@ -191,6 +191,7 @@ export class GPU {
     .slice(0, maxObjectsPerLine)
 
     for (const sprite of availableSprites) {
+      // see above comment. x position is offset by 8 and y position by 16 per the docs.
       const spriteX = sprite.xPosition - 8
       const spriteY = sprite.yPosition - 16
 
@@ -227,7 +228,6 @@ export class GPU {
 
         const color = this.colors[colorIndex]
 
-        // TODO: add check to see if sprite is behind background
         const windowVisible = this.windowPixelsDrawn[spriteX + i]
         const backgroundVisible = this.backgroundPixelsDrawn[spriteX + i]
 

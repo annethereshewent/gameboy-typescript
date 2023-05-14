@@ -24,12 +24,16 @@ export class Cartridge {
   writeWord(address: number, value: number) {
     return
   }
+
   /**
+   * See below for info on headers and what they return.
    * https://gbdev.io/pandocs/The_Cartridge_Header.html
    */
+
+
   get romSize() {
-    const sizeOffset = 0x148
-    const sizeCode = this.gameDataView.getUint8(sizeOffset)
+    const romAddress = 0x148
+    const sizeCode = this.gameDataView.getUint8(romAddress)
     const sizes = [
       0x08000,
       0x010000,
@@ -41,6 +45,24 @@ export class Cartridge {
       4096,
       8192,
     ]
+
+    return sizes[sizeCode]
+  }
+
+  get ramSize() {
+    const ramAddress = 0x149
+    const sizeCode = this.gameDataView.getUint8(ramAddress)
+
+    const sizes = [
+      0,
+      0x002000,
+      0x008000,
+      0x032000,
+      0x128000,
+      0x512000,
+    ]
+
+    console.log(sizes[sizeCode].toString(16))
 
     return sizes[sizeCode]
   }

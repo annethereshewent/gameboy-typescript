@@ -14,6 +14,10 @@ enum WriteMethod {
 // see https://gbdev.io/pandocs/MBC1.html for most of the details on these
 export class Mbc1Cartridge extends Cartridge {
 
+  ramBuffer = new ArrayBuffer(this.ramSize)
+  ramView = new DataView(this.ramBuffer)
+  ramBytes = new Uint8Array(this.ramBuffer)
+
   ramEnabled = false
   mode = 0
   romBankNumber = 1
@@ -24,6 +28,21 @@ export class Mbc1Cartridge extends Cartridge {
     (address: number) => this.gameDataView.getInt8(address),
     (address: number) => this.gameDataView.getUint16(address, true)
   ]
+
+  ramReadMethods = [
+    (address: number) => this.ramView.getUint8(address),
+    (address: number) => this.ramView.getInt8(address),
+    (address: number) => this.ramView.getUint16(address, true)
+  ]
+
+  ramWriteMethods = [
+    (address: number, value: number) => this.ramView.setUint8(address, value),
+    (address: number, value: number) => this.ramView.setUint16(address, value, true)
+  ]
+
+  resetRam() {
+    this.ramBytes.fill(0, 0, this.ramBytes.length - 1)
+  }
 
   override readByte(address: number): number {
     return this._read(address, ReadMethod.READ_BYTE)
@@ -49,7 +68,9 @@ export class Mbc1Cartridge extends Cartridge {
       return 0xff
     }
 
-    throw new Error("cannot read: sram not implemented yet")
+    const ramRead = this.ramReadMethods[readMethod]
+
+    return ramRead(address)
   }
 
   private readFromBankZero(address: number, readMethod: ReadMethod): number {
@@ -91,8 +112,17 @@ export class Mbc1Cartridge extends Cartridge {
       this.ramBankNumber = value & 0b11
     } else if (this.isBankingModeRegister(address)) {
       this.mode = value & 0b1
-    } else {
-      throw new Error("cannot write: sram not implemented yet")
+    } else if (this.isRamAddress(address) && this.ramEnabled) {
+      const maskedAddress = address & 0b1111111111111
+      const ramWrite = this.ramWriteMethods[writeMethod]
+      if (this.mode === 0) {
+        console.log(`writing to ${maskedAddress.toString(16)}`)
+        ramWrite(maskedAddress, value)
+      } else {
+        const actualAddress = (this.ramBankNumber << 12) + maskedAddress
+
+        ramWrite(actualAddress, value)
+      }
     }
   }
 
@@ -110,5 +140,9 @@ export class Mbc1Cartridge extends Cartridge {
 
   private isBankingModeRegister(address: number) {
     return address >= 0x6000 && address <= 0x7fff
+  }
+
+  private isRamAddress(address: number) {
+    return address >= 0xa000 && address <= 0xbfff
   }
 }
