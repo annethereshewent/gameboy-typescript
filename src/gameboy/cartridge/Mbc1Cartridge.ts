@@ -92,12 +92,8 @@ export class Mbc1Cartridge extends Cartridge {
     } else if (this.isBankingModeRegister(address)) {
       this.mode = value & 0b1
     }
-    // TODO: write to sram
-    // else if (writeMethod === WriteMethod.WRITE_BYTE) {
-    //   this.gameDataView.setUint8(address, value)
-    // } else if (writeMethod === WriteMethod.WRITE_WORD) {
-    //   this.gameDataView.setUint16(address, value, true)
-    // }
+
+    throw new Error("sram not implemented yet")
   }
 
   private isRamEnableRegister(address: number) {
