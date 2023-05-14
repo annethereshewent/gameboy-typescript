@@ -95,11 +95,15 @@ export class Mbc1Cartridge extends Cartridge {
       return this.readFromBanksOneThroughSeven(maskedAddress, readMethod)
     }
 
+    return this.readFromRam(address, readMethod)
+  }
+
+  private readFromRam(address: number, readMethod: ReadMethod) {
     if (!this.ramEnabled) {
       return 0xff
     }
 
-    maskedAddress = address & 0b1111111111111
+    const maskedAddress = address & 0b1111111111111
 
     const ramRead = this.ramReadMethods[readMethod]
 
@@ -115,11 +119,13 @@ export class Mbc1Cartridge extends Cartridge {
   private readFromBankZero(address: number, readMethod: ReadMethod): number {
     const read = this.readMethods[readMethod]
 
+    const maskedAddress = address & 0b11111111111111
+
     if (this.mode === 0) {
-      return read(address)
+      return read(maskedAddress)
     }
 
-    const actualAddress = ((this.ramBankNumber << 19) + address) & (this.romSize - 1)
+    const actualAddress = ((this.ramBankNumber << 19) + maskedAddress)
 
     return read(actualAddress)
   }
@@ -129,7 +135,9 @@ export class Mbc1Cartridge extends Cartridge {
 
     const bankNumber = (this.ramBankNumber << 5) + this.romBankNumber
 
-    const actualAddress = ((bankNumber << 14) + address) & (this.romSize - 1)
+    const maskedAddress = address & 0b11111111111111
+
+    const actualAddress = ((bankNumber << 14) + maskedAddress)
 
     return read(actualAddress)
   }

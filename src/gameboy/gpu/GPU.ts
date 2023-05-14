@@ -178,6 +178,7 @@ export class GPU {
       // has an offset of 8. So whatever value the registers have, subtract either 8 or 16 to
       // get the actual position on the screen.
       const yPos = entry.yPosition - 16
+      const xPos = entry.xPosition - 8
 
       let intersection = lineYRegister.value - yPos
 
@@ -185,7 +186,7 @@ export class GPU {
         intersection = lcdControlRegister.objSize() - 1 - intersection
       }
 
-      return intersection >= 0 && intersection <= lcdControlRegister.objSize() - 1
+      return intersection >= 0 && intersection <= lcdControlRegister.objSize() - 1 && xPos >= -2
     })
     .sort((a, b) => a.xPosition - b.xPosition)
     .slice(0, maxObjectsPerLine)
@@ -194,7 +195,6 @@ export class GPU {
       // see above comment. x position is offset by 8 and y position by 16 per the docs.
       const spriteX = sprite.xPosition - 8
       const spriteY = sprite.yPosition - 16
-
 
       // this tells us where in the sprite tile the y-coordinate is in.
       let intersection = lineYRegister.value - spriteY
