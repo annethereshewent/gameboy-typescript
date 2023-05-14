@@ -164,6 +164,7 @@ export class GPU {
   }
 
   drawSpriteLine() {
+    // per docs https://gbdev.io/pandocs/OAM.html, only 10 sprites can be visible per scan line
     const maxObjectsPerLine = 10
 
     const { lineYRegister, lcdControlRegister } = this.registers
@@ -177,22 +178,26 @@ export class GPU {
       if (numSprites === maxObjectsPerLine) {
         break
       }
+
+      // per the docs above, sprite.xPoition is the actual position + 16, sprite.yPosition is the actual position + 8
+      // so to get the actual position, subtract either 16 or 8
       const yPos = sprite.yPosition - 16
       const xPos = sprite.xPosition - 8
-      let intersection = lineYRegister.value - yPos
+
+      let yPosInTile = lineYRegister.value - yPos
 
       if (sprite.isYFlipped) {
-        intersection = lcdControlRegister.objSize() - 1 - intersection
+        yPosInTile = lcdControlRegister.objSize() - 1 - yPosInTile
       }
 
-      if (intersection <  0 || intersection > lcdControlRegister.objSize()-1) {
+      if (yPosInTile <  0 || yPosInTile > lcdControlRegister.objSize()-1) {
         continue
       }
 
       const tileIndex = lcdControlRegister.objSize() === 16 ? resetBit(sprite.tileIndex, 7) : sprite.tileIndex
 
       const tileBytePosition = tileIndex * 16
-      const tileYBytePosition = intersection * 2
+      const tileYBytePosition = yPosInTile * 2
 
       const tileAddress = tileBytePosition + tileYBytePosition + tileMapStartAddress
 
@@ -200,7 +205,6 @@ export class GPU {
       const upperByte = this.memory.readByte(tileAddress+1)
 
       const paletteColors = sprite.paletteNumber === 0 ? this.registers.objectPaletteRegister0.colors : this.registers.objectPaletteRegister1.colors
-
 
       for (let i = 0; i < 8; i++) {
         const bitPos = sprite.isXFlipped ? i : 7 - i
@@ -210,6 +214,7 @@ export class GPU {
 
         const paletteIndex = lowerBit + upperBit
 
+        // paletteIndex 0 is always transparent
         if (paletteIndex === 0 || (xPos + i) < 0) {
           continue
         }
