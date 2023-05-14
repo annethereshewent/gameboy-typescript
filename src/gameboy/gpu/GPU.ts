@@ -164,59 +164,45 @@ export class GPU {
   }
 
   drawSpriteLine() {
-    // per docs https://gbdev.io/pandocs/OAM.html, only 10 sprites can be visible per scan line
     const maxObjectsPerLine = 10
 
     const { lineYRegister, lcdControlRegister } = this.registers
 
-    // per the docs above, tilemap for sprites is located at 0x8000-0x8fff
     const tileMapStartAddress = 0x8000
 
-    // these are sprites that are available to be drawn at current lineY
-    const availableSprites = this.oamTable.entries.filter((entry) => {
-      // per https://gbdev.io/pandocs/OAM.html, sprite Y's position has an offset of 16, and sprite X
-      // has an offset of 8. So whatever value the registers have, subtract either 8 or 16 to
-      // get the actual position on the screen.
-      const yPos = entry.yPosition - 16
-      const xPos = entry.xPosition - 8
+    const sortedSprites = this.oamTable.entries.sort((a, b) => a.xPosition - b.xPosition)
 
+    let numSprites = 0
+    for (const sprite of sortedSprites) {
+      if (numSprites === maxObjectsPerLine) {
+        break
+      }
+      const yPos = sprite.yPosition - 16
+      const xPos = sprite.xPosition - 8
       let intersection = lineYRegister.value - yPos
 
-      if (entry.isYFlipped) {
-        intersection = lcdControlRegister.objSize() - 1 - intersection
-      }
-
-      return intersection >= 0 && intersection <= lcdControlRegister.objSize() - 1 && xPos >= -2
-    })
-    .sort((a, b) => a.xPosition - b.xPosition)
-    .slice(0, maxObjectsPerLine)
-
-    for (const sprite of availableSprites) {
-      // see above comment. x position is offset by 8 and y position by 16 per the docs.
-      const spriteX = sprite.xPosition - 8
-      const spriteY = sprite.yPosition - 16
-
-      // this tells us where in the sprite tile the y-coordinate is in.
-      let intersection = lineYRegister.value - spriteY
-
-      // start from the bottom of the sprite tile if flipped
       if (sprite.isYFlipped) {
         intersection = lcdControlRegister.objSize() - 1 - intersection
       }
+
+      if (intersection <  0 || intersection > lcdControlRegister.objSize()-1) {
+        continue
+      }
+
       const tileIndex = lcdControlRegister.objSize() === 16 ? resetBit(sprite.tileIndex, 7) : sprite.tileIndex
 
-      const tileBytePosition = intersection * 2
-      const tileStartIndex = tileIndex * 16 // 16 bytes per tile, takes 2 bits to encode one line, 8 lines total
+      const tileBytePosition = tileIndex * 16
+      const tileYBytePosition = intersection * 2
 
-      const tileAddress = tileMapStartAddress + tileBytePosition + tileStartIndex
+      const tileAddress = tileBytePosition + tileYBytePosition + tileMapStartAddress
 
-      // finally get upper and lower bytes and render the sprite
       const lowerByte = this.memory.readByte(tileAddress)
       const upperByte = this.memory.readByte(tileAddress+1)
 
       const paletteColors = sprite.paletteNumber === 0 ? this.registers.objectPaletteRegister0.colors : this.registers.objectPaletteRegister1.colors
 
-      for (let i = 7; i >= 0; i--) {
+
+      for (let i = 0; i < 8; i++) {
         const bitPos = sprite.isXFlipped ? i : 7 - i
 
         const lowerBit = getBit(lowerByte, bitPos)
@@ -224,20 +210,24 @@ export class GPU {
 
         const paletteIndex = lowerBit + upperBit
 
+        if (paletteIndex === 0 || (xPos + i) < 0) {
+          continue
+        }
+
         const colorIndex = paletteColors[paletteIndex]
 
         const color = this.colors[colorIndex]
 
-        const windowVisible = this.windowPixelsDrawn[spriteX + i]
-        const backgroundVisible = this.backgroundPixelsDrawn[spriteX + i]
+        const backgroundVisible = this.backgroundPixelsDrawn[xPos + i]
+        const windowVisible = this.windowPixelsDrawn[xPos + i]
 
-        // per https://gbdev.io/pandocs/Tile_Data.html, when palette index is 0 (color 0), that means transparent
-        if (paletteIndex !== 0 && !(sprite.bgAndWindowOverObj === 1 && (backgroundVisible || windowVisible))) {
-          this.drawPixel(spriteX + i, lineYRegister.value, color.red, color.green, color.blue)
+        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible))) {
+          this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
         }
       }
-    }
 
+      numSprites++
+    }
   }
 
   drawBackgroundLine() {
