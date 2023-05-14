@@ -49,7 +49,7 @@ export class Mbc1Cartridge extends Cartridge {
       return 0xff
     }
 
-    throw new Error("RAM not implemented yet")
+    throw new Error("cannot read: sram not implemented yet")
   }
 
   private readFromBankZero(address: number, readMethod: ReadMethod): number {
@@ -91,9 +91,9 @@ export class Mbc1Cartridge extends Cartridge {
       this.ramBankNumber = value & 0b11
     } else if (this.isBankingModeRegister(address)) {
       this.mode = value & 0b1
+    } else {
+      throw new Error("cannot write: sram not implemented yet")
     }
-
-    throw new Error("sram not implemented yet")
   }
 
   private isRamEnableRegister(address: number) {
