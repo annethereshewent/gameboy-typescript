@@ -5,7 +5,7 @@ export enum CartridgeType {
   ROM,
   MBC1,
   MBC1_PLUS_RAM,
-  MBC_PLUS_RAM_PLUS_BATTERY,
+  MBC1_PLUS_RAM_PLUS_BATTERY,
   MBC2 = 0x5,
   MBC2_PLUS_BATTERY,
   ROM_PLUS_RAM_1 = 0x8,

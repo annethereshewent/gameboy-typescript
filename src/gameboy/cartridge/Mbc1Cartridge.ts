@@ -57,20 +57,29 @@ export class Mbc1Cartridge extends Cartridge {
   }
 
   private _read(address: number, readMethod: ReadMethod): number {
-    const maskedAddress = address & 0b11111111111111
+    let maskedAddress = address & 0b11111111111111
     if (address >= 0 && address <= 0x3fff) {
       return this.readFromBankZero(maskedAddress, readMethod)
     }
     if (address >= 0x4000 && address <= 0x7fff) {
       return this.readFromBanksOneThroughSeven(maskedAddress, readMethod)
     }
+
     if (!this.ramEnabled) {
       return 0xff
     }
 
+    maskedAddress = address & 0b1111111111111
+
     const ramRead = this.ramReadMethods[readMethod]
 
-    return ramRead(address)
+    if (this.mode === 0) {
+      return ramRead(maskedAddress)
+    }
+
+    const actualAddress = (this.ramBankNumber << 13) + maskedAddress
+
+    return ramRead(actualAddress)
   }
 
   private readFromBankZero(address: number, readMethod: ReadMethod): number {
@@ -116,11 +125,9 @@ export class Mbc1Cartridge extends Cartridge {
       const maskedAddress = address & 0b1111111111111
       const ramWrite = this.ramWriteMethods[writeMethod]
       if (this.mode === 0) {
-        console.log(`writing to ${maskedAddress.toString(16)}`)
         ramWrite(maskedAddress, value)
       } else {
-        const actualAddress = (this.ramBankNumber << 12) + maskedAddress
-
+        const actualAddress = (this.ramBankNumber << 13) + maskedAddress
         ramWrite(actualAddress, value)
       }
     }

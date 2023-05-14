@@ -21,6 +21,8 @@ export class Memory {
         this.cartridge = new Cartridge(gameDataView)
         break
       case CartridgeType.MBC1:
+      case CartridgeType.MBC1_PLUS_RAM:
+      case CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY:
         this.cartridge = new Mbc1Cartridge(gameDataView)
         break
       default:
