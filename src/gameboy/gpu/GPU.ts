@@ -1,6 +1,6 @@
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
-import { resetBit } from "../misc/BitOperations"
+import { getBit, resetBit } from "../misc/BitOperations"
 import { GPURegisters } from "./registers/GPURegisters"
 import { OAMTable } from "./registers/OAMTable"
 import { LCDMode } from "./registers/lcd_status/LCDMode"
@@ -218,8 +218,8 @@ export class GPU {
       for (let i = 7; i >= 0; i--) {
         const bitPos = sprite.isXFlipped ? i : 7 - i
 
-        const lowerBit = this.getBit(lowerByte, bitPos)
-        const upperBit = this.getBit(upperByte, bitPos) << 1
+        const lowerBit = getBit(lowerByte, bitPos)
+        const upperBit = getBit(upperByte, bitPos) << 1
 
         const paletteIndex = lowerBit + upperBit
 
@@ -251,13 +251,13 @@ export class GPU {
 
     const paletteColors = this.registers.backgroundPaletteRegister.colors
 
-    let x = 0
-    while (x < GPU.screenWidth) {
-      const scrolledX = scrollXRegister.value + x
-      const scrolledY = scrollYRegister.value = lineYRegister.value
+    for (let x = 0; x < GPU.screenWidth; x++) {
+      const scrolledX = (scrollXRegister.value + x) & 0xff
+      const scrolledY = (scrollYRegister.value + lineYRegister.value) & 0xff
       const tileMapIndex = (Math.floor(scrolledY / 8) * 32 + Math.floor(scrolledX / 8))
 
       const yPosInTile = scrolledY % 8
+      const xPosInTile = scrolledX % 8
 
       const tileBytePosition  = yPosInTile * 2
 
@@ -269,21 +269,20 @@ export class GPU {
       const lowerByte = this.memory.readByte(tileLineAddress)
       const upperByte = this.memory.readByte(tileLineAddress + 1)
 
-      for (let i = 7; i >= 0; i--) {
-        const lowerBit = this.getBit(lowerByte, i)
-        const upperBit = this.getBit(upperByte, i) << 1
+      const bitIndex = 7 - xPosInTile
 
-        const paletteIndex = lowerBit + upperBit
+      const lowerBit = getBit(lowerByte, bitIndex)
+      const upperBit = getBit(upperByte, bitIndex) << 1
 
-        const colorIndex = paletteColors[paletteIndex]
+      const paletteIndex = lowerBit + upperBit
 
-        const color = this.colors[colorIndex]
+      const colorIndex = paletteColors[paletteIndex]
 
-        this.backgroundPixelsDrawn.push(paletteIndex !== 0)
+      const color = this.colors[colorIndex]
 
-        this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
-        x++
-      }
+      this.backgroundPixelsDrawn.push(paletteIndex !== 0)
+
+      this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
     }
   }
 
@@ -308,7 +307,6 @@ export class GPU {
 
     const paletteColors = this.registers.backgroundPaletteRegister.colors
 
-
     let x = 0
 
     // per gameboy docs, windowXRegister value always starts at 7, so we want to adjust for that
@@ -316,15 +314,17 @@ export class GPU {
 
     const offset = windowDataAddress === 0x8800 ? 128 : 0
 
+
     while (x < GPU.screenWidth) {
       if (x < adjustedWindowX) {
         this.windowPixelsDrawn.push(false)
         x++
         continue
       }
+      const xPos = x - adjustedWindowX
       const yPos = lineYRegister.value - windowYRegister.value
 
-      const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(yPos) / 8) * 32
+      const tileMapIndex = (Math.floor(xPos) / 8) + (Math.floor(yPos) / 8) * 32
 
       const yPosInTile = yPos % 8
 
@@ -340,8 +340,8 @@ export class GPU {
       const upperByte = this.memory.readByte(tileLineAddress + 1)
 
       for (let i = 7; i >= 0; i--) {
-        const lowerBit = this.getBit(lowerByte, i)
-        const upperBit = this.getBit(upperByte, i) << 1
+        const lowerBit = getBit(lowerByte, i)
+        const upperBit = getBit(upperByte, i) << 1
 
         const paletteIndex = lowerBit + upperBit
         const colorIndex = paletteColors[paletteIndex]
@@ -363,9 +363,5 @@ export class GPU {
     this.screen.data[pos + 1] = g
     this.screen.data[pos + 2] = b
     this.screen.data[pos + 3] = alpha
-  }
-
-  getBit(value: number, pos: number): number {
-    return (value >> pos) & 1
   }
 }

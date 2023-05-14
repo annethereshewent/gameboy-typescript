@@ -62,7 +62,7 @@ export class Joypad {
   }
 
   isPressingB(): boolean {
-    return this.gamepad.buttons[GamepadButtons.B].pressed
+    return this.gamepad.buttons[GamepadButtons.X].pressed
   }
 
   isPressingStart(): boolean {
