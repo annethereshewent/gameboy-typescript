@@ -4,8 +4,6 @@ import { Memory } from "../gameboy/cpu/Memory"
 const memory = new Memory()
 const cpu = new CPU(memory)
 
-cpu.loadCartridge(new ArrayBuffer(0x1000))
-
 test("it initializes registers to the proper values", () => {
   cpu.initialize()
 

@@ -4,9 +4,11 @@ import { Memory } from "../gameboy/cpu/Memory"
 const memory = new Memory()
 const cpu = new CPU(memory)
 
-cpu.loadCartridge(new ArrayBuffer(0x1000))
-const { registers } = cpu
+const arrayBuffer = new ArrayBuffer(0x1000)
+const gameDataView = new DataView(arrayBuffer)
 
+cpu.loadCartridge(arrayBuffer)
+const { registers } = cpu
 
 test("it performs add properly", () => {
   registers.A.value = 0xff
@@ -38,7 +40,7 @@ expect(registers.F.zero).toBe(true)
 
 test("it performs addWithCarryImmediate properly", () => {
   registers.PC.value = 0x100
-  memory.gameDataView?.setUint8(0x100, 1)
+  gameDataView.setUint8(0x100, 1)
 
   registers.F.carry = true
 

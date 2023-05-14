@@ -4,9 +4,11 @@ import { Memory } from "../gameboy/cpu/Memory"
 const memory = new Memory()
 const cpu = new CPU(memory)
 
-cpu.loadCartridge(new ArrayBuffer(0x1000))
-const { registers } = cpu
+const arrayBuffer = new ArrayBuffer(0x1000)
+const gameDataView = new DataView(arrayBuffer)
 
+const { registers } = cpu
+cpu.loadCartridge(arrayBuffer)
 
 test('it performs memory operations properly', () => {
   memory.writeByte(0x8000, 1)
@@ -19,7 +21,7 @@ test('it performs memory operations properly', () => {
 test("it performs loadFrom16bitAddr properly", () => {
 
   registers.A.value = 0
-  memory.gameDataView?.setUint16(1, 0xc058, true)
+  gameDataView.setUint16(1, 0xc058, true)
   memory.writeByte(0xc058, 0xff)
 
   registers.PC.value = 1
@@ -44,7 +46,7 @@ test("it performs loadByte properly", () => {
 test("it performs readByte properly", () => {
   registers.PC.value = 1
 
-  memory.gameDataView?.setUint8(1, 0xab)
+  gameDataView.setUint8(1, 0xab)
 
   registers.readByte(registers.A)
 
@@ -62,7 +64,7 @@ test("it performs writeToMemoryRegisterAddr properly", () => {
 
 test("it performs writeToMemory16Bit properly", () => {
   registers.PC.value = 1
-  memory.gameDataView?.setUint16(1, 0x8800, true)
+  gameDataView.setUint16(1, 0x8800, true)
 
   registers.A.value = 0xff
 
@@ -100,7 +102,7 @@ test("it performs writeByteIntoRegisterAddress properly", () => {
 
   registers.PC.value = 1
 
-  memory.gameDataView?.setUint8(1, 0xda)
+  gameDataView.setUint8(1, 0xda)
 
   registers.writeByteIntoRegisterAddress(registers.HL)
 
@@ -108,7 +110,7 @@ test("it performs writeByteIntoRegisterAddress properly", () => {
 })
 
 test("it performs loadWord properly", () => {
-  memory.gameDataView?.setUint16(1, 0xf0f0)
+  gameDataView.setUint16(1, 0xf0f0)
 
   registers.PC.value = 1
 
@@ -118,7 +120,7 @@ test("it performs loadWord properly", () => {
 })
 
 test("it performs writeStackPointerToMemory properly", () => {
-  memory.gameDataView?.setUint16(1, 0x8080)
+  gameDataView.setUint16(1, 0x8080)
 
   registers.PC.value = 1
 

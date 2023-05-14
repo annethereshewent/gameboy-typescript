@@ -23,9 +23,6 @@ export class GPU {
 
   static CyclesPerFrame = (CYCLES_PER_SCANLINE * SCANLINES_PER_FRAME) + CYCLES_IN_VBLANK
 
-
-  numWindowLines = 0
-
   windowPixelsDrawn: boolean[] = []
   backgroundPixelsDrawn: boolean[] = []
 
@@ -111,7 +108,6 @@ export class GPU {
           if (this.registers.lineYRegister.value === GPU.offscreenHeight) {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
             this.registers.lineYRegister.value = 0
-            this.numWindowLines = 0
           }
 
           this.cycles %= CYCLES_PER_SCANLINE
@@ -326,9 +322,11 @@ export class GPU {
         x++
         continue
       }
-      const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(this.numWindowLines) / 8) * 32
+      const yPos = lineYRegister.value - windowYRegister.value
 
-      const yPosInTile = this.numWindowLines % 8
+      const tileMapIndex = (Math.floor(x) / 8) + (Math.floor(yPos) / 8) * 32
+
+      const yPosInTile = yPos % 8
 
       // 2 bytes are needed to represent one line in a tile
       const tileBytePosition = yPosInTile * 2
@@ -356,12 +354,6 @@ export class GPU {
         x++
       }
     }
-
-    // numWindowLines drawn keeps track of where we are in the window rendering
-    // since the window can start at any position, but the first tile of the window
-    // always starts at the top of the map regardless of where the window is on the
-    // screen. hence why we need windowLinesDrawn.
-    this.numWindowLines++
   }
 
   drawPixel(x: number, y: number, r: number, g: number, b: number, alpha: number = 0xff) {

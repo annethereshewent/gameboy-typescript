@@ -9,7 +9,6 @@ const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
 const MAX_FRAMES_TO_RUN = 10
 
-
 export class Gameboy {
 
   cpu = new CPU(memory)
@@ -71,7 +70,7 @@ export class Gameboy {
     }
 
     // if (Gameboy.frames !== MAX_FRAMES_TO_RUN && cycles !== -1) {
-      requestAnimationFrame((time: number) => this.runFrame(time, context))
+    requestAnimationFrame((time: number) => this.runFrame(time, context))
     // } else {
     //   console.log(`finished running ${Gameboy.frames} frames successfully!`)
     //   this.cpu.registers.outputState()
