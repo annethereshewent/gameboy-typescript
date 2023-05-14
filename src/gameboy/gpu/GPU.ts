@@ -324,7 +324,7 @@ export class GPU {
       const xPos = x - adjustedWindowX
       const yPos = lineYRegister.value - windowYRegister.value
 
-      const tileMapIndex = (Math.floor(xPos) / 8) + (Math.floor(yPos) / 8) * 32
+      const tileMapIndex = (Math.floor(xPos / 8)) + (Math.floor(yPos / 8) * 32)
 
       const yPosInTile = yPos % 8
 
