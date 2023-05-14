@@ -1,8 +1,10 @@
 
 export class Cartridge {
   gameDataView: DataView
+  gameBytes: Uint8Array
   constructor(gameDataView: DataView) {
     this.gameDataView = gameDataView
+    this.gameBytes = new Uint8Array(gameDataView.buffer)
   }
 
   readByte(address: number) {
@@ -49,17 +51,31 @@ export class Cartridge {
     return sizes[sizeCode]
   }
 
+  get name() {
+    const nameStart = 0x134
+    const nameEnd = 0x143
+
+    return new TextDecoder().decode(this.gameBytes.subarray(nameStart, nameEnd))
+  }
+
+  get type(){
+    const typeAddress = 0x147
+
+    return this.gameDataView.getUint8(typeAddress)
+  }
+
   get ramSize() {
     const ramAddress = 0x149
     const sizeCode = this.gameDataView.getUint8(ramAddress)
 
     const sizes = [
       0,
+      -1, // unused
       0x002000,
       0x008000,
       0x032000,
-      0x128000,
-      0x512000,
+      0x020000,
+      0x010000,
     ]
 
     return sizes[sizeCode]

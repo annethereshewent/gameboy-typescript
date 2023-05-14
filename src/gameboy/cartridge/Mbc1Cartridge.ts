@@ -1,4 +1,5 @@
 import { Cartridge } from "./Cartridge"
+import { CartridgeType } from "./CartridgeType"
 
 enum ReadMethod {
   READ_BYTE,
@@ -13,6 +14,17 @@ enum WriteMethod {
 
 // see https://gbdev.io/pandocs/MBC1.html for most of the details on these
 export class Mbc1Cartridge extends Cartridge {
+
+  constructor(gameDataView: DataView) {
+    super(gameDataView)
+
+    const ramBytes: Uint8Array = this.stringToSram()
+
+    if (ramBytes != null) {
+      this.ramBytes = ramBytes
+      this.ramView = new DataView(ramBytes.buffer)
+    }
+  }
 
   ramBuffer = new ArrayBuffer(this.ramSize)
   ramView = new DataView(this.ramBuffer)
@@ -36,9 +48,27 @@ export class Mbc1Cartridge extends Cartridge {
   ]
 
   ramWriteMethods = [
-    (address: number, value: number) => this.ramView.setUint8(address, value),
-    (address: number, value: number) => this.ramView.setUint16(address, value, true)
+    (address: number, value: number) => {
+      this.ramView.setUint8(address, value)
+      if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
+        localStorage.setItem(this.name, this.sramToString())
+      }
+    },
+    (address: number, value: number) => {
+      this.ramView.setUint16(address, value, true)
+      if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
+        localStorage.setItem(this.name, this.sramToString())
+      }
+    }
   ]
+
+  stringToSram() {
+    return new TextEncoder().encode(localStorage.getItem(this.name) || "")
+  }
+
+  sramToString() {
+    return new TextDecoder().decode(this.ramBytes)
+  }
 
   resetRam() {
     this.ramBytes.fill(0, 0, this.ramBytes.length - 1)

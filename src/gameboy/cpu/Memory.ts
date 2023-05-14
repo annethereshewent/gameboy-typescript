@@ -7,6 +7,8 @@ const JOYPAD_REGISTER_ADDRESS = 0xff00
 const DMA_TRANSFER_ADDRESS = 0xff46
 const DIVIDER_REGISTER_ADDRESS = 0xff04
 
+const CARTRIDGE_TYPE_ADDRESS = 0x147
+
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
   memoryView = new DataView(this.memoryBuffer)
@@ -14,7 +16,7 @@ export class Memory {
   cartridge?: Cartridge
 
   loadCartridge(gameDataView: DataView) {
-    const cartridgeType = gameDataView.getUint8(0x147) as CartridgeType
+    const cartridgeType = gameDataView.getUint8(CARTRIDGE_TYPE_ADDRESS) as CartridgeType
 
     switch (cartridgeType) {
       case CartridgeType.ROM:
