@@ -1,3 +1,4 @@
+import { logger } from "../../logging/Logger"
 import { Gameboy } from "../Gameboy"
 import { CPURegisters } from "./CPURegisters"
 import { Instruction } from "./Instruction"
@@ -153,7 +154,7 @@ export class CPU {
 
         this.registers.PC.value++
         if (Gameboy.shouldOutputLogs()) {
-          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}`)
+          logger.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
         }
 
         instruction.operation()
@@ -171,7 +172,7 @@ export class CPU {
           this.registers.PC.value++
 
           if (Gameboy.shouldOutputLogs()) {
-            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}`)
+            logger.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
           }
 
           cbInstruction.operation()

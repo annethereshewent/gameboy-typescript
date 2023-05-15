@@ -18,11 +18,13 @@ export class Mbc1Cartridge extends Cartridge {
   constructor(gameDataView: DataView) {
     super(gameDataView)
 
-    const ramBytes: Uint8Array = this.stringToSram()
+    if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
+      const ramBytes: Uint8Array = this.stringToSram()
 
-    if (ramBytes != null) {
-      this.ramBytes = ramBytes
-      this.ramView = new DataView(ramBytes.buffer)
+      if (ramBytes.length === this.ramSize) {
+        this.ramBytes = ramBytes
+        this.ramView = new DataView(ramBytes.buffer)
+      }
     }
   }
 

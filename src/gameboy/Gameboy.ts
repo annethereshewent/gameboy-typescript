@@ -1,3 +1,4 @@
+import { logger } from "../logging/Logger"
 import { CPU } from "./cpu/CPU"
 import { Memory } from "./cpu/Memory"
 import { GPU } from "./gpu/GPU"
@@ -7,7 +8,7 @@ const memory = new Memory()
 
 const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
-const MAX_FRAMES_TO_RUN = 10
+const MAX_FRAMES_TO_RUN = 60 * 10
 
 export class Gameboy {
 
@@ -18,6 +19,8 @@ export class Gameboy {
   cycles = 0
   previousTime = 0
   static frames = 0
+
+  isStopped = false
 
 
   // only output the last logs of execution.
@@ -69,11 +72,12 @@ export class Gameboy {
       this.cycles %= GPU.CyclesPerFrame
     }
 
-    // if (Gameboy.frames !== MAX_FRAMES_TO_RUN && cycles !== -1) {
+    // if (Gameboy.frames !== MAX_FRAMES_TO_RUN && cycles !== -1 && !this.isStopped) {
     requestAnimationFrame((time: number) => this.runFrame(time, context))
     // } else {
     //   console.log(`finished running ${Gameboy.frames} frames successfully!`)
     //   this.cpu.registers.outputState()
+    //   logger.outputFile()
     // }
   }
 }

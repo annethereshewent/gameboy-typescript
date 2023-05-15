@@ -1,7 +1,6 @@
-.App {
-
+body {
+  background: #000000;
 }
-
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -39,7 +38,7 @@
 
 canvas {
   margin: 120px auto;
-  width: 50%;
+  width: 100%;
   image-rendering: pixelated;
 }
 
