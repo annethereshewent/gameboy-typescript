@@ -20,9 +20,6 @@ export class Gameboy {
   previousTime = 0
   static frames = 0
 
-  isStopped = false
-
-
   // only output the last logs of execution.
   // otherwise, logs get polluted with too much data
   // to sift through

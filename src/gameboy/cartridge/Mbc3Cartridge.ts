@@ -1,3 +1,4 @@
+import { logger } from "../../logging/Logger"
 import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
 import { ReadMethod } from "./ReadMethod"
@@ -53,6 +54,10 @@ export class Mbc3Cartridge extends Cartridge {
     return this._read(address, ReadMethod.READ_BYTE)
   }
 
+  readWord(address: number) {
+    return this._read(address, ReadMethod.READ_WORD)
+  }
+
   private _read(address: number, readMethod: ReadMethod): number {
     const read = this.readMethods[readMethod]
     const ramRead = this.readMethods[readMethod]
@@ -61,6 +66,7 @@ export class Mbc3Cartridge extends Cartridge {
       return read(address)
     }
     if (this.isRomBankOneThruSeven(address)) {
+
       const maskedAddress = address & 0b11111111111111
 
       const actualAddress = (this.romBankNumber << 14) + maskedAddress
@@ -97,6 +103,10 @@ export class Mbc3Cartridge extends Cartridge {
       this.ramAndTimerEnable = lowerBits === 0xa
     } else if (this.isRomBankNumber(address)) {
       this.romBankNumber = value & 0b1111111
+      if (this.romBankNumber === 0) {
+        this.romBankNumber = 1
+      }
+      console.log(`setting rom bank number to ${this.romBankNumber.toString(16)}`)
     }  else if (this.isRamBankNumberOrRtcRegisterSelect(address)) {
       this.ramBankNumber = value
     } else if (this.isLatchClockAddress(address)) {
