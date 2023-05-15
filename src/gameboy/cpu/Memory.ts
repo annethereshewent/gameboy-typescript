@@ -1,6 +1,8 @@
 import { Cartridge } from "../cartridge/Cartridge"
 import { CartridgeType } from "../cartridge/CartridgeType"
 import { Mbc1Cartridge } from "../cartridge/Mbc1Cartridge"
+import { Mbc2Cartridge } from "../cartridge/Mbc2Cartridge"
+import { Mbc3Cartridge } from "../cartridge/Mbc3Cartridge"
 import { joypadRegister } from "./memory_registers/JoypadRegister"
 
 const JOYPAD_REGISTER_ADDRESS = 0xff00
@@ -26,6 +28,17 @@ export class Memory {
       case CartridgeType.MBC1_PLUS_RAM:
       case CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY:
         this.cartridge = new Mbc1Cartridge(gameDataView)
+        break
+      case CartridgeType.MBC2:
+      case CartridgeType.MBC2_PLUS_BATTERY:
+        this.cartridge = new Mbc2Cartridge(gameDataView)
+        break
+      case CartridgeType.MBC3:
+      case CartridgeType.MBC3_PLUS_RAM:
+      case CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY:
+      case CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY:
+      case CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY:
+        this.cartridge = new Mbc3Cartridge(gameDataView)
         break
       default:
         throw new Error(`Cartridge type not supported: ${cartridgeType}`)

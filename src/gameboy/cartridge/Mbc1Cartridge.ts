@@ -1,16 +1,8 @@
 import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
+import { ReadMethod } from "./ReadMethod"
+import { WriteMethod } from "./WriteMethods"
 
-enum ReadMethod {
-  READ_BYTE,
-  READ_SIGNED_BYTE,
-  READ_WORD
-}
-
-enum WriteMethod {
-  WRITE_BYTE,
-  WRITE_WORD
-}
 
 // see https://gbdev.io/pandocs/MBC1.html for most of the details on these
 export class Mbc1Cartridge extends Cartridge {
@@ -89,12 +81,11 @@ export class Mbc1Cartridge extends Cartridge {
   }
 
   private _read(address: number, readMethod: ReadMethod): number {
-    let maskedAddress = address & 0b11111111111111
     if (address >= 0 && address <= 0x3fff) {
-      return this.readFromBankZero(maskedAddress, readMethod)
+      return this.readFromBankZero(address, readMethod)
     }
     if (address >= 0x4000 && address <= 0x7fff) {
-      return this.readFromBanksOneThroughSeven(maskedAddress, readMethod)
+      return this.readFromBanksOneThroughSeven(address, readMethod)
     }
 
     return this.readFromRam(address, readMethod)
