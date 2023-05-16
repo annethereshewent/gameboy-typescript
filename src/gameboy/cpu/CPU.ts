@@ -154,7 +154,7 @@ export class CPU {
 
         this.registers.PC.value++
         if (Gameboy.shouldOutputLogs) {
-          logger.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
+          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
         }
 
         instruction.operation()
@@ -172,7 +172,7 @@ export class CPU {
           this.registers.PC.value++
 
           if (Gameboy.shouldOutputLogs) {
-            logger.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
+            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
           }
 
           cbInstruction.operation()

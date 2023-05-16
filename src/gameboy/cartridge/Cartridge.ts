@@ -37,7 +37,7 @@ export class Cartridge {
     const romAddress = 0x148
     const sizeCode = this.gameDataView.getUint8(romAddress)
     const sizes = [
-      32768,
+      0x08000,
       0x010000,
       0x020000,
       0x040000,

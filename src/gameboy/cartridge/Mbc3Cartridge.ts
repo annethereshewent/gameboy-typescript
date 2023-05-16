@@ -70,7 +70,6 @@ export class Mbc3Cartridge extends Cartridge {
       const maskedAddress = address & 0b11111111111111
 
       const actualAddress = (this.romBankNumber << 14) + maskedAddress
-
       return read(actualAddress)
     }
     if (!this.ramAndTimerEnable) {
@@ -106,7 +105,6 @@ export class Mbc3Cartridge extends Cartridge {
       if (this.romBankNumber === 0) {
         this.romBankNumber = 1
       }
-      console.log(`setting rom bank number to ${this.romBankNumber.toString(16)}`)
     }  else if (this.isRamBankNumberOrRtcRegisterSelect(address)) {
       this.ramBankNumber = value
     } else if (this.isLatchClockAddress(address)) {
@@ -124,24 +122,22 @@ export class Mbc3Cartridge extends Cartridge {
     }
   }
 
+  // read addresses
   private isRomBankZero(address: number) {
     return address >= 0 && address <= 0x3fff
   }
 
   private isRomBankOneThruSeven(address: number) {
-    return address >= 0x4000 && address <= 0x5fff
+    return address >= 0x4000 && address <= 0x7fff
   }
 
-  private isRamOrRtcRegisterAddress(address: number) {
-    return address >= 0xa000 && address <= 0xbfff
-  }
-
+  // write addresses
   private isRamAndTimerEnableAddress(address: number) {
     return address >= 0 && address <= 0x1fff
   }
 
   private isRomBankNumber(address: number) {
-    return address >- 0x2000 && address <= 0x3fff
+    return address >= 0x2000 && address <= 0x3fff
   }
 
   private isRamBankNumberOrRtcRegisterSelect(address: number) {
@@ -150,6 +146,10 @@ export class Mbc3Cartridge extends Cartridge {
 
   private isLatchClockAddress(address: number) {
     return address >= 0x6000 && address <= 0x7fff
+  }
+
+  private isRamOrRtcRegisterAddress(address: number) {
+    return address >= 0xa000 && address <= 0xbfff
   }
 
 }

@@ -57,11 +57,11 @@ export class Mbc1Cartridge extends Cartridge {
   ]
 
   stringToSram() {
-    return new TextEncoder().encode(localStorage.getItem(this.name) || "")
+    return new TextEncoder().encode(atob(localStorage.getItem(this.name) || ""))
   }
 
   sramToString() {
-    return new TextDecoder().decode(this.ramBytes)
+    return  btoa(new TextDecoder().decode(this.ramBytes))
   }
 
   resetRam() {
