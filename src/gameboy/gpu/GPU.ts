@@ -27,6 +27,7 @@ export class GPU {
   backgroundPixelsDrawn: boolean[] = []
 
   cycles = 0
+  internalWindowLineCounter = 0
 
   // color is determined by the palette registers
   colors = [
@@ -109,6 +110,7 @@ export class GPU {
           if (this.registers.lineYRegister.value === GPU.offscreenHeight) {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
             this.registers.lineYRegister.value = 0
+            this.internalWindowLineCounter = 0
           }
 
           this.cycles %= CYCLES_PER_SCANLINE
@@ -306,9 +308,8 @@ export class GPU {
       windowXRegister,
       windowYRegister
     } = this.registers
-
     // no need to render anything if we're not at a line where the window starts
-    if (lineYRegister.value < windowYRegister.value) {
+    if (lineYRegister.value < windowYRegister.value || windowXRegister.value > GPU.screenWidth + 7) {
       return
     }
 
@@ -327,6 +328,7 @@ export class GPU {
 
     const tileMapAddress = lcdControlRegister.windowTileMapArea()
 
+    const yPos = this.internalWindowLineCounter
     while (x < GPU.screenWidth) {
 
       if (x < adjustedWindowX) {
@@ -335,7 +337,6 @@ export class GPU {
         continue
       }
       const xPos = x - adjustedWindowX
-      const yPos = lineYRegister.value - windowYRegister.value
 
       const tileMapIndex = (Math.floor(xPos / 8)) + (Math.floor(yPos / 8) * 32)
 
@@ -367,6 +368,7 @@ export class GPU {
         x++
       }
     }
+    this.internalWindowLineCounter++
   }
 
   drawPixel(x: number, y: number, r: number, g: number, b: number, alpha: number = 0xff) {
