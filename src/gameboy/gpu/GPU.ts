@@ -1,3 +1,4 @@
+import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { getBit, resetBit } from "../misc/BitOperations"
@@ -152,7 +153,11 @@ export class GPU {
       return
     }
 
-    // still need to draw a background line (except it's white) if the background is off
+    this.backgroundPixelsDrawn = []
+    this.windowPixelsDrawn = []
+
+    // still need to draw a background line (except it's white)
+    // if the LCD control is off for the background
     this.drawBackgroundLine()
 
     if (lcdControlRegister.isWindowOn()) {
@@ -176,6 +181,10 @@ export class GPU {
       .filter((sprite) => {
         const yPos = sprite.yPosition - 16
 
+        if (sprite.xPosition === 0 || sprite.yPosition === 0 || sprite.xPosition > GPU.screenWidth + 8 || sprite.yPosition > GPU.screenHeight + 16) {
+          return false
+        }
+
         let yPosInTile = lineYRegister.value - yPos
 
         if (sprite.isYFlipped) {
@@ -188,6 +197,10 @@ export class GPU {
       .reverse() // this is to get any elements with the same xPosition as others to the beginning of the array, so we can prioritize it when sorting
       .sort((a, b) => b.xPosition - a.xPosition)
 
+    if (Gameboy.shouldOutputLogs && sortedSprites.length > 0) {
+      console.log(sortedSprites)
+    }
+
     for (const sprite of sortedSprites) {
       // per the docs above, sprite.xPoition is the actual position + 16, sprite.yPosition is the actual position + 8
       // so to get the actual position, subtract either 16 or 8
@@ -198,10 +211,6 @@ export class GPU {
 
       if (sprite.isYFlipped) {
         yPosInTile = lcdControlRegister.objSize() - 1 - yPosInTile
-      }
-
-      if (yPosInTile <  0 || yPosInTile > lcdControlRegister.objSize()-1) {
-        continue
       }
 
       // 8x16 tiles do not use the first bit of the tile index, per the docs
@@ -225,7 +234,7 @@ export class GPU {
 
         const paletteIndex = lowerBit + upperBit
 
-        // paletteIndex 0 is always transparent, ignore any pixels that are off screen
+        // paletteIndex 0 is always transparent; ignore any pixels that are off screen
         // otherwise they will wrap around to the right side of the screen
         if (paletteIndex === 0 || (xPos + i) < 0) {
           continue
@@ -238,7 +247,9 @@ export class GPU {
         const backgroundVisible = this.backgroundPixelsDrawn[xPos + i]
         const windowVisible = this.windowPixelsDrawn[xPos + i]
 
-        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible))) {
+        const isPixelBehindBackground = sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible)
+
+        if (!isPixelBehindBackground) {
           this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
         }
       }
@@ -246,7 +257,6 @@ export class GPU {
   }
 
   drawBackgroundLine() {
-    this.backgroundPixelsDrawn = []
     const { lineYRegister, lcdControlRegister, scrollXRegister, scrollYRegister } = this.registers
     const tileDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
 
@@ -301,14 +311,14 @@ export class GPU {
   }
 
   drawWindowLine() {
-    this.windowPixelsDrawn = []
     const {
       lineYRegister,
       lcdControlRegister,
       windowXRegister,
       windowYRegister
     } = this.registers
-    // no need to render anything if we're not at a line where the window starts
+
+    // no need to render anything if we're not at a line where the window starts or window is off screen
     if (lineYRegister.value < windowYRegister.value || windowXRegister.value > GPU.screenWidth + 7) {
       return
     }

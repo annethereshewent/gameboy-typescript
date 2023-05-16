@@ -34,6 +34,7 @@ function App() {
       <div className="gameboy">
         <input type="file" onChange={handleFileChange} />
         <canvas width="160" height="144"></canvas>
+        <button type="button" onClick={() => Gameboy.shouldOutputLogs = !Gameboy.shouldOutputLogs}>Toggle logs</button>
       </div>
     </div>
   );
