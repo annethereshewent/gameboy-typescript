@@ -82,6 +82,7 @@ export class GPU {
     switch (this.registers.lcdStatusRegister.mode) {
       case LCDMode.HBlank:
         if (this.cycles >= CYCLES_IN_HBLANK) {
+          this.drawLine()
           this.registers.lineYRegister.value++
 
           if (this.registers.lineYRegister.value === GPU.screenHeight) {
@@ -123,7 +124,6 @@ export class GPU {
         break
       case LCDMode.TransferringToLCD:
         if (this.cycles >= CYCLES_IN_VRAM) {
-          this.drawLine()
           const { lcdStatusRegister } = this.registers
 
           if (lcdStatusRegister.isHBlankInterruptSelected() || lcdStatusRegister.isVBlankInterruptSelected() || lcdStatusRegister.isOamInterruptSelected()) {
@@ -150,9 +150,8 @@ export class GPU {
       return
     }
 
-    if (lcdControlRegister.isBackgroundOn()) {
-      this.drawBackgroundLine()
-    }
+    // still need to draw a background line (except it's white) if the background is off
+    this.drawBackgroundLine()
 
     if (lcdControlRegister.isWindowOn()) {
       this.drawWindowLine()
@@ -171,14 +170,23 @@ export class GPU {
 
     const tileMapStartAddress = 0x8000
 
-    const sortedSprites = this.oamTable.entries.sort((a, b) => a.xPosition - b.xPosition)
+    const sortedSprites = this.oamTable.entries
+      .filter((sprite) => {
+        const yPos = sprite.yPosition - 16
 
-    let numSprites = 0
+        let yPosInTile = lineYRegister.value - yPos
+
+        if (sprite.isYFlipped) {
+          yPosInTile = lcdControlRegister.objSize() - 1 - yPosInTile
+        }
+
+        return yPosInTile >= 0 && yPosInTile < lcdControlRegister.objSize()
+      })
+      .slice(0, maxObjectsPerLine)
+      .reverse() // this is to get any elements with the same xPosition as others to the beginning of the array, so we can prioritize it when sorting
+      .sort((a, b) => b.xPosition - a.xPosition)
+
     for (const sprite of sortedSprites) {
-      if (numSprites === maxObjectsPerLine) {
-        break
-      }
-
       // per the docs above, sprite.xPoition is the actual position + 16, sprite.yPosition is the actual position + 8
       // so to get the actual position, subtract either 16 or 8
       const yPos = sprite.yPosition - 16
@@ -194,7 +202,8 @@ export class GPU {
         continue
       }
 
-      const tileIndex = lcdControlRegister.objSize() === 16 ? resetBit(sprite.tileIndex, 7) : sprite.tileIndex
+      // 8x16 tiles do not use the first bit of the tile index, per the docs
+      const tileIndex = lcdControlRegister.objSize() === 16 ? resetBit(sprite.tileIndex, 0) : sprite.tileIndex
 
       const tileBytePosition = tileIndex * 16
       const tileYBytePosition = yPosInTile * 2
@@ -214,7 +223,8 @@ export class GPU {
 
         const paletteIndex = lowerBit + upperBit
 
-        // paletteIndex 0 is always transparent
+        // paletteIndex 0 is always transparent, ignore any pixels that are off screen
+        // otherwise they will wrap around to the right side of the screen
         if (paletteIndex === 0 || (xPos + i) < 0) {
           continue
         }
@@ -230,8 +240,6 @@ export class GPU {
           this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
         }
       }
-
-      numSprites++
     }
   }
 
@@ -247,37 +255,46 @@ export class GPU {
     const paletteColors = this.registers.backgroundPaletteRegister.colors
 
     for (let x = 0; x < GPU.screenWidth; x++) {
-      const scrolledX = (scrollXRegister.value + x) & 0xff
-      const scrolledY = (scrollYRegister.value + lineYRegister.value) & 0xff
-      const tileMapIndex = (Math.floor(scrolledY / 8) * 32 + Math.floor(scrolledX / 8))
+      if (!lcdControlRegister.isBackgroundOn()) {
+        const colorIndex = paletteColors[0]
 
-      const yPosInTile = scrolledY % 8
-      const xPosInTile = scrolledX % 8
+        const color = this.colors[colorIndex]
 
-      const tileBytePosition  = yPosInTile * 2
+        this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+      } else {
+        const scrolledX = (scrollXRegister.value + x) & 0xff
+        const scrolledY = (scrollYRegister.value + lineYRegister.value) & 0xff
+        const tileMapIndex = (Math.floor(scrolledY / 8) * 32 + Math.floor(scrolledX / 8))
 
-      // we need to multiply by 16 since it takes 16 bytes to represent one tile.
-      // you need two bytes to represent one row of a tile. 16 bytes total for all 8 rows.
-      const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
-      const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
+        const yPosInTile = scrolledY % 8
+        const xPosInTile = scrolledX % 8
 
-      const lowerByte = this.memory.readByte(tileLineAddress)
-      const upperByte = this.memory.readByte(tileLineAddress + 1)
+        const tileBytePosition  = yPosInTile * 2
 
-      const bitIndex = 7 - xPosInTile
+        // we need to multiply by 16 since it takes 16 bytes to represent one tile.
+        // you need two bytes to represent one row of a tile. 16 bytes total for all 8 rows.
+        const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
+        const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
 
-      const lowerBit = getBit(lowerByte, bitIndex)
-      const upperBit = getBit(upperByte, bitIndex) << 1
+        const lowerByte = this.memory.readByte(tileLineAddress)
+        const upperByte = this.memory.readByte(tileLineAddress + 1)
 
-      const paletteIndex = lowerBit + upperBit
+        const bitIndex = 7 - xPosInTile
 
-      const colorIndex = paletteColors[paletteIndex]
+        const lowerBit = getBit(lowerByte, bitIndex)
+        const upperBit = getBit(upperByte, bitIndex) << 1
 
-      const color = this.colors[colorIndex]
+        const paletteIndex = lowerBit + upperBit
 
-      this.backgroundPixelsDrawn.push(paletteIndex !== 0)
+        const colorIndex = paletteColors[paletteIndex]
 
-      this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+        const color = this.colors[colorIndex]
+
+        this.backgroundPixelsDrawn.push(paletteIndex !== 0)
+
+        this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+      }
+
     }
   }
 
@@ -296,7 +313,6 @@ export class GPU {
     }
 
     const windowDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
-    const tileMapAddress = lcdControlRegister.windowTileMapArea()
 
     const memoryRead = (address: number) => windowDataAddress === 0x8800 ? this.memory.readSignedByte(address) : this.memory.readByte(address)
 
@@ -309,8 +325,10 @@ export class GPU {
 
     const offset = windowDataAddress === 0x8800 ? 128 : 0
 
+    const tileMapAddress = lcdControlRegister.windowTileMapArea()
 
     while (x < GPU.screenWidth) {
+
       if (x < adjustedWindowX) {
         this.windowPixelsDrawn.push(false)
         x++
