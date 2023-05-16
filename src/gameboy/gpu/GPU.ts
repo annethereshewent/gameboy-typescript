@@ -17,6 +17,39 @@ const CYCLES_IN_VBLANK = 4560
 
 const SCANLINES_PER_FRAME = 144
 
+const COLOR_GRAYSCALE = [
+  // white
+  { red: 255, green: 255, blue: 255 },
+  // light grey
+  { red: 192, green: 192, blue: 192 },
+  // gray
+  { red: 96, green: 96, blue: 96 },
+  // black
+  { red: 0, green: 0, blue: 0 },
+]
+
+const COLOR_INVERTED = [
+  // black
+  { red: 0, green: 0, blue: 0 },
+  // gray
+  { red: 96, green: 96, blue: 96 },
+  // light grey
+  { red: 192, green: 192, blue: 192 },
+  // white
+  { red: 255, green: 255, blue: 255 },
+]
+
+const COLOR_ORIGINAL = [
+  // lightest green
+  { red: 155, green: 188, blue: 15 },
+  // light green
+  { red: 139, green: 172, blue: 15 },
+  // green
+  { red: 48, green: 98, blue: 48 },
+  // dark green
+  { red: 15, green: 56, blue: 15 },
+]
+
 export class GPU {
   static screenWidth = 160
   static screenHeight = 144
@@ -31,38 +64,7 @@ export class GPU {
   internalWindowLineCounter = 0
 
   // color is determined by the palette registers
-  colors = [
-    // white
-    { red: 255, green: 255, blue: 255 },
-    // light grey
-    { red: 192, green: 192, blue: 192 },
-    // gray
-    { red: 96, green: 96, blue: 96 },
-    // black
-    { red: 0, green: 0, blue: 0 },
-  ]
-  // inverted mode
-  // colors = [
-  //   // black
-  //   { red: 0, green: 0, blue: 0 },
-  //   // gray
-  //   { red: 96, green: 96, blue: 96 },
-  //   // light grey
-  //   { red: 192, green: 192, blue: 192 },
-  //   // white
-  //   { red: 255, green: 255, blue: 255 },
-  // ]
-  // original green colors
-  // colors = [
-  //   // lightest green
-  //   { red: 155, green: 188, blue: 15 },
-  //   // light green
-  //   { red: 139, green: 172, blue: 15 },
-  //   // green
-  //   { red: 48, green: 98, blue: 48 },
-  //   // dark green
-  //   { red: 15, green: 56, blue: 15 },
-  // ]
+  colors = COLOR_GRAYSCALE
 
   memory: Memory
   registers: GPURegisters

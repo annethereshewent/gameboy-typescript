@@ -33,8 +33,11 @@ function App() {
     <div className="App">
       <div className="gameboy">
         <input type="file" onChange={handleFileChange} />
+        <label>Toggle logs</label>
+        <input type="checkbox" onChange={(e: React.ChangeEvent<HTMLInputElement>) => Gameboy.shouldOutputLogs = e.target.checked ? true : false} />
+        <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
-        <button type="button" onClick={() => Gameboy.shouldOutputLogs = !Gameboy.shouldOutputLogs}>Toggle logs</button>
+
       </div>
     </div>
   );

@@ -37,15 +37,15 @@ export class Cartridge {
     const romAddress = 0x148
     const sizeCode = this.gameDataView.getUint8(romAddress)
     const sizes = [
-      0x08000,
-      0x010000,
-      0x020000,
-      0x040000,
-      0x080000,
-      0x100000,
-      0x200000,
-      0x400000,
-      0x800000,
+      0x08000, // 32 kb
+      0x010000, // 64 kb
+      0x020000, // 128 kb
+      0x040000, // 256 kb
+      0x080000, // 512 kb
+      0x100000, // 1 mb
+      0x200000, // 2mb
+      0x400000, // 4mb
+      0x800000, // 8mb
     ]
 
     return sizes[sizeCode]
@@ -71,11 +71,10 @@ export class Cartridge {
     const sizes = [
       0,
       -1, // unused
-      0x002000,
-      0x008000,
-      0x032000,
-      0x020000,
-      0x010000,
+      0x002000, // 8 kb
+      0x008000, // 32 kb
+      0x020000, // 128 kb
+      0x010000, // 64 kb
     ]
 
     return sizes[sizeCode]

@@ -4,25 +4,25 @@ import { CartridgeType } from "./CartridgeType"
 import { ReadMethod } from "./ReadMethod"
 import { WriteMethod } from "./WriteMethods"
 
+enum RtcType {
+  Unlatched,
+  Latched
+}
+
 export class Mbc3Cartridge extends Cartridge {
 
 
   constructor(gameDataView: DataView) {
     super(gameDataView)
-
-    console.log(this.ramSize.toString(16))
     // set an interval to update the clock every second
     setInterval(() => {
+      const date = new Date()
 
-      if (!this.clockIsLatched) {
-        const date = new Date()
+      this.secondsRegister[RtcType.Unlatched] = date.getSeconds()
+      this.minutesRegister[RtcType.Unlatched] = date.getMinutes()
+      this.hoursRegister[RtcType.Unlatched] = date.getHours()
 
-        this.secondsRegister = date.getSeconds()
-        this.minutesRegister = date.getMinutes()
-        this.hoursRegister = date.getHours()
-
-        this.lowerDaysRegister = this.getDays()
-      }
+      this.lowerDaysRegister[RtcType.Unlatched] = this.getDays()
     }, 1000)
   }
 
@@ -35,12 +35,15 @@ export class Mbc3Cartridge extends Cartridge {
   romBankNumber = 1
   ramBankNumberOrRtcRegister = 0
 
-  secondsRegister = 0
-  minutesRegister = 0
-  hoursRegister = 0
+  // in the case of the RTC registers, the 0th index are the
+  // normal unlatched values that will continuously count down
+  // the 1st index denotes latched registers
+  secondsRegister = [0, 0]
+  minutesRegister = [0, 0]
+  hoursRegister = [0, 0]
 
-  lowerDaysRegister = 0
-  upperDaysRegister = 0
+  lowerDaysRegister = [0, 0]
+  upperDaysRegister = [0, 0]
 
   latchClockRegister = -1
 
@@ -117,27 +120,24 @@ export class Mbc3Cartridge extends Cartridge {
     if (!this.ramAndTimerEnable) {
       return 0xff
     }
-
-    const maskedAddress = address & 0b1111111111111
-
     if (this.ramBankNumberOrRtcRegister <= 3) {
-      const realAddress = (this.ramBankNumberOrRtcRegister << 13 + maskedAddress)
-
-      console.log(`reading from address 0x${realAddress.toString(16)}`)
+      const maskedAddress = address & 0b1111111111111
+      const realAddress = ((this.ramBankNumberOrRtcRegister << 13) + maskedAddress)
 
       return ramRead(realAddress)
     } else {
+      const registerIndex = this.clockIsLatched ? RtcType.Latched : RtcType.Unlatched
       switch (this.ramBankNumberOrRtcRegister) {
         case 0x8:
-          return this.secondsRegister
+          return this.secondsRegister[registerIndex]
         case 0x9:
-          return this.minutesRegister
+          return this.minutesRegister[registerIndex]
         case 0xa:
-          return this.hoursRegister
+          return this.hoursRegister[registerIndex]
         case 0xb:
-          return this.lowerDaysRegister
+          return this.lowerDaysRegister[registerIndex]
         case 0xc:
-          return this.upperDaysRegister
+          return this.upperDaysRegister[registerIndex]
         default:
           throw new Error("invalid value specified")
       }
@@ -150,6 +150,14 @@ export class Mbc3Cartridge extends Cartridge {
 
   writeWord(address: number, value: number) {
     this._write(address, value, WriteMethod.WRITE_WORD)
+  }
+
+  private copyRTCToLatchedRegisters() {
+    this.secondsRegister[RtcType.Latched] = this.secondsRegister[RtcType.Unlatched]
+    this.minutesRegister[RtcType.Latched] = this.minutesRegister[RtcType.Unlatched]
+    this.hoursRegister[RtcType.Latched] = this.minutesRegister[RtcType.Unlatched]
+    this.lowerDaysRegister[RtcType.Latched] = this.lowerDaysRegister[RtcType.Unlatched]
+    this.upperDaysRegister[RtcType.Latched] = this.upperDaysRegister[RtcType.Unlatched]
   }
 
   private _write(address: number, value: number, writeMethod: WriteMethod) {
@@ -168,6 +176,9 @@ export class Mbc3Cartridge extends Cartridge {
     } else if (this.isLatchClockAddress(address)) {
       if (this.latchClockRegister === 0 && value === 1) {
         this.clockIsLatched = !this.clockIsLatched
+        if (this.clockIsLatched) {
+          this.copyRTCToLatchedRegisters()
+        }
       }
       this.latchClockRegister = value
     } else if (this.isRamOrRtcRegisterAddress(address)) {
@@ -177,35 +188,42 @@ export class Mbc3Cartridge extends Cartridge {
         const realAddress = (this.ramBankNumberOrRtcRegister << 13) + maskedAddress
         sramWrite(realAddress, value)
       } else {
-        this.upperDaysRegister = setBit(this.upperDaysRegister, 6, 1)
-        switch (this.ramBankNumberOrRtcRegister) {
-          case 0x8:
-          this.secondsRegister = value % 60
-          break
-        case 0x9:
-          this.minutesRegister = value % 60
-          break
-        case 0xa:
-          this.hoursRegister = value % 60
-          break
-        case 0xb:
-          const upperBit = getBit(value, 8)
-          this.lowerDaysRegister = value & 0b11111111
-          this.upperDaysRegister = setBit(this.upperDaysRegister, 0, upperBit)
-          if (value > 0x1ff) {
-            // overflow happens
-            this.upperDaysRegister = setBit(this.upperDaysRegister, 7, 1)
-          }
-          break
-        case 0xc:
-          this.upperDaysRegister = value & 0xff
-          break
-        default:
-          throw new Error("invalid value specified")
+        if (!this.clockIsLatched) {
+          this.updateRtcRegister(value)
         }
-        this.upperDaysRegister = setBit(this.upperDaysRegister, 6, 0)
       }
     }
+  }
+
+  private updateRtcRegister(value: number) {
+    const index = RtcType.Unlatched
+    this.upperDaysRegister[index] = setBit(this.upperDaysRegister[index], 6, 1)
+    switch (this.ramBankNumberOrRtcRegister) {
+      case 0x8:
+      this.secondsRegister[index] = value % 60
+      break
+    case 0x9:
+      this.minutesRegister[index] = value % 60
+      break
+    case 0xa:
+      this.hoursRegister[index] = value % 60
+      break
+    case 0xb:
+      const upperBit = getBit(value, 8)
+      this.lowerDaysRegister[index] = value & 0b11111111
+      this.upperDaysRegister[index] = setBit(this.upperDaysRegister[index], 0, upperBit)
+      if (value > 0x1ff) {
+        // overflow happens
+        this.upperDaysRegister[index] = setBit(this.upperDaysRegister[index], 7, 1)
+      }
+    break
+    case 0xc:
+      this.upperDaysRegister[index] = value & 0xff
+      break
+    default:
+      throw new Error("invalid value specified")
+    }
+    this.upperDaysRegister[index] = setBit(this.upperDaysRegister[index], 6, 0)
   }
 
   // read addresses
