@@ -1,10 +1,31 @@
-import { logger } from "../../logging/Logger"
+import { getBit, setBit } from "../misc/BitOperations"
 import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
 import { ReadMethod } from "./ReadMethod"
 import { WriteMethod } from "./WriteMethods"
 
 export class Mbc3Cartridge extends Cartridge {
+
+
+  constructor(gameDataView: DataView) {
+    super(gameDataView)
+
+    console.log(this.ramSize.toString(16))
+    // set an interval to update the clock every second
+    setInterval(() => {
+
+      if (!this.clockIsLatched) {
+        const date = new Date()
+
+        this.secondsRegister = date.getSeconds()
+        this.minutesRegister = date.getMinutes()
+        this.hoursRegister = date.getHours()
+
+        this.lowerDaysRegister = this.getDays()
+      }
+    }, 1000)
+  }
+
   ramBuffer = new ArrayBuffer(this.ramSize)
   ramView = new DataView(this.ramBuffer)
   ramBytes = new Uint8Array(this.ramBuffer)
@@ -12,7 +33,19 @@ export class Mbc3Cartridge extends Cartridge {
   mode = 0
   ramAndTimerEnable = false
   romBankNumber = 1
-  ramBankNumber = 0
+  ramBankNumberOrRtcRegister = 0
+
+  secondsRegister = 0
+  minutesRegister = 0
+  hoursRegister = 0
+
+  lowerDaysRegister = 0
+  upperDaysRegister = 0
+
+  latchClockRegister = -1
+
+  clockIsLatched = false
+
 
   readMethods = [
     (address: number) => this.gameDataView.getUint8(address),
@@ -41,6 +74,11 @@ export class Mbc3Cartridge extends Cartridge {
     }
   ]
 
+  getDays() {
+    const date = new Date()
+    return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000
+  }
+
   stringToSram() {
     return new TextEncoder().encode(localStorage.getItem(this.name) || "")
   }
@@ -54,13 +92,17 @@ export class Mbc3Cartridge extends Cartridge {
     return this._read(address, ReadMethod.READ_BYTE)
   }
 
+  readSignedByte(address: number): number {
+    return this._read(address, ReadMethod.READ_SIGNED_BYTE)
+  }
+
   readWord(address: number) {
     return this._read(address, ReadMethod.READ_WORD)
   }
 
   private _read(address: number, readMethod: ReadMethod): number {
     const read = this.readMethods[readMethod]
-    const ramRead = this.readMethods[readMethod]
+    const ramRead = this.ramReadMethods[readMethod]
 
     if (this.isRomBankZero(address)) {
       return read(address)
@@ -78,12 +120,28 @@ export class Mbc3Cartridge extends Cartridge {
 
     const maskedAddress = address & 0b1111111111111
 
-    if (this.ramBankNumber <= 3) {
-      const realAddress = this.ramBankNumber << 13 + maskedAddress
+    if (this.ramBankNumberOrRtcRegister <= 3) {
+      const realAddress = (this.ramBankNumberOrRtcRegister << 13 + maskedAddress)
+
+      console.log(`reading from address 0x${realAddress.toString(16)}`)
 
       return ramRead(realAddress)
+    } else {
+      switch (this.ramBankNumberOrRtcRegister) {
+        case 0x8:
+          return this.secondsRegister
+        case 0x9:
+          return this.minutesRegister
+        case 0xa:
+          return this.hoursRegister
+        case 0xb:
+          return this.lowerDaysRegister
+        case 0xc:
+          return this.upperDaysRegister
+        default:
+          throw new Error("invalid value specified")
+      }
     }
-    throw new Error("not implemented")
   }
 
   writeByte(address: number, value: number) {
@@ -106,18 +164,46 @@ export class Mbc3Cartridge extends Cartridge {
         this.romBankNumber = 1
       }
     }  else if (this.isRamBankNumberOrRtcRegisterSelect(address)) {
-      this.ramBankNumber = value
+      this.ramBankNumberOrRtcRegister = value
     } else if (this.isLatchClockAddress(address)) {
-      // TODO
-      console.log('not implemented yet!')
+      if (this.latchClockRegister === 0 && value === 1) {
+        this.clockIsLatched = !this.clockIsLatched
+      }
+      this.latchClockRegister = value
     } else if (this.isRamOrRtcRegisterAddress(address)) {
       const maskedAddress = address & 0b1111111111111
 
-      if (this.ramBankNumber <= 3) {
-        const realAddress = (this.ramBankNumber << 13) + maskedAddress
+      if (this.ramBankNumberOrRtcRegister <= 3) {
+        const realAddress = (this.ramBankNumberOrRtcRegister << 13) + maskedAddress
         sramWrite(realAddress, value)
       } else {
-        // TODO
+        this.upperDaysRegister = setBit(this.upperDaysRegister, 6, 1)
+        switch (this.ramBankNumberOrRtcRegister) {
+          case 0x8:
+          this.secondsRegister = value % 60
+          break
+        case 0x9:
+          this.minutesRegister = value % 60
+          break
+        case 0xa:
+          this.hoursRegister = value % 60
+          break
+        case 0xb:
+          const upperBit = getBit(value, 8)
+          this.lowerDaysRegister = value & 0b11111111
+          this.upperDaysRegister = setBit(this.upperDaysRegister, 0, upperBit)
+          if (value > 0x1ff) {
+            // overflow happens
+            this.upperDaysRegister = setBit(this.upperDaysRegister, 7, 1)
+          }
+          break
+        case 0xc:
+          this.upperDaysRegister = value & 0xff
+          break
+        default:
+          throw new Error("invalid value specified")
+        }
+        this.upperDaysRegister = setBit(this.upperDaysRegister, 6, 0)
       }
     }
   }
