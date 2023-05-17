@@ -18,7 +18,7 @@ export class MemoryRegister {
   }
 
   set value(newValue: number) {
-    this.memory.writeByte(this.address, newValue, "MemoryRegister")
+    this.memory.writeByte(this.address, newValue, this.type)
   }
 
   protected setBit(pos: number, bitValue: number) {

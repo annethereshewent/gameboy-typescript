@@ -172,9 +172,6 @@ export class GPU {
   }
 
   drawSpriteLine() {
-    // per docs https://gbdev.io/pandocs/OAM.html, only 10 sprites can be visible per scan line
-    const maxObjectsPerLine = 10
-
     const { lineYRegister, lcdControlRegister } = this.registers
 
     const tileMapStartAddress = 0x8000
@@ -195,13 +192,9 @@ export class GPU {
 
         return yPosInTile >= 0 && yPosInTile < lcdControlRegister.objSize()
       })
-      .slice(0, maxObjectsPerLine)
+      .slice(0, 10) // per docs https://gbdev.io/pandocs/OAM.html, only 10 sprites can be visible per scan line
       .reverse() // this is to get any elements with the same xPosition as others to the beginning of the array, so we can prioritize it when sorting
       .sort((a, b) => b.xPosition - a.xPosition)
-
-    if (Gameboy.shouldOutputLogs && sortedSprites.length > 0) {
-      console.log(sortedSprites)
-    }
 
     for (const sprite of sortedSprites) {
       // per the docs above, sprite.xPoition is the actual position + 16, sprite.yPosition is the actual position + 8
@@ -249,9 +242,7 @@ export class GPU {
         const backgroundVisible = this.backgroundPixelsDrawn[xPos + i]
         const windowVisible = this.windowPixelsDrawn[xPos + i]
 
-        const isPixelBehindBackground = sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible)
-
-        if (!isPixelBehindBackground) {
+        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible))) {
           this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
         }
       }

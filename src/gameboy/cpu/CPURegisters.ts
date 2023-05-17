@@ -73,7 +73,7 @@ export class CPURegisters {
   }
 
   initialize() {
-    this.AF.value = 0x1b0
+    this.AF.value = 0x11b0
     this.BC.value = 0x13
     this.DE.value = 0xd8
     this.HL.value = 0x14d
