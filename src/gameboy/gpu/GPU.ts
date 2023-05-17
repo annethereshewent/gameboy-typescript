@@ -63,6 +63,8 @@ export class GPU {
   cycles = 0
   internalWindowLineCounter = 0
 
+  isGBC = false
+
   // color is determined by the palette registers
   colors = COLOR_GRAYSCALE
 
@@ -137,7 +139,7 @@ export class GPU {
 
           this.registers.lcdStatusRegister.lineYCompareMatching = this.registers.lineYCompareRegister.value === this.registers.lineYRegister.value ? 1 : 0
 
-          if (this.registers.lcdStatusRegister.isLineYCompareMatching() && this.registers.lcdStatusRegister.isLineYCompareMatching()) {
+          if (this.registers.lcdStatusRegister.isLineYCompareMatching() && this.registers.lcdStatusRegister.isLineYMatchingInerruptSelected()) {
             interruptRequestRegister.triggerLcdStatRequest()
           }
 
@@ -158,17 +160,137 @@ export class GPU {
     this.backgroundPixelsDrawn = []
     this.windowPixelsDrawn = []
 
-    // still need to draw a background line (except it's white)
-    // if the LCD control is off for the background
-    this.drawBackgroundLine()
+    if (!this.isGBC) {
+      // still need to draw a background line (except it's white)
+      // if the LCD control is off for the background
+      this.drawBackgroundLine()
 
-    if (lcdControlRegister.isWindowOn()) {
-      this.drawWindowLine()
-    }
+      if (lcdControlRegister.isWindowOn()) {
+        this.drawWindowLine()
+      }
 
-    if (lcdControlRegister.isObjOn()) {
-      this.drawSpriteLine()
+      if (lcdControlRegister.isObjOn()) {
+        this.drawSpriteLine()
+      }
+    } else {
+      if (lcdControlRegister.isBackgroundOn()) {
+        this.drawBackgroundLineGBC()
+      }
+
+      if (lcdControlRegister.isWindowOn()) {
+        this.drawWindowLine()
+      }
+
+      if (lcdControlRegister.isObjOn()) {
+        this.drawSpriteLine()
+      }
     }
+  }
+
+  drawBackgroundLineGBC() {
+    const { lineYRegister, lcdControlRegister, scrollXRegister, scrollYRegister, backgroundPaletteIndexRegister } = this.registers
+    const tileDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
+
+    const offset = tileDataAddress === 0x8800 ? 128 : 0
+
+    const memoryRead = (address: number) => tileDataAddress === 0x8800 ? this.memory.readSignedByte(address) : this.memory.readByte(address)
+
+    for (let x = 0; x < GPU.screenWidth; x++) {
+      const scrolledX = (scrollXRegister.value + x) & 0xff
+      const scrolledY = (scrollYRegister.value + lineYRegister.value) & 0xff
+
+      const tileMapIndex = (Math.floor(scrolledY/8) * 32) + Math.floor(scrolledX/8)
+
+      const xPosInTile = scrolledX % 8
+      let yPosInTile = scrolledY % 8
+
+      const tileBytePosition  = yPosInTile * 2
+
+      this.memory.vramBank = 0
+      const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
+
+      // https://gbdev.io/pandocs/Tile_Maps.html see CGB section for details
+      this.memory.vramBank = 1
+      const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex)
+
+      if (Gameboy.shouldOutputLogs) {
+        console.log(tileByteAttributes)
+      }
+
+      const backgroundPaletteNumber = tileByteAttributes & 0b111
+      const tileVramBankNumber = getBit(tileByteAttributes, 3)
+      const xFlip = getBit(tileByteAttributes, 5)
+      const yFlip = getBit(tileByteAttributes, 6)
+      const bgToOamPriority = getBit(tileByteAttributes, 7)
+
+      const colorsPerPalette = 4
+      const bytesPerColor = 2
+
+      const backgroundPaletteStartAddress = backgroundPaletteNumber * colorsPerPalette * bytesPerColor
+
+      const paletteColors = []
+
+      let i = 0
+      while (paletteColors.length < 4) {
+        backgroundPaletteIndexRegister.paletteAddress = backgroundPaletteStartAddress + i
+
+        const lowerByte = this.memory.readByte(Memory.BgpdRegisterAddress)
+
+        i++
+        backgroundPaletteIndexRegister.paletteAddress = backgroundPaletteStartAddress + i
+
+        const upperByte = this.memory.readByte(Memory.BgpdRegisterAddress)
+
+        // get the RGB values from the upper and lower bytes
+        // example:
+       // 11001111 -> lower byte
+       // 11101011 -> upper byte
+
+       // r would be 01111
+       // g would be 11110
+       // b would be 11101
+
+        const red = lowerByte & 0b11111
+        const green = ((lowerByte >> 5) & 0b111) + (upperByte & 0b11) << 3
+        const blue = (upperByte >> 3) & 0b11111
+
+        paletteColors.push({ red, green, blue })
+
+        i++
+      }
+
+      this.memory.vramBank = tileVramBankNumber
+
+      if (yFlip) {
+        yPosInTile = 8 - yPosInTile
+      }
+
+      const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
+
+      const lowerByte = this.memory.readByte(tileLineAddress)
+      const upperByte = this.memory.readByte(tileLineAddress + 1)
+
+      const bitIndex = xFlip ? xPosInTile : 7 - xPosInTile
+
+      const lowerBit = getBit(lowerByte, bitIndex)
+      const upperBit = getBit(upperByte, bitIndex) << 1
+
+      const paletteIndex = lowerBit + upperBit
+
+      const color = paletteColors[paletteIndex]
+
+      this.backgroundPixelsDrawn.push(paletteIndex !== 0)
+
+      this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+    }
+  }
+
+  drawWindowLineGBC() {
+
+  }
+
+  drawSpriteLineGBC() {
+
   }
 
   drawSpriteLine() {

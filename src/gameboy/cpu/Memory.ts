@@ -1,8 +1,11 @@
+import { Gameboy } from "../Gameboy"
 import { Cartridge } from "../cartridge/Cartridge"
 import { CartridgeType } from "../cartridge/CartridgeType"
 import { Mbc1Cartridge } from "../cartridge/Mbc1Cartridge"
 import { Mbc2Cartridge } from "../cartridge/Mbc2Cartridge"
 import { Mbc3Cartridge } from "../cartridge/Mbc3Cartridge"
+import { BackgroundPaletteIndexRegister } from "../gpu/registers/BackgroundPaletteIndexRegister"
+import { ObjectPaletteIndexRegister } from "../gpu/registers/ObjectPaletteIndexRegister"
 import { joypadRegister } from "./memory_registers/JoypadRegister"
 
 const JOYPAD_REGISTER_ADDRESS = 0xff00
@@ -11,11 +14,35 @@ const DIVIDER_REGISTER_ADDRESS = 0xff04
 
 const CARTRIDGE_TYPE_ADDRESS = 0x147
 
+const BGPD_REGISTER_ADDRESS = 0xff69
+const OBPD_REGISTER_ADDRESS = 0xff6b
+
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
   memoryView = new DataView(this.memoryBuffer)
   memoryBytes = new Uint8Array(this.memoryBuffer)
+
+  static BgpdRegisterAddress = 0xff69
+  static ObpdRegisterAddress = 0xff6b
+
+  backgroundPaletteIndexRegister = new BackgroundPaletteIndexRegister(this)
+  objectPaletteIndexRegister = new ObjectPaletteIndexRegister(this)
+
+  vramBank1Buffer = new ArrayBuffer(0x2000)
+  vramView = new DataView(this.vramBank1Buffer)
+  vramBytes = new Uint8Array(this.vramBank1Buffer)
+
+  backgroundPaletteRam = new ArrayBuffer(0x40)
+  backgroundPaletteView = new DataView(this.backgroundPaletteRam)
+  backgroundPaletteBytes = new Uint8Array(this.backgroundPaletteRam)
+
+  objectPaletteRam = new ArrayBuffer(0x40)
+  objectPaletteView = new DataView(this.objectPaletteRam)
+  objectPaletteBytes = new Uint8Array(this.objectPaletteRam)
+
   cartridge?: Cartridge
+
+  isGBC?: boolean
 
   loadCartridge(gameDataView: DataView) {
     const cartridgeType = gameDataView.getUint8(CARTRIDGE_TYPE_ADDRESS) as CartridgeType
@@ -43,6 +70,10 @@ export class Memory {
       default:
         throw new Error(`Cartridge type not supported: ${cartridgeType}`)
     }
+
+    this.isGBC = this.cartridge.isGameboyColor()
+
+    return this.isGBC
   }
 
   reset() {
@@ -56,11 +87,28 @@ export class Memory {
     if (this.isAccessingCartridge(address)) {
       return this.cartridge.readByte(address)
     }
+    if (address === Memory.BgpdRegisterAddress) {
+      return this.backgroundPaletteView.getUint8(this.backgroundPaletteIndexRegister.paletteAddress)
+    }
+    if (address === Memory.ObpdRegisterAddress) {
+      return this.objectPaletteView.getUint8(this.objectPaletteIndexRegister.paletteAddress)
+    }
     if (address === JOYPAD_REGISTER_ADDRESS) {
       return joypadRegister.getInput()
     }
+    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+      return this.vramView.getUint8(address - 0x8000)
+    }
 
     return this.memoryView.getUint8(address)
+  }
+
+  get vramBank() {
+    return this.memoryView.getUint8(0xff4f) & 0b1
+  }
+
+  set vramBank(newVal) {
+    this.memoryView.setUint8(0xff4f, newVal)
   }
 
   readSignedByte(address: number): number {
@@ -80,6 +128,10 @@ export class Memory {
     if (this.isAccessingCartridge(address)) {
       return this.cartridge.readWord(address)
     }
+    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+      return this.vramView.getUint16(address - 0x8000, true)
+    }
+
     return this.memoryView.getUint16(address, true)
   }
 
@@ -98,6 +150,30 @@ export class Memory {
       return
     }
 
+    if (address === Memory.BgpdRegisterAddress) {
+      this.backgroundPaletteView.setUint8(this.backgroundPaletteIndexRegister.paletteAddress, value)
+      if (this.backgroundPaletteIndexRegister.autoIncrement) {
+        this.backgroundPaletteIndexRegister.paletteAddress++
+        if (Gameboy.shouldOutputLogs) {
+          console.log(`auto incrementing palette address to ${this.backgroundPaletteIndexRegister.paletteAddress.toString(16)}`)
+        }
+      }
+      return
+    }
+
+    if (address === Memory.ObpdRegisterAddress) {
+      this.objectPaletteView.setUint8(this.objectPaletteIndexRegister.paletteAddress, value)
+      if (this.objectPaletteIndexRegister.autoIncrement) {
+        this.objectPaletteIndexRegister.paletteAddress++
+      }
+      return
+    }
+
+    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+      this.vramView.setUint8(address - 0x8000, value)
+      return
+    }
+
     this.memoryView.setUint8(address, value)
 
     if (address === DMA_TRANSFER_ADDRESS) {
@@ -110,11 +186,19 @@ export class Memory {
       this.cartridge?.writeWord(address, value)
       return
     }
+    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+      this.vramView.setUint16(address - 0x8000, value, true)
+      return
+    }
     this.memoryView.setUint16(address, value, true)
   }
 
   isAccessingCartridge(address: number): boolean {
     return address <= 0x7FFF || (address >= 0xA000 && address <= 0xBFFF)
+  }
+
+  isVram(address: number): boolean {
+    return address >= 0x8000 && address <= 0x9fff
   }
 
   // see http://www.codeslinger.co.uk/pages/projects/gameboy/dma.html

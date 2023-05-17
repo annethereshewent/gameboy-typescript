@@ -20,13 +20,12 @@ export class Gameboy {
   previousTime = 0
   static frames = 0
 
-  // only output the last logs of execution.
-  // otherwise, logs get polluted with too much data
-  // to sift through
   static shouldOutputLogs = false
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
-    this.cpu.loadCartridge(arrayBuffer)
+    const isGBC = this.cpu.loadCartridge(arrayBuffer)
+
+    this.gpu.isGBC = isGBC
   }
 
   run() {

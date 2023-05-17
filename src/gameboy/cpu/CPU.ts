@@ -39,8 +39,10 @@ export class CPU {
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
     const gameDataView = new DataView(arrayBuffer)
-    this.memory.loadCartridge(gameDataView)
+    const isGBC = this.memory.loadCartridge(gameDataView)
     this.initialize()
+
+    return isGBC
   }
 
   initialize() {
@@ -153,9 +155,9 @@ export class CPU {
         const previousAddress = this.registers.PC.hexValue
 
         this.registers.PC.value++
-        if (Gameboy.shouldOutputLogs) {
-          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
-        }
+        // if (Gameboy.shouldOutputLogs) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
+        // }
 
         instruction.operation()
 
@@ -171,9 +173,9 @@ export class CPU {
           const previousAddress = this.registers.PC.hexValue
           this.registers.PC.value++
 
-          if (Gameboy.shouldOutputLogs) {
-            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
-          }
+          // if (Gameboy.shouldOutputLogs) {
+          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
+          // }
 
           cbInstruction.operation()
 
