@@ -1,9 +1,19 @@
 export class SramSaver {
-  saveFile(name: string, sram: Uint8Array) {
+  static saveFile(name: string, sram: Uint8Array) {
+    const jsonArray = Array.from(sram)
 
+    localStorage.setItem(`${name}.sav`, JSON.stringify(jsonArray))
   }
 
-  loadFile(name: string) {
+  static loadFile(name: string): Uint8Array|null {
+    const json = localStorage.getItem(`${name}.sav`)
 
+    if (json != null) {
+      const jsonArray = JSON.parse(json)
+
+      return new Uint8Array(jsonArray)
+    }
+
+    return null
   }
 }

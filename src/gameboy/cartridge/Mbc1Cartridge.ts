@@ -1,3 +1,4 @@
+import { SramSaver } from "../misc/SramSaver"
 import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
 import { ReadMethod } from "./ReadMethod"
@@ -11,9 +12,10 @@ export class Mbc1Cartridge extends Cartridge {
     super(gameDataView)
 
     if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
-      const ramBytes: Uint8Array = this.stringToSram()
+      const ramBytes: Uint8Array|null = SramSaver.loadFile(this.name)
 
-      if (ramBytes.length === this.ramSize) {
+      if (ramBytes?.length === this.ramSize) {
+        this.ramBuffer = ramBytes.buffer
         this.ramBytes = ramBytes
         this.ramView = new DataView(ramBytes.buffer)
       }
@@ -45,24 +47,16 @@ export class Mbc1Cartridge extends Cartridge {
     (address: number, value: number) => {
       this.ramView.setUint8(address, value)
       if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
-        localStorage.setItem(this.name, this.sramToString())
+        SramSaver.saveFile(this.name, this.ramBytes)
       }
     },
     (address: number, value: number) => {
       this.ramView.setUint16(address, value, true)
       if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
-        localStorage.setItem(this.name, this.sramToString())
+        SramSaver.saveFile(this.name, this.ramBytes)
       }
     }
   ]
-
-  stringToSram() {
-    return new TextEncoder().encode(atob(localStorage.getItem(this.name) || ""))
-  }
-
-  sramToString() {
-    return  btoa(new TextDecoder().decode(this.ramBytes))
-  }
 
   resetRam() {
     this.ramBytes.fill(0, 0, this.ramBytes.length - 1)

@@ -1,4 +1,5 @@
 import { getBit, setBit } from "../misc/BitOperations"
+import { SramSaver } from "../misc/SramSaver"
 import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
 import { ReadMethod } from "./ReadMethod"
@@ -10,20 +11,22 @@ enum RtcType {
 }
 
 export class Mbc3Cartridge extends Cartridge {
-
-
   constructor(gameDataView: DataView) {
     super(gameDataView)
-    // set an interval to update the clock every second
-    setInterval(() => {
-      const date = new Date()
+    const ramBytes = SramSaver.loadFile(this.name)
 
-      this.secondsRegister[RtcType.Unlatched] = date.getSeconds()
-      this.minutesRegister[RtcType.Unlatched] = date.getMinutes()
-      this.hoursRegister[RtcType.Unlatched] = date.getHours()
+    if (ramBytes?.length === this.ramSize) {
+      this.ramBuffer = ramBytes.buffer
+      this.ramView = new DataView(ramBytes.buffer)
+      this.ramBytes = ramBytes
+    }
 
-      this.lowerDaysRegister[RtcType.Unlatched] = this.getDays()
-    }, 1000)
+    if (this.type === CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY) {
+      this.updateClock()
+      setInterval(() => {
+        this.updateClock()
+      }, 1000)
+    }
   }
 
   ramBuffer = new ArrayBuffer(this.ramSize)
@@ -34,6 +37,8 @@ export class Mbc3Cartridge extends Cartridge {
   ramAndTimerEnable = false
   romBankNumber = 1
   ramBankNumberOrRtcRegister = 0
+
+  sramTimeout: ReturnType<typeof setTimeout>|null = null
 
   // in the case of the RTC registers, the 0th index are the
   // normal unlatched values that will continuously count down
@@ -65,31 +70,46 @@ export class Mbc3Cartridge extends Cartridge {
   ramWriteMethods = [
     (address: number, value: number) => {
       this.ramView.setUint8(address, value)
-      if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY].includes(this.type)) {
-        localStorage.setItem(this.name, this.sramToString())
+      if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY].includes(this.type)) {
+        if (this.sramTimeout != null) {
+          clearTimeout(this.sramTimeout)
+        }
+
+        this.sramTimeout = setTimeout(() => {
+          SramSaver.saveFile(this.name, this.ramBytes)
+        }, 1000)
+
       }
     },
     (address: number, value: number) => {
       this.ramView.setUint16(address, value, true)
-      if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY].includes(this.type)) {
-        localStorage.setItem(this.name, this.sramToString())
+      if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY].includes(this.type)) {
+        if (this.sramTimeout != null) {
+          clearTimeout(this.sramTimeout)
+        }
+
+        this.sramTimeout = setTimeout(() => {
+          SramSaver.saveFile(this.name, this.ramBytes)
+        }, 1000)
       }
     }
   ]
+
+  updateClock() {
+    const date = new Date()
+
+    this.secondsRegister[RtcType.Unlatched] = date.getSeconds()
+    this.minutesRegister[RtcType.Unlatched] = date.getMinutes()
+    this.hoursRegister[RtcType.Unlatched] = date.getHours()
+
+    this.lowerDaysRegister[RtcType.Unlatched] = this.getDays()
+    this.upperDaysRegister[RtcType.Unlatched] = 0
+  }
 
   getDays() {
     const date = new Date()
     return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000
   }
-
-  stringToSram() {
-    return new TextEncoder().encode(localStorage.getItem(this.name) || "")
-  }
-
-  sramToString() {
-    return new TextDecoder().decode(this.ramBytes)
-  }
-
 
   readByte(address: number): number {
     return this._read(address, ReadMethod.READ_BYTE)
@@ -126,21 +146,7 @@ export class Mbc3Cartridge extends Cartridge {
 
       return ramRead(realAddress)
     } else {
-      const registerIndex = this.clockIsLatched ? RtcType.Latched : RtcType.Unlatched
-      switch (this.ramBankNumberOrRtcRegister) {
-        case 0x8:
-          return this.secondsRegister[registerIndex]
-        case 0x9:
-          return this.minutesRegister[registerIndex]
-        case 0xa:
-          return this.hoursRegister[registerIndex]
-        case 0xb:
-          return this.lowerDaysRegister[registerIndex]
-        case 0xc:
-          return this.upperDaysRegister[registerIndex]
-        default:
-          throw new Error("invalid value specified")
-      }
+      return this.readFromRtcRegister()
     }
   }
 
@@ -192,6 +198,24 @@ export class Mbc3Cartridge extends Cartridge {
           this.updateRtcRegister(value)
         }
       }
+    }
+  }
+
+  readFromRtcRegister() {
+    const registerIndex = RtcType.Unlatched
+    switch (this.ramBankNumberOrRtcRegister) {
+      case 0x8:
+        return this.secondsRegister[registerIndex]
+      case 0x9:
+        return this.minutesRegister[registerIndex]
+      case 0xa:
+        return this.hoursRegister[registerIndex]
+      case 0xb:
+        return this.lowerDaysRegister[registerIndex]
+      case 0xc:
+        return this.upperDaysRegister[registerIndex]
+      default:
+        throw new Error("invalid value specified")
     }
   }
 
