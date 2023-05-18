@@ -206,8 +206,6 @@ export class GPU {
       const xPosInTile = scrolledX % 8
       let yPosInTile = scrolledY % 8
 
-      const tileBytePosition  = yPosInTile * 2
-
       this.memory.vramBank = 0
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
 
@@ -234,6 +232,8 @@ export class GPU {
       if (yFlip) {
         yPosInTile = 8 - yPosInTile
       }
+
+      const tileBytePosition  = yPosInTile * 2
 
       const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
 
@@ -294,10 +294,6 @@ export class GPU {
 
       const tileMapIndex = (Math.floor(xPos / 8)) + (Math.floor(yPos / 8) * 32)
 
-      const yPosInTile = yPos % 8
-
-      // 2 bytes are needed to represent one line in a tile
-      const tileBytePosition = yPosInTile * 2
 
       const tileByteIndex = memoryRead(tileMapAddress + tileMapIndex) + offset
 
@@ -308,6 +304,15 @@ export class GPU {
       const xFlip = getBit(tileByteAttributes, 5)
       const yFlip = getBit(tileByteAttributes, 6)
       const bgToOamPriority = getBit(tileByteAttributes, 7)
+
+      let yPosInTile = yPos % 8
+
+      if (yFlip) {
+        yPosInTile = 8 - yPosInTile
+      }
+
+      // 2 bytes are needed to represent one line in a tile
+      const tileBytePosition = yPosInTile * 2
 
       const colorsPerPalette = 4
       const bytesPerColor = 2
@@ -325,8 +330,9 @@ export class GPU {
       const upperByte = this.memory.readByte(tileLineAddress + 1)
 
       for (let i = 7; i >= 0; i--) {
-        const lowerBit = getBit(lowerByte, i)
-        const upperBit = getBit(upperByte, i) << 1
+        const bitPos = xFlip ? 7 - i : i
+        const lowerBit = getBit(lowerByte, bitPos)
+        const upperBit = getBit(upperByte, bitPos) << 1
 
         const paletteIndex = lowerBit + upperBit
         const color = paletteColors[paletteIndex]
