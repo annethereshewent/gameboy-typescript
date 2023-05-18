@@ -349,7 +349,6 @@ export class GPU {
   getPaletteColors(paletteStartAddress: number, pdAddress: number, register: ObjectPaletteIndexRegister|BackgroundPaletteIndexRegister, ) {
     const paletteColors = []
 
-    // todo: add this to its own method
     let i = 0
     while (paletteColors.length < 4) {
       register.paletteAddress = paletteStartAddress + i
@@ -391,6 +390,9 @@ export class GPU {
     const tileMapStartAddress = 0x8000
 
     const maxNumberSprites = 10
+
+    if (Gameboy.shouldOutputLogs)
+      console.log(this.oamTable.entries.slice(0,10).map(sprite => sprite.xPosition.toString(16)))
 
     let numSprites = 0
     for (const sprite of this.oamTable.entries) {
