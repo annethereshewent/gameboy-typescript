@@ -179,9 +179,7 @@ export class GPU {
     } else {
       this.backgroundPixelPriorities = []
 
-      if (lcdControlRegister.isBackgroundOn()) {
-        this.drawBackgroundLineGBC()
-      }
+      this.drawBackgroundLineGBC()
 
       if (lcdControlRegister.isWindowOn()) {
         this.drawWindowLineGBC()
@@ -202,6 +200,7 @@ export class GPU {
     const memoryRead = (address: number) => tileDataAddress === 0x8800 ? this.memory.readSignedByte(address) : this.memory.readByte(address)
 
     for (let x = 0; x < GPU.screenWidth; x++) {
+      this.memory.vramBank = 0
       const scrolledX = (scrollXRegister.value + x) & 0xff
       const scrolledY = (scrollYRegister.value + lineYRegister.value) & 0xff
 
@@ -210,7 +209,6 @@ export class GPU {
       const xPosInTile = scrolledX % 8
       let yPosInTile = scrolledY % 8
 
-      this.memory.vramBank = 0
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
 
       // https://gbdev.io/pandocs/Tile_Maps.html see CGB section for details
@@ -386,6 +384,7 @@ export class GPU {
       red = (red << 3) | (red >> 2)
       green = (green << 3) | (green >> 2)
       blue = (blue << 3) | (blue >> 2)
+
       paletteColors.push({ red, green, blue })
 
       i++
@@ -406,6 +405,7 @@ export class GPU {
     const spritePixelsDrawn: boolean[] = []
 
     for (const sprite of this.oamTable.entries) {
+      this.memory.vramBank = 0
       if (numSprites === maxNumberSprites) {
         break
       }
@@ -429,9 +429,12 @@ export class GPU {
 
       const tileAddress = tileBytePosition + tileYBytePosition + tileMapStartAddress
 
-      const spritePaletteStartAddress = sprite.cgbPaletteNumber
+      const spritePaletteNumber = sprite.cgbPaletteNumber
 
-      this.memory.vramBank = 0
+      const colorsPerPalette = 4
+      const bytesPerColor = 2
+
+      const spritePaletteStartAddress = spritePaletteNumber * colorsPerPalette * bytesPerColor
 
       const paletteColors = this.getPaletteColors(spritePaletteStartAddress, Memory.ObpdRegisterAddress, objectPaletteIndexRegister)
 

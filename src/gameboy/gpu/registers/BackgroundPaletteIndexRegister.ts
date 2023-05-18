@@ -11,7 +11,7 @@ export class BackgroundPaletteIndexRegister extends MemoryRegister {
 
   set paletteAddress(newVal: number) {
     const paletteAddress = newVal & 0b111111
-    const actualWrite = (this.getBit(7) << 7) + paletteAddress
+    const actualWrite = (this.getBit(7) << 7) | paletteAddress
 
     this.memory.writeByte(this.address, actualWrite)
   }

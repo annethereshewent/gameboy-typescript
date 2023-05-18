@@ -83,6 +83,9 @@ export class Memory {
 
   reset() {
     this.memoryBytes.fill(0, 0, this.memoryBytes.length - 1)
+    this.vramBytes.fill(0, 0, this.vramBytes.length - 1)
+    this.backgroundPaletteBytes.fill(0, 0, this.backgroundPaletteBytes.length - 1)
+    this.objectPaletteBytes.fill(0, 0, this.objectPaletteBytes.length - 1)
   }
 
   readByte(address: number): number {
