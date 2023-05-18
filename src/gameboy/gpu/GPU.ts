@@ -180,7 +180,7 @@ export class GPU {
       }
 
       if (lcdControlRegister.isWindowOn()) {
-        this.drawWindowLine()
+        this.drawWindowLineGBC()
       }
 
       if (lcdControlRegister.isObjOn()) {
@@ -256,7 +256,86 @@ export class GPU {
   }
 
   drawWindowLineGBC() {
+    const {
+      lineYRegister,
+      lcdControlRegister,
+      windowXRegister,
+      windowYRegister,
+      backgroundPaletteIndexRegister
+    } = this.registers
 
+    // no need to render anything if we're not at a line where the window starts or window is off screen
+    if (lineYRegister.value < windowYRegister.value || windowXRegister.value > GPU.screenWidth + 7) {
+      return
+    }
+
+    const windowDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
+
+    const memoryRead = (address: number) => windowDataAddress === 0x8800 ? this.memory.readSignedByte(address) : this.memory.readByte(address)
+
+    let x = 0
+
+    // per gameboy docs, windowXRegister value always starts at 7, so we want to adjust for that
+    let adjustedWindowX = windowXRegister.value - 7
+
+    const offset = windowDataAddress === 0x8800 ? 128 : 0
+
+    const tileMapAddress = lcdControlRegister.windowTileMapArea()
+
+    const yPos = this.internalWindowLineCounter
+    while (x < GPU.screenWidth) {
+
+      if (x < adjustedWindowX) {
+        this.windowPixelsDrawn.push(false)
+        x++
+        continue
+      }
+      const xPos = x - adjustedWindowX
+
+      const tileMapIndex = (Math.floor(xPos / 8)) + (Math.floor(yPos / 8) * 32)
+
+      const yPosInTile = yPos % 8
+
+      // 2 bytes are needed to represent one line in a tile
+      const tileBytePosition = yPosInTile * 2
+
+      const tileByteIndex = memoryRead(tileMapAddress + tileMapIndex) + offset
+
+      const tileByteAttributes = this.memory.readByte(tileMapAddress + tileMapIndex)
+
+      const backgroundPaletteNumber = tileByteAttributes & 0b111
+      const tileVramBankNumber = getBit(tileByteAttributes, 3)
+      const xFlip = getBit(tileByteAttributes, 5)
+      const yFlip = getBit(tileByteAttributes, 6)
+      const bgToOamPriority = getBit(tileByteAttributes, 7)
+
+      const colorsPerPalette = 4
+      const bytesPerColor = 2
+
+      const backgroundPaletteStartAddress = backgroundPaletteNumber * colorsPerPalette * bytesPerColor
+
+      const paletteColors = this.getPaletteColors(backgroundPaletteStartAddress, Memory.BgpdRegisterAddress, backgroundPaletteIndexRegister)
+
+      // 2 bytes are needed to represent one line in a tile, 8 lines total means 16 bytes to represent one tile.
+      const tileLineAddress = windowDataAddress + (tileByteIndex * 16) + tileBytePosition
+
+      const lowerByte = this.memory.readByte(tileLineAddress)
+      const upperByte = this.memory.readByte(tileLineAddress + 1)
+
+      for (let i = 7; i >= 0; i--) {
+        const lowerBit = getBit(lowerByte, i)
+        const upperBit = getBit(upperByte, i) << 1
+
+        const paletteIndex = lowerBit + upperBit
+        const color = paletteColors[paletteIndex]
+
+        this.windowPixelsDrawn.push(paletteIndex !== 0)
+
+        this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
+        x++
+      }
+    }
+    this.internalWindowLineCounter++
   }
 
   getPaletteColors(paletteStartAddress: number, pdAddress: number, register: ObjectPaletteIndexRegister|BackgroundPaletteIndexRegister, ) {
@@ -331,7 +410,12 @@ export class GPU {
       const tileAddress = tileBytePosition + tileYBytePosition + tileMapStartAddress
 
       const spritePaletteStartAddress = sprite.cgbPaletteNumber
+
+      this.memory.vramBank = 0
+
       const paletteColors = this.getPaletteColors(spritePaletteStartAddress, Memory.ObpdRegisterAddress, objectPaletteIndexRegister)
+
+      this.memory.vramBank = sprite.tileVramBankNumber
 
       const lowerByte = this.memory.readByte(tileAddress)
       const upperByte = this.memory.readByte(tileAddress+1)
