@@ -2,8 +2,10 @@ import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { getBit, resetBit } from "../misc/BitOperations"
+import { BackgroundPaletteIndexRegister } from "./registers/BackgroundPaletteIndexRegister"
 import { GPURegisters } from "./registers/GPURegisters"
 import { OAMTable } from "./registers/OAMTable"
+import { ObjectPaletteIndexRegister } from "./registers/ObjectPaletteIndexRegister"
 import { LCDMode } from "./registers/lcd_status/LCDMode"
 
 
@@ -182,7 +184,7 @@ export class GPU {
       }
 
       if (lcdControlRegister.isObjOn()) {
-        this.drawSpriteLine()
+        this.drawSpriteLineGBC()
       }
     }
   }
@@ -211,11 +213,8 @@ export class GPU {
 
       // https://gbdev.io/pandocs/Tile_Maps.html see CGB section for details
       this.memory.vramBank = 1
-      const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex)
 
-      if (Gameboy.shouldOutputLogs) {
-        console.log(tileByteAttributes)
-      }
+      const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex)
 
       const backgroundPaletteNumber = tileByteAttributes & 0b111
       const tileVramBankNumber = getBit(tileByteAttributes, 3)
@@ -228,35 +227,10 @@ export class GPU {
 
       const backgroundPaletteStartAddress = backgroundPaletteNumber * colorsPerPalette * bytesPerColor
 
-      const paletteColors = []
+      const paletteColors = this.getPaletteColors(backgroundPaletteStartAddress, Memory.BgpdRegisterAddress, backgroundPaletteIndexRegister)
 
-      let i = 0
-      while (paletteColors.length < 4) {
-        backgroundPaletteIndexRegister.paletteAddress = backgroundPaletteStartAddress + i
-
-        const lowerByte = this.memory.readByte(Memory.BgpdRegisterAddress)
-
-        i++
-        backgroundPaletteIndexRegister.paletteAddress = backgroundPaletteStartAddress + i
-
-        const upperByte = this.memory.readByte(Memory.BgpdRegisterAddress)
-
-        // get the RGB values from the upper and lower bytes
-        // example:
-       // 11001111 -> lower byte
-       // 11101011 -> upper byte
-
-       // r would be 01111
-       // g would be 11110
-       // b would be 11101
-
-        const red = lowerByte & 0b11111
-        const green = ((lowerByte >> 5) & 0b111) + (upperByte & 0b11) << 3
-        const blue = (upperByte >> 3) & 0b11111
-
-        paletteColors.push({ red, green, blue })
-
-        i++
+      if (Gameboy.shouldOutputLogs) {
+        console.log(paletteColors)
       }
 
       this.memory.vramBank = tileVramBankNumber
@@ -289,8 +263,114 @@ export class GPU {
 
   }
 
-  drawSpriteLineGBC() {
+  getPaletteColors(paletteStartAddress: number, pdAddress: number, register: ObjectPaletteIndexRegister|BackgroundPaletteIndexRegister, ) {
+    const paletteColors = []
 
+    // todo: add this to its own method
+    let i = 0
+    while (paletteColors.length < 4) {
+      register.paletteAddress = paletteStartAddress + i
+
+      const lowerByte = this.memory.readByte(pdAddress)
+
+      i++
+      register.paletteAddress = paletteStartAddress + i
+
+      const upperByte = this.memory.readByte(pdAddress)
+
+      // get the RGB values from the upper and lower bytes
+      // example:
+      // 11001111 -> lower byte
+      // 11101011 -> upper byte
+
+      // r would be 01111
+      // g would be 11110
+      // b would be 11101
+
+      let red = lowerByte & 0b11111
+      let green = ((lowerByte >> 5) & 0b111) + (upperByte & 0b11) << 3
+      let blue = (upperByte >> 2) & 0b11111
+
+      const redUpperBits = red >> 2
+      const greenUpperBits = green >> 2
+      const blueUpperBits = blue >> 2
+
+      red = (red << 3) + redUpperBits
+      green = (green << 3) + greenUpperBits
+      blue = (blue << 3) + blueUpperBits
+
+      paletteColors.push({ red, green, blue })
+
+      i++
+    }
+
+    return paletteColors
+  }
+
+  drawSpriteLineGBC() {
+    const { lineYRegister, lcdControlRegister, objectPaletteIndexRegister } = this.registers
+
+    const tileMapStartAddress = 0x8000
+
+    const maxNumberSprites = 10
+
+    let numSprites = 0
+    for (const sprite of this.oamTable.entries) {
+      if (numSprites === maxNumberSprites) {
+        break
+      }
+      const yPos = sprite.yPosition - 16
+      const xPos = sprite.xPosition - 8
+
+      let yPosInTile = lineYRegister.value - yPos
+
+      if (sprite.isYFlipped) {
+        yPosInTile = lcdControlRegister.objSize() - 1 - yPosInTile
+      }
+
+      if (yPosInTile < 0 || yPosInTile >= lcdControlRegister.objSize()) {
+        continue
+      }
+
+      const tileIndex = lcdControlRegister.objSize() === 16 ? resetBit(sprite.tileIndex, 0) : sprite.tileIndex
+
+      const tileBytePosition = tileIndex * 16
+      const tileYBytePosition = yPosInTile * 2
+
+      const tileAddress = tileBytePosition + tileYBytePosition + tileMapStartAddress
+
+      const spritePaletteStartAddress = sprite.cgbPaletteNumber
+      const paletteColors = this.getPaletteColors(spritePaletteStartAddress, Memory.ObpdRegisterAddress, objectPaletteIndexRegister)
+
+      const lowerByte = this.memory.readByte(tileAddress)
+      const upperByte = this.memory.readByte(tileAddress+1)
+
+      for (let i = 0; i < 8; i++) {
+        const bitPos = sprite.isXFlipped ? i : 7 - i
+
+        const lowerBit = getBit(lowerByte, bitPos)
+        const upperBit = getBit(upperByte, bitPos) << 1
+
+        const paletteIndex = lowerBit + upperBit
+
+        // paletteIndex 0 is always transparent; ignore any pixels that are off screen
+        // otherwise they will wrap around to the right side of the screen
+        if (paletteIndex === 0 || (xPos + i) < 0) {
+          continue
+        }
+
+        const color = paletteColors[paletteIndex]
+
+        const backgroundVisible = this.backgroundPixelsDrawn[xPos + i]
+        const windowVisible = this.windowPixelsDrawn[xPos + i]
+
+        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible))) {
+          this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
+        }
+      }
+
+      numSprites++
+    }
   }
 
   drawSpriteLine() {

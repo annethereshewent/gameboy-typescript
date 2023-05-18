@@ -5,6 +5,7 @@ import { LCDControlRegister } from "./LCDControlRegister"
 import { ObjectPaletteRegister } from "./ObjectPaletteRegister"
 import { LCDStatusRegister } from "./lcd_status/LCDStatusRegister"
 import { BackgroundPaletteIndexRegister } from "./BackgroundPaletteIndexRegister"
+import { ObjectPaletteIndexRegister } from "./ObjectPaletteIndexRegister"
 
 export class GPURegisters {
   memory: Memory
@@ -22,6 +23,7 @@ export class GPURegisters {
   objectPaletteRegister1: ObjectPaletteRegister
 
   backgroundPaletteIndexRegister: BackgroundPaletteIndexRegister
+  objectPaletteIndexRegister: ObjectPaletteIndexRegister
 
   constructor(memory: Memory) {
     this.memory = memory
@@ -38,6 +40,7 @@ export class GPURegisters {
     this.objectPaletteRegister0 = new ObjectPaletteRegister(0xff48, memory, "objetPaletteRegister0")
     this.objectPaletteRegister1 = new ObjectPaletteRegister(0xff49, memory, "objectPaletteRegister1")
     this.backgroundPaletteIndexRegister = new BackgroundPaletteIndexRegister(memory)
+    this.objectPaletteIndexRegister = new ObjectPaletteIndexRegister(memory)
 
     // default value according to docs
     this.lcdControlRegister.value = 0x83

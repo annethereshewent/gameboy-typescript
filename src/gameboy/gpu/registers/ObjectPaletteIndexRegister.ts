@@ -10,7 +10,10 @@ export class ObjectPaletteIndexRegister extends MemoryRegister {
   }
 
   set paletteAddress(newVal: number) {
-    this.memory.writeByte(this.address, newVal)
+    const paletteAddress = newVal & 0b111111
+    const actualWrite = (this.getBit(7) << 7) + paletteAddress
+
+    this.memory.writeByte(this.address, actualWrite)
   }
 
   get autoIncrement() {

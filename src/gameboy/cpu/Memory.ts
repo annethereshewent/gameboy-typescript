@@ -6,6 +6,7 @@ import { Mbc2Cartridge } from "../cartridge/Mbc2Cartridge"
 import { Mbc3Cartridge } from "../cartridge/Mbc3Cartridge"
 import { BackgroundPaletteIndexRegister } from "../gpu/registers/BackgroundPaletteIndexRegister"
 import { ObjectPaletteIndexRegister } from "../gpu/registers/ObjectPaletteIndexRegister"
+import { getBit } from "../misc/BitOperations"
 import { joypadRegister } from "./memory_registers/JoypadRegister"
 
 const JOYPAD_REGISTER_ADDRESS = 0xff00
@@ -14,8 +15,12 @@ const DIVIDER_REGISTER_ADDRESS = 0xff04
 
 const CARTRIDGE_TYPE_ADDRESS = 0x147
 
-const BGPD_REGISTER_ADDRESS = 0xff69
-const OBPD_REGISTER_ADDRESS = 0xff6b
+const HDMA_TRANSFER_ADDRESS = 0xff55
+
+enum TransferType {
+  GeneralPurpose,
+  Hblank
+}
 
 export class Memory {
   memoryBuffer = new ArrayBuffer(0x10000)
@@ -96,7 +101,7 @@ export class Memory {
     if (address === JOYPAD_REGISTER_ADDRESS) {
       return joypadRegister.getInput()
     }
-    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+    if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getUint8(address - 0x8000)
     }
 
@@ -128,7 +133,7 @@ export class Memory {
     if (this.isAccessingCartridge(address)) {
       return this.cartridge.readWord(address)
     }
-    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+    if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getUint16(address - 0x8000, true)
     }
 
@@ -154,9 +159,6 @@ export class Memory {
       this.backgroundPaletteView.setUint8(this.backgroundPaletteIndexRegister.paletteAddress, value)
       if (this.backgroundPaletteIndexRegister.autoIncrement) {
         this.backgroundPaletteIndexRegister.paletteAddress++
-        if (Gameboy.shouldOutputLogs) {
-          console.log(`auto incrementing palette address to ${this.backgroundPaletteIndexRegister.paletteAddress.toString(16)}`)
-        }
       }
       return
     }
@@ -169,7 +171,7 @@ export class Memory {
       return
     }
 
-    if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
+    if (this.isVram(address) && this.vramBank === 1) {
       this.vramView.setUint8(address - 0x8000, value)
       return
     }
@@ -178,6 +180,9 @@ export class Memory {
 
     if (address === DMA_TRANSFER_ADDRESS) {
       this.doDmaTransfer(value)
+    }
+    if (address === HDMA_TRANSFER_ADDRESS) {
+      this.doHdmaTransfer(value)
     }
    }
 
@@ -207,6 +212,28 @@ export class Memory {
 
     for (let i = 0; i < 0xa0; i++) {
       this.writeByte(0xFE00+i, this.readByte(address+i))
+    }
+  }
+
+  // see https://gbdev.io/pandocs/CGB_Registers.html
+  doHdmaTransfer(value: number) {
+    const transferLength = ((value & 0b1111111) + 1) * 0x10
+    const transferType = getBit(value, 7)
+
+    const upperByteDestination = this.readByte(0xff53)
+    const lowerByteDestination = this.readByte(0xff54)
+
+    const destinationStartAddress = ((upperByteDestination << 8) + lowerByteDestination) & 0b1111111111110000
+
+    const upperByteSource = this.readByte(0xff51)
+    const lowerByteSource = this.readByte(0xff52)
+
+    const sourceStartAddress = ((upperByteSource << 8) + lowerByteSource) & 0b1111111111110000
+
+    if (transferType === TransferType.GeneralPurpose) {
+
+    } else if (transferType === TransferType.Hblank) {
+
     }
   }
 }

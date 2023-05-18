@@ -155,6 +155,7 @@ export class CPU {
         const previousAddress = this.registers.PC.hexValue
 
         this.registers.PC.value++
+
         // if (Gameboy.shouldOutputLogs) {
         //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
         // }
