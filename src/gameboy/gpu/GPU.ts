@@ -4,7 +4,7 @@ import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptReque
 import { getBit, resetBit } from "../misc/BitOperations"
 import { BackgroundPaletteIndexRegister } from "./registers/BackgroundPaletteIndexRegister"
 import { GPURegisters } from "./registers/GPURegisters"
-import { OAMTable } from "./registers/OAMTable"
+import { OAMEntry, OAMTable } from "./registers/OAMTable"
 import { ObjectPaletteIndexRegister } from "./registers/ObjectPaletteIndexRegister"
 import { LCDMode } from "./registers/lcd_status/LCDMode"
 
@@ -61,6 +61,8 @@ export class GPU {
 
   windowPixelsDrawn: boolean[] = []
   backgroundPixelsDrawn: boolean[] = []
+
+  backgroundPixelPriorities: number[] = []
 
   cycles = 0
   internalWindowLineCounter = 0
@@ -175,6 +177,8 @@ export class GPU {
         this.drawSpriteLine()
       }
     } else {
+      this.backgroundPixelPriorities = []
+
       if (lcdControlRegister.isBackgroundOn()) {
         this.drawBackgroundLineGBC()
       }
@@ -251,6 +255,8 @@ export class GPU {
 
       this.backgroundPixelsDrawn.push(paletteIndex !== 0)
 
+      this.backgroundPixelPriorities.push(bgToOamPriority)
+
       this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
     }
   }
@@ -284,6 +290,7 @@ export class GPU {
 
     const yPos = this.internalWindowLineCounter
     while (x < GPU.screenWidth) {
+      this.memory.vramBank = 0
 
       if (x < adjustedWindowX) {
         this.windowPixelsDrawn.push(false)
@@ -294,8 +301,9 @@ export class GPU {
 
       const tileMapIndex = (Math.floor(xPos / 8)) + (Math.floor(yPos / 8) * 32)
 
-
       const tileByteIndex = memoryRead(tileMapAddress + tileMapIndex) + offset
+
+      this.memory.vramBank = 1
 
       const tileByteAttributes = this.memory.readByte(tileMapAddress + tileMapIndex)
 
@@ -338,6 +346,7 @@ export class GPU {
         const color = paletteColors[paletteIndex]
 
         this.windowPixelsDrawn.push(paletteIndex !== 0)
+        this.backgroundPixelPriorities[x] = bgToOamPriority
 
         this.drawPixel(x, lineYRegister.value, color.red, color.green, color.blue)
         x++
@@ -373,6 +382,7 @@ export class GPU {
       let green = (lowerByte >> 5) + ((upperByte & 0b11) << 3)
       let blue = (upperByte >> 2) & 0b11111
 
+      // this converts from rgb555 to rgb888, which html uses
       red = (red << 3) | (red >> 2)
       green = (green << 3) | (green >> 2)
       blue = (blue << 3) | (blue >> 2)
@@ -449,7 +459,9 @@ export class GPU {
         const backgroundVisible = this.backgroundPixelsDrawn[xPos + i]
         const windowVisible = this.windowPixelsDrawn[xPos + i]
 
-        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible)) && !spritePixelsDrawn[xPos + i]) {
+        const isPixelBehindBackground = !this.spriteHasPriority(sprite, this.backgroundPixelPriorities[xPos + i]) && (windowVisible || backgroundVisible)
+
+        if (!(isPixelBehindBackground) && !spritePixelsDrawn[xPos + i]) {
           spritePixelsDrawn[xPos + i] = true
           this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
         }
@@ -659,6 +671,17 @@ export class GPU {
       }
     }
     this.internalWindowLineCounter++
+  }
+
+  spriteHasPriority(sprite: OAMEntry, bgToOamPriority: number): boolean {
+    const { bgAndWindowOverObj } = sprite
+    const { lcdControlRegister } = this.registers
+
+    if (!lcdControlRegister.doesBgHavePriority() || (!bgAndWindowOverObj && !bgToOamPriority)) {
+      return true
+    }
+
+    return false
   }
 
   drawPixel(x: number, y: number, r: number, g: number, b: number, alpha: number = 0xff) {
