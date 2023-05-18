@@ -103,6 +103,11 @@ export class GPU {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
           }
 
+          // do an HDMA transfer if active
+          if (this.isGBC && this.isHDMATransferActive()) {
+            this.memory.doHblankHdmaTransfer()
+          }
+
           this.cycles %= CYCLES_IN_HBLANK
         }
         break
@@ -153,6 +158,12 @@ export class GPU {
         }
         break
     }
+  }
+
+  isHDMATransferActive(): boolean {
+    const value = this.memory.readByte(0xff55)
+
+    return getBit(value, 7) === 1
   }
 
   drawLine() {

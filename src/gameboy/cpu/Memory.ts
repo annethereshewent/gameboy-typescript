@@ -1,4 +1,3 @@
-import { Gameboy } from "../Gameboy"
 import { Cartridge } from "../cartridge/Cartridge"
 import { CartridgeType } from "../cartridge/CartridgeType"
 import { Mbc1Cartridge } from "../cartridge/Mbc1Cartridge"
@@ -23,9 +22,9 @@ enum TransferType {
 }
 
 export class Memory {
-  memoryBuffer = new ArrayBuffer(0x10000)
-  memoryView = new DataView(this.memoryBuffer)
-  memoryBytes = new Uint8Array(this.memoryBuffer)
+  private memoryBuffer = new ArrayBuffer(0x10000)
+  private memoryView = new DataView(this.memoryBuffer)
+  private memoryBytes = new Uint8Array(this.memoryBuffer)
 
   static BgpdRegisterAddress = 0xff69
   static ObpdRegisterAddress = 0xff6b
@@ -33,17 +32,17 @@ export class Memory {
   backgroundPaletteIndexRegister = new BackgroundPaletteIndexRegister(this)
   objectPaletteIndexRegister = new ObjectPaletteIndexRegister(this)
 
-  vramBank1Buffer = new ArrayBuffer(0x2000)
-  vramView = new DataView(this.vramBank1Buffer)
-  vramBytes = new Uint8Array(this.vramBank1Buffer)
+  private vramBank1Buffer = new ArrayBuffer(0x2000)
+  private vramView = new DataView(this.vramBank1Buffer)
+  private vramBytes = new Uint8Array(this.vramBank1Buffer)
 
-  backgroundPaletteRam = new ArrayBuffer(0x40)
-  backgroundPaletteView = new DataView(this.backgroundPaletteRam)
-  backgroundPaletteBytes = new Uint8Array(this.backgroundPaletteRam)
+  private backgroundPaletteRam = new ArrayBuffer(0x40)
+  private backgroundPaletteView = new DataView(this.backgroundPaletteRam)
+  private backgroundPaletteBytes = new Uint8Array(this.backgroundPaletteRam)
 
-  objectPaletteRam = new ArrayBuffer(0x40)
-  objectPaletteView = new DataView(this.objectPaletteRam)
-  objectPaletteBytes = new Uint8Array(this.objectPaletteRam)
+  private objectPaletteRam = new ArrayBuffer(0x40)
+  private objectPaletteView = new DataView(this.objectPaletteRam)
+  private objectPaletteBytes = new Uint8Array(this.objectPaletteRam)
 
   cartridge?: Cartridge
 
@@ -210,7 +209,7 @@ export class Memory {
   }
 
   // see http://www.codeslinger.co.uk/pages/projects/gameboy/dma.html
-  doDmaTransfer(value: number) {
+  private doDmaTransfer(value: number) {
     const address = value << 8
 
     for (let i = 0; i < 0xa0; i++) {
@@ -219,24 +218,49 @@ export class Memory {
   }
 
   // see https://gbdev.io/pandocs/CGB_Registers.html
-  doHdmaTransfer(value: number) {
+  private doHdmaTransfer(value: number) {
     const transferLength = ((value & 0b1111111) + 1) * 0x10
     const transferType = getBit(value, 7)
 
-    const upperByteDestination = this.readByte(0xff53)
-    const lowerByteDestination = this.readByte(0xff54)
-
-    const destinationStartAddress = ((upperByteDestination << 8) + lowerByteDestination) & 0b1111111111110000
-
-    const upperByteSource = this.readByte(0xff51)
-    const lowerByteSource = this.readByte(0xff52)
-
-    const sourceStartAddress = ((upperByteSource << 8) + lowerByteSource) & 0b1111111111110000
+    const destinationStartAddress = this.getHdmaDestinationAddress()
+    const sourceStartAddress = this.getHdmaSourceAddress()
 
     if (transferType === TransferType.GeneralPurpose) {
+      this.doGeneralPurposeHdma(sourceStartAddress, destinationStartAddress, transferLength)
+    }
+  }
 
-    } else if (transferType === TransferType.Hblank) {
+  private getHdmaDestinationAddress() {
+    const upperByte = this.readByte(0xff53)
+    const lowerByte = this.readByte(0xff54)
 
+    return ((upperByte << 8) + lowerByte) & 0b1111111111110000
+  }
+
+  private getHdmaSourceAddress() {
+    const upperByte = this.readByte(0xff51)
+    const lowerByte = this.readByte(0xff52)
+
+    return ((upperByte << 8) + lowerByte) & 0b1111111111110000
+  }
+
+  private doGeneralPurposeHdma(sourceStartAddress: number, destinationStartAddress: number, transferLength: number) {
+    const actualDestinationStartAddress = destinationStartAddress + 0x8000
+
+
+    for (let i = 0; i < transferLength; i++) {
+      this.writeByte(actualDestinationStartAddress + i, this.readByte(sourceStartAddress + i))
+    }
+  }
+
+  doHblankHdmaTransfer() {
+    const destinationStartAddress = this.getHdmaDestinationAddress()
+    const sourceStartAddress = this.getHdmaSourceAddress()
+
+    const actualDestinationStart = destinationStartAddress + 0x8000
+
+    for (let i = 0; i < 0x10; i++) {
+      this.writeByte(actualDestinationStart + i, this.readByte(sourceStartAddress + i))
     }
   }
 }
