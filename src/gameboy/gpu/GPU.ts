@@ -232,7 +232,7 @@ export class GPU {
       this.memory.vramBank = tileVramBankNumber
 
       if (yFlip) {
-        yPosInTile = 8 - yPosInTile
+        yPosInTile = 7 - yPosInTile
       }
 
       const tileBytePosition  = yPosInTile * 2
@@ -314,7 +314,7 @@ export class GPU {
       let yPosInTile = yPos % 8
 
       if (yFlip) {
-        yPosInTile = 8 - yPosInTile
+        yPosInTile = 7 - yPosInTile
       }
 
       // 2 bytes are needed to represent one line in a tile
