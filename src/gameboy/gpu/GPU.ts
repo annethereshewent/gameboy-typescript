@@ -229,10 +229,6 @@ export class GPU {
 
       const paletteColors = this.getPaletteColors(backgroundPaletteStartAddress, Memory.BgpdRegisterAddress, backgroundPaletteIndexRegister)
 
-      if (Gameboy.shouldOutputLogs) {
-        console.log(paletteColors)
-      }
-
       this.memory.vramBank = tileVramBankNumber
 
       if (yFlip) {
@@ -288,17 +284,12 @@ export class GPU {
       // b would be 11101
 
       let red = lowerByte & 0b11111
-      let green = ((lowerByte >> 5) & 0b111) + (upperByte & 0b11) << 3
+      let green = (lowerByte >> 5) + ((upperByte & 0b11) << 3)
       let blue = (upperByte >> 2) & 0b11111
 
-      const redUpperBits = red >> 2
-      const greenUpperBits = green >> 2
-      const blueUpperBits = blue >> 2
-
-      red = (red << 3) + redUpperBits
-      green = (green << 3) + greenUpperBits
-      blue = (blue << 3) + blueUpperBits
-
+      red = (red << 3) | (red >> 2)
+      green = (green << 3) | (green >> 2)
+      blue = (blue << 3) | (blue >> 2)
       paletteColors.push({ red, green, blue })
 
       i++
