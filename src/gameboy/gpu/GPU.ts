@@ -319,6 +319,8 @@ export class GPU {
       // 2 bytes are needed to represent one line in a tile, 8 lines total means 16 bytes to represent one tile.
       const tileLineAddress = windowDataAddress + (tileByteIndex * 16) + tileBytePosition
 
+      this.memory.vramBank = tileVramBankNumber
+
       const lowerByte = this.memory.readByte(tileLineAddress)
       const upperByte = this.memory.readByte(tileLineAddress + 1)
 
