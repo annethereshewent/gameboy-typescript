@@ -391,10 +391,10 @@ export class GPU {
 
     const maxNumberSprites = 10
 
-    if (Gameboy.shouldOutputLogs)
-      console.log(this.oamTable.entries.slice(0,10).map(sprite => sprite.xPosition.toString(16)))
-
     let numSprites = 0
+
+    const spritePixelsDrawn: boolean[] = []
+
     for (const sprite of this.oamTable.entries) {
       if (numSprites === maxNumberSprites) {
         break
@@ -449,11 +449,11 @@ export class GPU {
         const backgroundVisible = this.backgroundPixelsDrawn[xPos + i]
         const windowVisible = this.windowPixelsDrawn[xPos + i]
 
-        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible))) {
+        if (!(sprite.bgAndWindowOverObj && (windowVisible || backgroundVisible)) && !spritePixelsDrawn[xPos + i]) {
+          spritePixelsDrawn[xPos + i] = true
           this.drawPixel(xPos + i, lineYRegister.value, color.red, color.green, color.blue)
         }
       }
-
       numSprites++
     }
   }
