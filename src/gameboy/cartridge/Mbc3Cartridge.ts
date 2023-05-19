@@ -130,7 +130,7 @@ export class Mbc3Cartridge extends Cartridge {
     if (this.isRomBankZero(address)) {
       return read(address)
     }
-    if (this.isRomBankOneThruSeven(address)) {
+    if (this.isRomBankOneThru7f(address)) {
 
       const maskedAddress = address & 0b11111111111111
 
@@ -215,7 +215,7 @@ export class Mbc3Cartridge extends Cartridge {
       case 0xc:
         return this.upperDaysRegister[registerIndex]
       default:
-        throw new Error("invalid value specified")
+        throw new Error(`invalid value specified:0x${this.ramBankNumberOrRtcRegister.toString(16)}`)
     }
   }
 
@@ -255,7 +255,7 @@ export class Mbc3Cartridge extends Cartridge {
     return address >= 0 && address <= 0x3fff
   }
 
-  private isRomBankOneThruSeven(address: number) {
+  private isRomBankOneThru7f(address: number) {
     return address >= 0x4000 && address <= 0x7fff
   }
 

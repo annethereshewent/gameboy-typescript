@@ -79,7 +79,7 @@ export class Mbc1Cartridge extends Cartridge {
       return this.readFromBankZero(address, readMethod)
     }
     if (address >= 0x4000 && address <= 0x7fff) {
-      return this.readFromBanksOneThroughSeven(address, readMethod)
+      return this.readFromBanksOneThrough7f(address, readMethod)
     }
 
     return this.readFromRam(address, readMethod)
@@ -117,7 +117,7 @@ export class Mbc1Cartridge extends Cartridge {
     return read(actualAddress)
   }
 
-  private readFromBanksOneThroughSeven(address: number, readMethod: ReadMethod): number {
+  private readFromBanksOneThrough7f(address: number, readMethod: ReadMethod): number {
     const read = this.readMethods[readMethod]
 
     const bankNumber = (this.ramBankNumber << 5) + this.romBankNumber

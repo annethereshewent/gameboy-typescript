@@ -6,7 +6,7 @@ const OAM_START = 0xfe00
 const OAM_END = 0xfe9f
 
 export class OAMTable {
-  memory: Memory
+  private memory: Memory
   entries: OAMEntry[] = []
   constructor(memory: Memory) {
     this.memory = memory
@@ -17,8 +17,8 @@ export class OAMTable {
 }
 
 export class OAMEntry {
-  address: number
-  memory: Memory
+  private address: number
+  private memory: Memory
   constructor(address: number, memory: Memory) {
     this.address = address
     this.memory = memory
