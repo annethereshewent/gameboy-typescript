@@ -169,9 +169,9 @@ export class CPU {
 
         this.registers.PC.value++
 
-        // if (Gameboy.shouldOutputLogs) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
-        // }
+        if (Gameboy.shouldOutputLogs) {
+          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
+        }
 
         instruction.operation()
 
@@ -187,9 +187,9 @@ export class CPU {
           const previousAddress = this.registers.PC.hexValue
           this.registers.PC.value++
 
-          // if (Gameboy.shouldOutputLogs) {
-          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
-          // }
+          if (Gameboy.shouldOutputLogs) {
+            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
+          }
 
           cbInstruction.operation()
 
@@ -205,7 +205,7 @@ export class CPU {
         this.updateTimers(cycles)
 
         if (this.isDoubleSpeed) {
-          cycles = Math.ceil(cycles / 2)
+          cycles = cycles / 2
         }
 
         return cycles

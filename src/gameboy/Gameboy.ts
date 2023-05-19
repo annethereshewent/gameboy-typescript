@@ -35,9 +35,6 @@ export class Gameboy {
     }
   }
 
-  outputLogs() {
-    Gameboy.shouldOutputLogs = true
-  }
 
   execute(currentTime: number, context: CanvasRenderingContext2D) {
     const diff = currentTime - this.previousTime
@@ -50,12 +47,8 @@ export class Gameboy {
 
       while (this.cycles <= GPU.CyclesPerFrame) {
         cycles = this.cpu.step()
-        if (cycles !== -1) {
-          this.gpu.step(cycles)
-          this.cycles += cycles
-        } else {
-          break
-        }
+        this.gpu.step(cycles)
+        this.cycles += cycles
       }
 
       Joypad.handleInput()
@@ -67,12 +60,6 @@ export class Gameboy {
       this.cycles %= GPU.CyclesPerFrame
     }
 
-    // if (Gameboy.frames !== MAX_FRAMES_TO_RUN && cycles !== -1) {
     requestAnimationFrame((time: number) => this.execute(time, context))
-    // } else {
-    //   console.log(`finished running ${Gameboy.frames} frames successfully!`)
-    //   this.cpu.registers.outputState()
-    //   logger.outputFile()
-    // }
   }
 }
