@@ -2094,7 +2094,6 @@ export function setInstructionMap(this: CPU) {
     name: "RST 38H",
     cycleTime: 16,
     operation: () => {
-      throw new Error("shouldn't be getting here")
       this.registers.restart(0x38)
     }
   })
