@@ -90,7 +90,7 @@ export class Mbc1Cartridge extends Cartridge {
       return 0xff
     }
 
-    const maskedAddress = address & 0b1111111111111
+    const maskedAddress = (address - 0xa000) & 0b1111111111111
 
     const ramRead = this.ramReadMethods[readMethod]
 
@@ -147,7 +147,7 @@ export class Mbc1Cartridge extends Cartridge {
     } else if (this.isBankingModeRegister(address)) {
       this.mode = value & 0b1
     } else if (this.isRamAddress(address) && this.ramEnabled) {
-      const maskedAddress = address & 0b1111111111111
+      const maskedAddress = (address - 0xa000) & 0b1111111111111
       const ramWrite = this.ramWriteMethods[writeMethod]
       if (this.mode === 0) {
         ramWrite(maskedAddress, value)

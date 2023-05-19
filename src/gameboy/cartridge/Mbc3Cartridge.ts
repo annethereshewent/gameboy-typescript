@@ -13,6 +13,8 @@ enum RtcType {
 export class Mbc3Cartridge extends Cartridge {
   constructor(gameDataView: DataView) {
     super(gameDataView)
+    this.ramBytes.fill(0xff)
+
     const ramBytes = SramSaver.loadFile(this.name)
 
     if (ramBytes?.length === this.ramSize) {
@@ -141,8 +143,10 @@ export class Mbc3Cartridge extends Cartridge {
       return 0xff
     }
     if (this.ramBankNumberOrRtcRegister <= 3) {
-      const maskedAddress = address & 0b1111111111111
+      const maskedAddress = (address - 0xa000) & 0b1111111111111
       const realAddress = ((this.ramBankNumberOrRtcRegister << 13) + maskedAddress)
+
+      console.log(`reading from sram at 0x${realAddress.toString(16)} value 0x${ramRead(realAddress).toString(16)}`)
 
       return ramRead(realAddress)
     } else {
@@ -188,15 +192,12 @@ export class Mbc3Cartridge extends Cartridge {
       }
       this.latchClockRegister = value
     } else if (this.isRamOrRtcRegisterAddress(address)) {
-      const maskedAddress = address & 0b1111111111111
-
       if (this.ramBankNumberOrRtcRegister <= 3) {
+        const maskedAddress = (address - 0xa000) & 0b1111111111111
         const realAddress = (this.ramBankNumberOrRtcRegister << 13) + maskedAddress
         sramWrite(realAddress, value)
       } else {
-        if (!this.clockIsLatched) {
-          this.updateRtcRegister(value)
-        }
+        this.updateRtcRegister(value)
       }
     }
   }
