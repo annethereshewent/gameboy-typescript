@@ -52,7 +52,7 @@ export class CPURegisters {
 
 
     // see http://bgb.bircd.org/pandocs.htm#powerupsequence for info on initial register values
-    this.AF = new FlagsRegisterPair("AF", 0x1b0, 0, this.registerDataView, true)
+    this.AF = new FlagsRegisterPair("AF", 0x11b0, 0, this.registerDataView, true)
     this.BC = new CPURegister("BC", 0x13, 2, this.registerDataView, true)
     this.DE = new CPURegister("DE", 0xd8, 4, this.registerDataView, true)
     this.HL = new CPURegister("HL", 0x14d, 6, this.registerDataView, true)

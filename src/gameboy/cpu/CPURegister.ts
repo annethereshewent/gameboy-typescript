@@ -33,9 +33,6 @@ export class CPURegister {
     } else {
       this.dataView.setUint16(this.registerId, newValue, true)
     }
-    // if (this.name !== 'PC') {
-    //   console.log(`${this.name} = 0x${this.value.toString(16)}`)
-    // }
   }
 
   setBit(pos: number, bitValue: number) {

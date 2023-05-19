@@ -5,7 +5,13 @@ export class LCDControlRegister extends MemoryRegister {
   constructor(memory: Memory) {
     super(0xff40, memory, "LCDControlRegister")
   }
+  // GB mode only
   isBackgroundOn() {
+    return this.getBit(0) === 1
+  }
+
+  // GBC mode only
+  doesBgHavePriority() {
     return this.getBit(0) === 1
   }
 

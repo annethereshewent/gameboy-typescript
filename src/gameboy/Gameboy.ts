@@ -1,4 +1,3 @@
-import { logger } from "../logging/Logger"
 import { CPU } from "./cpu/CPU"
 import { Memory } from "./cpu/Memory"
 import { GPU } from "./gpu/GPU"
@@ -8,7 +7,6 @@ const memory = new Memory()
 
 const MAX_FPS = 60
 const INTERVAL = 1000 / MAX_FPS
-const MAX_FRAMES_TO_RUN = 5
 
 export class Gameboy {
 
@@ -20,13 +18,12 @@ export class Gameboy {
   previousTime = 0
   static frames = 0
 
-  // only output the last logs of execution.
-  // otherwise, logs get polluted with too much data
-  // to sift through
   static shouldOutputLogs = false
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
-    this.cpu.loadCartridge(arrayBuffer)
+    const isGBC = this.cpu.loadCartridge(arrayBuffer)
+
+    this.gpu.isGBC = isGBC
   }
 
   run() {

@@ -27,6 +27,11 @@ export class Cartridge {
     return
   }
 
+  isGameboyColor(): boolean {
+    const gbcFlag = this.gameDataView.getUint8(0x143)
+    return [0x80, 0xc0].includes(gbcFlag)
+  }
+
   /**
    * See below for info on headers and what they return.
    * https://gbdev.io/pandocs/The_Cartridge_Header.html

@@ -1,5 +1,6 @@
 import { logger } from "../../logging/Logger"
 import { Gameboy } from "../Gameboy"
+import { getBit } from "../misc/BitOperations"
 import { CPURegisters } from "./CPURegisters"
 import { Instruction } from "./Instruction"
 import { Memory } from "./Memory"
@@ -29,6 +30,8 @@ export class CPU {
   counter = 0
   timerCycles = 0
 
+  isDoubleSpeed = false
+
   constructor(memory: Memory) {
     this.registers = new CPURegisters(memory)
     this.memory = memory
@@ -39,8 +42,10 @@ export class CPU {
 
   loadCartridge(arrayBuffer: ArrayBuffer) {
     const gameDataView = new DataView(arrayBuffer)
-    this.memory.loadCartridge(gameDataView)
+    const isGBC = this.memory.loadCartridge(gameDataView)
     this.initialize()
+
+    return isGBC
   }
 
   initialize() {
@@ -134,9 +139,20 @@ export class CPU {
     }
   }
 
+  checkIfDoubleSpeed() {
+    const speedSwitch = this.memory.readByte(0xff4d)
+
+    if (getBit(speedSwitch, 7) === 1) {
+      this.isDoubleSpeed = true
+    } else {
+      this.isDoubleSpeed = false
+    }
+  }
+
   // TODO: refactor this
   step(): number {
     this.checkInterrupts()
+    this.checkIfDoubleSpeed()
 
     if (this.isHalted) {
       this.updateTimers(4)
@@ -153,9 +169,10 @@ export class CPU {
         const previousAddress = this.registers.PC.hexValue
 
         this.registers.PC.value++
-        if (Gameboy.shouldOutputLogs) {
-          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
-        }
+
+        // if (Gameboy.shouldOutputLogs) {
+        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
+        // }
 
         instruction.operation()
 
@@ -171,9 +188,9 @@ export class CPU {
           const previousAddress = this.registers.PC.hexValue
           this.registers.PC.value++
 
-          if (Gameboy.shouldOutputLogs) {
-            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
-          }
+          // if (Gameboy.shouldOutputLogs) {
+          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
+          // }
 
           cbInstruction.operation()
 
@@ -189,6 +206,10 @@ export class CPU {
         this.updateTimers(cycles)
 
         cycles = cycles / 4
+
+        if (this.isDoubleSpeed) {
+          cycles = Math.ceil(cycles / 2)
+        }
 
         return cycles
       } else {

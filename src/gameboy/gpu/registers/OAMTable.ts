@@ -55,4 +55,12 @@ export class OAMEntry {
   get bgAndWindowOverObj() {
     return getBit(this.attributeFlags, 7)
   }
+
+  get cgbPaletteNumber() {
+    return this.attributeFlags & 0b111
+  }
+
+  get tileVramBankNumber() {
+    return getBit(this.attributeFlags, 3)
+  }
 }
