@@ -146,8 +146,6 @@ export class Mbc3Cartridge extends Cartridge {
       const maskedAddress = (address - 0xa000) & 0b1111111111111
       const realAddress = ((this.ramBankNumberOrRtcRegister << 13) + maskedAddress)
 
-      console.log(`reading from sram at 0x${realAddress.toString(16)} value 0x${ramRead(realAddress).toString(16)}`)
-
       return ramRead(realAddress)
     } else {
       return this.readFromRtcRegister()
