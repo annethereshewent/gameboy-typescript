@@ -63,9 +63,7 @@ export class CPU {
       timerModuloRegister
     } = this.registers
 
-    const mCycles = cycles / 4
-
-    this.counter = (this.counter + mCycles) & 0xffff
+    this.counter = (this.counter + cycles) & 0xffff
 
     const msb = (this.counter >> 8) & 0xff
 
@@ -78,14 +76,15 @@ export class CPU {
     this.timerCycles += cycles
 
     if (this.timerCycles >= timerControlRegister.getClockFrequency()) {
+      this.timerCycles -= timerControlRegister.getClockFrequency()
       // if overflow happens
-      if (timerCounterRegister.value + 1 > 0xff) {
+      if (timerCounterRegister.value === 0xff) {
         interruptRequestRegister.triggerTimerRequest()
         timerCounterRegister.value = timerModuloRegister.value
+      } else {
+        timerCounterRegister.value++
       }
 
-      timerCounterRegister.value++
-      this.timerCycles -= timerControlRegister.getClockFrequency()
     }
 
   }
@@ -157,7 +156,7 @@ export class CPU {
     if (this.isHalted) {
       this.updateTimers(4)
 
-      return 1
+      return 4
     }
 
     try {
@@ -170,9 +169,9 @@ export class CPU {
 
         this.registers.PC.value++
 
-        // if (Gameboy.shouldOutputLogs) {
-        //   console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
-        // }
+        if (Gameboy.shouldOutputLogs) {
+          console.log(`found instruction ${instruction.name} with code 0x${opCode.toString(16)} at address ${previousAddress}\n`)
+        }
 
         instruction.operation()
 
@@ -188,9 +187,9 @@ export class CPU {
           const previousAddress = this.registers.PC.hexValue
           this.registers.PC.value++
 
-          // if (Gameboy.shouldOutputLogs) {
-          //   console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
-          // }
+          if (Gameboy.shouldOutputLogs) {
+            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}\n`)
+          }
 
           cbInstruction.operation()
 
@@ -205,10 +204,8 @@ export class CPU {
 
         this.updateTimers(cycles)
 
-        cycles = cycles / 4
-
         if (this.isDoubleSpeed) {
-          cycles = Math.ceil(cycles / 2)
+          cycles = cycles / 2
         }
 
         return cycles

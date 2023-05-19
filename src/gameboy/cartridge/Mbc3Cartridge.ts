@@ -13,6 +13,8 @@ enum RtcType {
 export class Mbc3Cartridge extends Cartridge {
   constructor(gameDataView: DataView) {
     super(gameDataView)
+    this.ramBytes.fill(0xff)
+
     const ramBytes = SramSaver.loadFile(this.name)
 
     if (ramBytes?.length === this.ramSize) {
@@ -130,7 +132,7 @@ export class Mbc3Cartridge extends Cartridge {
     if (this.isRomBankZero(address)) {
       return read(address)
     }
-    if (this.isRomBankOneThruSeven(address)) {
+    if (this.isRomBankOneThru7f(address)) {
 
       const maskedAddress = address & 0b11111111111111
 
@@ -141,7 +143,7 @@ export class Mbc3Cartridge extends Cartridge {
       return 0xff
     }
     if (this.ramBankNumberOrRtcRegister <= 3) {
-      const maskedAddress = address & 0b1111111111111
+      const maskedAddress = (address - 0xa000) & 0b1111111111111
       const realAddress = ((this.ramBankNumberOrRtcRegister << 13) + maskedAddress)
 
       return ramRead(realAddress)
@@ -188,15 +190,12 @@ export class Mbc3Cartridge extends Cartridge {
       }
       this.latchClockRegister = value
     } else if (this.isRamOrRtcRegisterAddress(address)) {
-      const maskedAddress = address & 0b1111111111111
-
       if (this.ramBankNumberOrRtcRegister <= 3) {
+        const maskedAddress = (address - 0xa000) & 0b1111111111111
         const realAddress = (this.ramBankNumberOrRtcRegister << 13) + maskedAddress
         sramWrite(realAddress, value)
       } else {
-        if (!this.clockIsLatched) {
-          this.updateRtcRegister(value)
-        }
+        this.updateRtcRegister(value)
       }
     }
   }
@@ -215,7 +214,7 @@ export class Mbc3Cartridge extends Cartridge {
       case 0xc:
         return this.upperDaysRegister[registerIndex]
       default:
-        throw new Error("invalid value specified")
+        throw new Error(`invalid value specified:0x${this.ramBankNumberOrRtcRegister.toString(16)}`)
     }
   }
 
@@ -255,7 +254,7 @@ export class Mbc3Cartridge extends Cartridge {
     return address >= 0 && address <= 0x3fff
   }
 
-  private isRomBankOneThruSeven(address: number) {
+  private isRomBankOneThru7f(address: number) {
     return address >= 0x4000 && address <= 0x7fff
   }
 
