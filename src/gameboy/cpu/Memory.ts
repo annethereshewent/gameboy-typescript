@@ -121,7 +121,7 @@ export class Memory {
   }
 
   set vramBank(newVal) {
-    this.memoryView.setUint8(0xff4f, newVal)
+    this.memoryView.setUint8(0xff4f, newVal & 0b1)
   }
 
   readSignedByte(address: number): number {
@@ -131,6 +131,10 @@ export class Memory {
     if (this.isAccessingCartridge(address)) {
       return this.cartridge.readSignedByte(address)
     }
+    if (this.isVram(address) && this.vramBank === 1) {
+      return this.vramView.getInt8(address - 0x8000)
+    }
+
     return this.memoryView.getInt8(address)
   }
 
@@ -236,8 +240,8 @@ export class Memory {
     } else {
       this.currentHdmaDestinationAddress = -1
       this.currentHdmaSourceAddress = -1
-      this.initialHdmaSourceAddress = this.getHdmaSourceAddress()
-      this.initialHdmaDestinationAddress = this.getHdmaDestinationAddress()
+      this.initialHdmaSourceAddress = sourceStartAddress
+      this.initialHdmaDestinationAddress = destinationStartAddress
     }
   }
 
@@ -281,5 +285,8 @@ export class Memory {
     for (let i = 0; i < 0x10; i++) {
       this.writeByte(actualDestinationStart + i, this.readByte(this.currentHdmaSourceAddress + i))
     }
+
+    // transfer completed
+    this.writeByte(0xff55, 0xff)
   }
 }

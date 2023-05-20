@@ -1,3 +1,4 @@
+import { Gameboy } from "../../Gameboy"
 import { getBit, setBit } from "../../misc/BitOperations"
 
 export class JoypadRegister {
@@ -13,11 +14,11 @@ export class JoypadRegister {
   isPressingSelect = false
 
   get isCheckingDirections() {
-    return getBit(this.value, 4) === 0
+    return this.getBit(4) === 0
   }
 
   get isCheckingButtons() {
-    return getBit(this.value, 5) === 0
+    return this.getBit(5) === 0
   }
 
   getInput() {
@@ -42,6 +43,10 @@ export class JoypadRegister {
 
   private setBit(pos: number, bitValue: number) {
     this.value = setBit(this.value, pos, bitValue)
+  }
+
+  private getBit(pos: number) {
+    return getBit(this.value, pos)
   }
 }
 

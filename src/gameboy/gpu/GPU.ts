@@ -170,7 +170,7 @@ export class GPU {
   isHDMATransferActive(): boolean {
     const value = this.memory.readByte(0xff55)
 
-    return getBit(value, 7) === 1 && (value && 0b1111111) !== 0
+    return getBit(value, 7) === 1 && value !== 0xff
   }
 
   drawLine() {
@@ -218,7 +218,7 @@ export class GPU {
     const memoryRead = (address: number) => tileDataAddress === 0x8800 ? this.memory.readSignedByte(address) : this.memory.readByte(address)
 
     for (let x = 0; x < GPU.screenWidth; x++) {
-      this.memory.vramBank = 0
+
       const scrolledX = (scrollXRegister.value + x) & 0xff
       const scrolledY = (scrollYRegister.value + lineYRegister.value) & 0xff
 
@@ -227,11 +227,11 @@ export class GPU {
       const xPosInTile = scrolledX % 8
       let yPosInTile = scrolledY % 8
 
+      this.memory.vramBank = 0
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
 
       // https://gbdev.io/pandocs/Tile_Maps.html see CGB section for details
       this.memory.vramBank = 1
-
       const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex)
 
       const backgroundPaletteNumber = tileByteAttributes & 0b111
@@ -570,6 +570,7 @@ export class GPU {
   }
 
   drawBackgroundLine() {
+
     const { lineYRegister, lcdControlRegister, scrollXRegister, scrollYRegister } = this.registers
     const tileDataAddress = lcdControlRegister.bgAndWindowTileDataArea()
 
