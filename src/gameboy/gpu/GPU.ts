@@ -1,4 +1,3 @@
-import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { getBit, resetBit } from "../misc/BitOperations"
@@ -88,6 +87,15 @@ export class GPU {
   step(cycles: number) {
     const interruptRequestRegister = new InterruptRequestRegister(this.memory)
 
+    if (!this.registers.lcdControlRegister.isLCDControllerOn()) {
+      this.registers.lcdStatusRegister.mode = LCDMode.VBlank
+      // pokemon gold will get stuck in a loop if the controller is off and lineY isn't 145.
+      // this may be hacky, but it works for now.
+      this.registers.lineYRegister.value = 0x91
+      this.cycles = 0
+      return
+    }
+
     this.cycles += cycles
     switch (this.registers.lcdStatusRegister.mode) {
       case LCDMode.HBlank:
@@ -168,9 +176,9 @@ export class GPU {
 
   drawLine() {
     const { lcdControlRegister } = this.registers
-    if (!lcdControlRegister.isLCDControllerOn()) {
-      return
-    }
+    // if (!lcdControlRegister.isLCDControllerOn()) {
+    //   return
+    // }
 
     this.backgroundPixelsDrawn = []
     this.windowPixelsDrawn = []
