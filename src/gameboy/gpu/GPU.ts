@@ -89,9 +89,9 @@ export class GPU {
 
     if (!this.registers.lcdControlRegister.isLCDControllerOn()) {
       this.registers.lcdStatusRegister.mode = LCDMode.HBlank
-      // pokemon gold will get stuck in a loop if the controller is off and lineY isn't 145.
-      // this may be hacky, but it works for now.
-      this.registers.lineYRegister.value = 0x91
+      // pokemon gold will get stuck in a loop if the controller is off and lineY isn't 145 at bootup.
+      // this may be hacky, but it seems to work out.
+      this.registers.lineYRegister.value = this.registers.lineYRegister.value  === 0x91 ? 0 : 0x91
       this.cycles = 0
       return
     }
