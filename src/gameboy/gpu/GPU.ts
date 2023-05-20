@@ -88,7 +88,7 @@ export class GPU {
     const interruptRequestRegister = new InterruptRequestRegister(this.memory)
 
     if (!this.registers.lcdControlRegister.isLCDControllerOn()) {
-      this.registers.lcdStatusRegister.mode = LCDMode.VBlank
+      this.registers.lcdStatusRegister.mode = LCDMode.HBlank
       // pokemon gold will get stuck in a loop if the controller is off and lineY isn't 145.
       // this may be hacky, but it works for now.
       this.registers.lineYRegister.value = 0x91
@@ -100,6 +100,10 @@ export class GPU {
     switch (this.registers.lcdStatusRegister.mode) {
       case LCDMode.HBlank:
         if (this.cycles >= CYCLES_IN_HBLANK) {
+          // do an HDMA transfer if active
+          if (this.isGBC && this.isHDMATransferActive()) {
+            this.memory.doHblankHdmaTransfer()
+          }
           this.drawLine()
           this.registers.lineYRegister.value++
 
@@ -109,11 +113,6 @@ export class GPU {
             interruptRequestRegister.triggerVBlankRequest()
           } else {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
-          }
-
-          // do an HDMA transfer if active
-          if (this.isGBC && this.isHDMATransferActive()) {
-            this.memory.doHblankHdmaTransfer()
           }
 
           this.cycles %= CYCLES_IN_HBLANK
@@ -171,7 +170,7 @@ export class GPU {
   isHDMATransferActive(): boolean {
     const value = this.memory.readByte(0xff55)
 
-    return getBit(value, 7) === 1
+    return getBit(value, 7) === 1 && (value && 0b1111111) !== 0
   }
 
   drawLine() {

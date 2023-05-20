@@ -32,6 +32,12 @@ export class Memory {
   backgroundPaletteIndexRegister = new BackgroundPaletteIndexRegister(this)
   objectPaletteIndexRegister = new ObjectPaletteIndexRegister(this)
 
+  initialHdmaSourceAddress = 0
+  initialHdmaDestinationAddress = 0
+
+  currentHdmaSourceAddress = -1
+  currentHdmaDestinationAddress = -1
+
   private vramBank1Buffer = new ArrayBuffer(0x2000)
   private vramView = new DataView(this.vramBank1Buffer)
   private vramBytes = new Uint8Array(this.vramBank1Buffer)
@@ -227,6 +233,11 @@ export class Memory {
 
     if (transferType === TransferType.GeneralPurpose) {
       this.doGeneralPurposeHdma(sourceStartAddress, destinationStartAddress, transferLength)
+    } else {
+      this.currentHdmaDestinationAddress = -1
+      this.currentHdmaSourceAddress = -1
+      this.initialHdmaSourceAddress = this.getHdmaSourceAddress()
+      this.initialHdmaDestinationAddress = this.getHdmaDestinationAddress()
     }
   }
 
@@ -254,13 +265,21 @@ export class Memory {
   }
 
   doHblankHdmaTransfer() {
-    const destinationStartAddress = this.getHdmaDestinationAddress()
-    const sourceStartAddress = this.getHdmaSourceAddress()
+    if (this.currentHdmaDestinationAddress === -1) {
+      this.currentHdmaDestinationAddress = this.initialHdmaDestinationAddress
+    } else {
+      this.currentHdmaDestinationAddress += 0x10
+    }
+    if (this.currentHdmaSourceAddress === -1) {
+      this.currentHdmaSourceAddress = this.initialHdmaSourceAddress
+    } else {
+      this.currentHdmaSourceAddress += 0x10
+    }
 
-    const actualDestinationStart = destinationStartAddress + 0x8000
+    const actualDestinationStart = this.currentHdmaDestinationAddress + 0x8000
 
     for (let i = 0; i < 0x10; i++) {
-      this.writeByte(actualDestinationStart + i, this.readByte(sourceStartAddress + i))
+      this.writeByte(actualDestinationStart + i, this.readByte(this.currentHdmaSourceAddress + i))
     }
   }
 }
