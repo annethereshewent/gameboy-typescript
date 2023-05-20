@@ -20,6 +20,8 @@ export class Gameboy {
 
   static shouldOutputLogs = false
 
+  isRunning = true
+
   loadCartridge(arrayBuffer: ArrayBuffer) {
     const isGBC = this.cpu.loadCartridge(arrayBuffer)
 
@@ -60,6 +62,8 @@ export class Gameboy {
       this.cycles %= GPU.CyclesPerFrame
     }
 
-    requestAnimationFrame((time: number) => this.execute(time, context))
+    if (this.isRunning) {
+      requestAnimationFrame((time: number) => this.execute(time, context))
+    }
   }
 }

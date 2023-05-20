@@ -35,6 +35,7 @@ function App() {
         <input type="file" onChange={handleFileChange} />
         <label>Toggle logs</label>
         <input type="checkbox" onChange={(e: React.ChangeEvent<HTMLInputElement>) => Gameboy.shouldOutputLogs = e.target.checked ? true : false} />
+        <button type="button" onClick={() => gameboy.isRunning = false}>Stop execution</button>
         <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
 
