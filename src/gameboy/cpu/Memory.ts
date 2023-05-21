@@ -266,8 +266,7 @@ export class Memory {
   }
 
   private doGeneralPurposeHdma(sourceStartAddress: number, destinationStartAddress: number, transferLength: number) {
-    const actualDestinationStartAddress = destinationStartAddress + 0x8000
-
+    const actualDestinationStartAddress = destinationStartAddress < 0x8000 ? destinationStartAddress + 0x8000 : destinationStartAddress
 
     for (let i = 0; i < transferLength; i++) {
       this.writeByte(actualDestinationStartAddress + i, this.readByte(sourceStartAddress + i))
@@ -286,7 +285,7 @@ export class Memory {
       this.currentHdmaSourceAddress += 0x10
     }
 
-    const actualDestinationStart = this.currentHdmaDestinationAddress + 0x8000
+    const actualDestinationStart = this.currentHdmaDestinationAddress < 0x8000 ? this.currentHdmaDestinationAddress + 0x8000 : this.currentHdmaDestinationAddress
 
     for (let i = 0; i < 0x10; i++) {
       this.writeByte(actualDestinationStart + i, this.readByte(this.currentHdmaSourceAddress + i))

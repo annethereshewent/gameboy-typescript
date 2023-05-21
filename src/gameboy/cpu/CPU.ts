@@ -1,4 +1,3 @@
-import { logger } from "../../logging/Logger"
 import { Gameboy } from "../Gameboy"
 import { getBit } from "../misc/BitOperations"
 import { CPURegisters } from "./CPURegisters"

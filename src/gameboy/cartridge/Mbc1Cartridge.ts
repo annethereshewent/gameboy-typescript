@@ -62,7 +62,7 @@ export class Mbc1Cartridge extends MbcCartridge {
       return read(maskedAddress)
     }
 
-    const actualAddress = ((this.ramBankNumber << 19) + maskedAddress)
+    const actualAddress = ((this.ramBankNumber << 19) + maskedAddress) & (this.romSize - 1)
 
     return read(actualAddress)
   }
@@ -74,14 +74,14 @@ export class Mbc1Cartridge extends MbcCartridge {
 
     const maskedAddress = address & 0b11111111111111
 
-    const actualAddress = ((bankNumber << 14) + maskedAddress)
+    const actualAddress = ((bankNumber << 14) + maskedAddress) & (this.romSize - 1)
 
     return read(actualAddress)
   }
 
   protected _write(address: number, value: number, writeMethod: WriteMethod) {
     if (this.isRamEnableRegister(address)) {
-      this.ramEnabled = value === 0xa ? true : false
+      this.ramEnabled = value === 0xa
     } else if (this.isRomBankNumberRegister(address)) {
       this.romBankNumber = value === 0 ? 1 : value & 0b11111
     } else if (this.isRamBankNumberRegister(address)) {
