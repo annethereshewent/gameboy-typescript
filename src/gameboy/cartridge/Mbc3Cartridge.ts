@@ -1,7 +1,6 @@
 import { getBit, setBit } from "../misc/BitOperations"
-import { SramSaver } from "../misc/SramSaver"
-import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
+import { MbcCartridge } from "./MbcCartridge"
 import { ReadMethod } from "./ReadMethod"
 import { WriteMethod } from "./WriteMethods"
 
@@ -10,18 +9,9 @@ enum RtcType {
   Latched
 }
 
-export class Mbc3Cartridge extends Cartridge {
+export class Mbc3Cartridge extends MbcCartridge {
   constructor(gameDataView: DataView) {
     super(gameDataView)
-    this.ramBytes.fill(0xff)
-
-    const ramBytes = SramSaver.loadFile(this.name)
-
-    if (ramBytes?.length === this.ramSize) {
-      this.ramBuffer = ramBytes.buffer
-      this.ramView = new DataView(ramBytes.buffer)
-      this.ramBytes = ramBytes
-    }
 
     if (this.type === CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY) {
       this.updateClock()
@@ -29,11 +19,11 @@ export class Mbc3Cartridge extends Cartridge {
         this.updateClock()
       }, 1000)
     }
-  }
 
-  ramBuffer = new ArrayBuffer(this.ramSize)
-  ramView = new DataView(this.ramBuffer)
-  ramBytes = new Uint8Array(this.ramBuffer)
+    if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY].includes(this.type)) {
+      this.hasBattery = true
+    }
+  }
 
   mode = 0
   ramAndTimerEnable = false
@@ -56,47 +46,6 @@ export class Mbc3Cartridge extends Cartridge {
 
   clockIsLatched = false
 
-
-  readMethods = [
-    (address: number) => this.gameDataView.getUint8(address),
-    (address: number) => this.gameDataView.getInt8(address),
-    (address: number) => this.gameDataView.getUint16(address, true)
-  ]
-
-  ramReadMethods = [
-    (address: number) => this.ramView.getUint8(address),
-    (address: number) => this.ramView.getInt8(address),
-    (address: number) => this.ramView.getUint16(address, true)
-  ]
-
-  ramWriteMethods = [
-    (address: number, value: number) => {
-      this.ramView.setUint8(address, value)
-      if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY].includes(this.type)) {
-        if (this.sramTimeout != null) {
-          clearTimeout(this.sramTimeout)
-        }
-
-        this.sramTimeout = setTimeout(() => {
-          SramSaver.saveFile(this.name, this.ramBytes)
-        }, 1000)
-
-      }
-    },
-    (address: number, value: number) => {
-      this.ramView.setUint16(address, value, true)
-      if ([CartridgeType.MBC3_PLUS_RAM_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY, CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY].includes(this.type)) {
-        if (this.sramTimeout != null) {
-          clearTimeout(this.sramTimeout)
-        }
-
-        this.sramTimeout = setTimeout(() => {
-          SramSaver.saveFile(this.name, this.ramBytes)
-        }, 1000)
-      }
-    }
-  ]
-
   updateClock() {
     const date = new Date()
 
@@ -113,19 +62,8 @@ export class Mbc3Cartridge extends Cartridge {
     return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000
   }
 
-  readByte(address: number): number {
-    return this._read(address, ReadMethod.READ_BYTE)
-  }
 
-  readSignedByte(address: number): number {
-    return this._read(address, ReadMethod.READ_SIGNED_BYTE)
-  }
-
-  readWord(address: number) {
-    return this._read(address, ReadMethod.READ_WORD)
-  }
-
-  private _read(address: number, readMethod: ReadMethod): number {
+  protected _read(address: number, readMethod: ReadMethod): number {
     const read = this.readMethods[readMethod]
     const ramRead = this.ramReadMethods[readMethod]
 
@@ -152,14 +90,6 @@ export class Mbc3Cartridge extends Cartridge {
     }
   }
 
-  writeByte(address: number, value: number) {
-    this._write(address, value, WriteMethod.WRITE_BYTE)
-  }
-
-  writeWord(address: number, value: number) {
-    this._write(address, value, WriteMethod.WRITE_WORD)
-  }
-
   private copyRTCToLatchedRegisters() {
     this.secondsRegister[RtcType.Latched] = this.secondsRegister[RtcType.Unlatched]
     this.minutesRegister[RtcType.Latched] = this.minutesRegister[RtcType.Unlatched]
@@ -168,7 +98,7 @@ export class Mbc3Cartridge extends Cartridge {
     this.upperDaysRegister[RtcType.Latched] = this.upperDaysRegister[RtcType.Unlatched]
   }
 
-  private _write(address: number, value: number, writeMethod: WriteMethod) {
+  protected _write(address: number, value: number, writeMethod: WriteMethod) {
     const sramWrite = this.ramWriteMethods[writeMethod]
     if (this.isRamAndTimerEnableAddress(address)) {
       const lowerBits = value & 0b1111

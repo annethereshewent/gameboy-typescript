@@ -1,80 +1,30 @@
-import { SramSaver } from "../misc/SramSaver"
-import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
+import { MbcCartridge } from "./MbcCartridge"
 import { ReadMethod } from "./ReadMethod"
 import { WriteMethod } from "./WriteMethods"
 
 
 // see https://gbdev.io/pandocs/MBC1.html for most of the details on these
-export class Mbc1Cartridge extends Cartridge {
+export class Mbc1Cartridge extends MbcCartridge {
 
   constructor(gameDataView: DataView) {
     super(gameDataView)
 
     if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
-      const ramBytes: Uint8Array|null = SramSaver.loadFile(this.name)
-
-      if (ramBytes?.length === this.ramSize) {
-        this.ramBuffer = ramBytes.buffer
-        this.ramBytes = ramBytes
-        this.ramView = new DataView(ramBytes.buffer)
-      }
+      this.hasBattery = true
     }
   }
-
-  ramBuffer = new ArrayBuffer(this.ramSize)
-  ramView = new DataView(this.ramBuffer)
-  ramBytes = new Uint8Array(this.ramBuffer)
 
   ramEnabled = false
   mode = 0
   romBankNumber = 1
   ramBankNumber = 0
 
-  readMethods = [
-    (address: number) => this.gameDataView.getUint8(address),
-    (address: number) => this.gameDataView.getInt8(address),
-    (address: number) => this.gameDataView.getUint16(address, true)
-  ]
-
-  ramReadMethods = [
-    (address: number) => this.ramView.getUint8(address),
-    (address: number) => this.ramView.getInt8(address),
-    (address: number) => this.ramView.getUint16(address, true)
-  ]
-
-  ramWriteMethods = [
-    (address: number, value: number) => {
-      this.ramView.setUint8(address, value)
-      if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
-        SramSaver.saveFile(this.name, this.ramBytes)
-      }
-    },
-    (address: number, value: number) => {
-      this.ramView.setUint16(address, value, true)
-      if (this.type === CartridgeType.MBC1_PLUS_RAM_PLUS_BATTERY) {
-        SramSaver.saveFile(this.name, this.ramBytes)
-      }
-    }
-  ]
-
   resetRam() {
     this.ramBytes.fill(0, 0, this.ramBytes.length - 1)
   }
 
-  override readByte(address: number): number {
-    return this._read(address, ReadMethod.READ_BYTE)
-  }
-
-  override readWord(address: number): number {
-    return this._read(address, ReadMethod.READ_WORD)
-  }
-
-  override readSignedByte(address: number): number {
-    return this._read(address, ReadMethod.READ_SIGNED_BYTE)
-  }
-
-  private _read(address: number, readMethod: ReadMethod): number {
+  protected _read(address: number, readMethod: ReadMethod): number {
     if (address >= 0 && address <= 0x3fff) {
       return this.readFromBankZero(address, readMethod)
     }
@@ -129,15 +79,7 @@ export class Mbc1Cartridge extends Cartridge {
     return read(actualAddress)
   }
 
-  writeByte(address: number, value: number) {
-    this._write(address, value, WriteMethod.WRITE_BYTE)
-  }
-
-  writeWord(address: number, value: number) {
-    this._write(address, value, WriteMethod.WRITE_WORD)
-  }
-
-  private _write(address: number, value: number, writeMethod: WriteMethod) {
+  protected _write(address: number, value: number, writeMethod: WriteMethod) {
     if (this.isRamEnableRegister(address)) {
       this.ramEnabled = value === 0xa ? true : false
     } else if (this.isRomBankNumberRegister(address)) {

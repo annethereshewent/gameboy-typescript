@@ -23,6 +23,8 @@ export class MbcCartridge extends Cartridge {
   ramView = new DataView(this.ramBuffer)
   ramBytes = new Uint8Array(this.ramBuffer)
 
+  sramTimeout: ReturnType<typeof setTimeout>|null = null
+
   hasBattery = false
 
   readMethods = [
@@ -41,13 +43,20 @@ export class MbcCartridge extends Cartridge {
     (address: number, value: number) => {
       this.ramView.setUint8(address, value)
       if (this.hasBattery) {
-        SramSaver.saveFile(this.name, this.ramBytes)
+        if (this.sramTimeout != null) {
+          clearTimeout(this.sramTimeout)
+        }
+
+        this.sramTimeout = setTimeout(() => SramSaver.saveFile(this.name, this.ramBytes), 1500)
       }
     },
     (address: number, value: number) => {
       this.ramView.setUint16(address, value, true)
       if (this.hasBattery) {
-        SramSaver.saveFile(this.name, this.ramBytes)
+        if (this.sramTimeout != null) {
+          clearTimeout(this.sramTimeout)
+        }
+        this.sramTimeout = setTimeout(() => SramSaver.saveFile(this.name, this.ramBytes), 1500)
       }
     }
   ]
