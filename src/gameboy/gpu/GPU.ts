@@ -175,9 +175,6 @@ export class GPU {
 
   drawLine() {
     const { lcdControlRegister } = this.registers
-    // if (!lcdControlRegister.isLCDControllerOn()) {
-    //   return
-    // }
 
     this.backgroundPixelsDrawn = []
     this.windowPixelsDrawn = []

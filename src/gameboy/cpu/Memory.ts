@@ -247,16 +247,16 @@ export class Memory {
 
   private getHdmaDestinationAddress() {
     const upperByte = this.readByte(0xff53)
-    const lowerByte = this.readByte(0xff54)
+    const lowerByte = this.readByte(0xff54) & 0b11110000
 
-    return ((upperByte << 8) + lowerByte) & 0b1111111111110000
+    return ((upperByte << 8) + lowerByte)
   }
 
   private getHdmaSourceAddress() {
     const upperByte = this.readByte(0xff51)
-    const lowerByte = this.readByte(0xff52)
+    const lowerByte = this.readByte(0xff52) & 0b11110000
 
-    return ((upperByte << 8) + lowerByte) & 0b1111111111110000
+    return ((upperByte << 8) + lowerByte)
   }
 
   private doGeneralPurposeHdma(sourceStartAddress: number, destinationStartAddress: number, transferLength: number) {
