@@ -28,8 +28,7 @@ export class Mbc5Cartridge extends MbcCartridge {
 
       const romBankNumber = (this.romBankNumberHigher << 8) + this.romBankNumberLower
 
-      const actualAddress = (romBankNumber << 14) + maskedAddress
-
+      const actualAddress = ((romBankNumber << 14) + maskedAddress) & (this.romSize - 1)
 
       return read(actualAddress)
     }
