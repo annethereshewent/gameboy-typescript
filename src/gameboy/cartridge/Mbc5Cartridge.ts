@@ -1,7 +1,6 @@
 import { SramSaver } from "../misc/SramSaver"
 import { Cartridge } from "./Cartridge"
 import { CartridgeType } from "./CartridgeType"
-import { MbcCartridge } from "./MbcCartridge"
 import { ReadMethod } from "./ReadMethod"
 import { WriteMethod } from "./WriteMethods"
 
