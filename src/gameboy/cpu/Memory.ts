@@ -3,6 +3,7 @@ import { CartridgeType } from "../cartridge/CartridgeType"
 import { Mbc1Cartridge } from "../cartridge/Mbc1Cartridge"
 import { Mbc2Cartridge } from "../cartridge/Mbc2Cartridge"
 import { Mbc3Cartridge } from "../cartridge/Mbc3Cartridge"
+import { Mbc5Cartridge } from "../cartridge/Mbc5Cartridge"
 import { BackgroundPaletteIndexRegister } from "../gpu/registers/BackgroundPaletteIndexRegister"
 import { ObjectPaletteIndexRegister } from "../gpu/registers/ObjectPaletteIndexRegister"
 import { getBit } from "../misc/BitOperations"
@@ -76,6 +77,11 @@ export class Memory {
       case CartridgeType.MBC3_PLUS_TIMER_PLUS_BATTERY:
       case CartridgeType.MBC3_PLUS_TIMER_PLUS_RAM_PLUS_BATTERY:
         this.cartridge = new Mbc3Cartridge(gameDataView)
+        break
+      case CartridgeType.MBC5:
+      case CartridgeType.MBC5_PLUS_RAM:
+      case CartridgeType.MBC5_PLUS_RAM_PLUS_BATTERY:
+        this.cartridge = new Mbc5Cartridge(gameDataView)
         break
       default:
         throw new Error(`Cartridge type not supported: ${cartridgeType}`)
