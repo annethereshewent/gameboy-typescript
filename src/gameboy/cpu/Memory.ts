@@ -238,8 +238,8 @@ export class Memory {
     const transferLength = ((value & 0b1111111) + 1) * 0x10
     const transferType = getBit(value, 7)
 
-    const destinationStartAddress = this.getHdmaDestinationAddress()
-    const sourceStartAddress = this.getHdmaSourceAddress()
+    const destinationStartAddress = this.hdmaDestinationAddress
+    const sourceStartAddress = this.hdmaSourceAddress
 
     if (transferType === TransferType.GeneralPurpose) {
       this.doGeneralPurposeHdma(sourceStartAddress, destinationStartAddress, transferLength)
@@ -251,47 +251,67 @@ export class Memory {
     }
   }
 
-  private getHdmaDestinationAddress() {
-    const upperByte = this.readByte(0xff53)
+  private get hdmaDestinationAddress() {
+    const upperByte = this.readByte(0xff53) & 0b11111
     const lowerByte = this.readByte(0xff54) & 0b11110000
 
     return ((upperByte << 8) + lowerByte)
   }
 
-  private getHdmaSourceAddress() {
+  private set hdmaDestinationAddress(newAddress: number) {
+    const lowerByte = newAddress & 0b11110000
+    const upperByte = (newAddress >> 8) & 0b11111
+
+    this.writeByte(0xff53, upperByte)
+    this.writeByte(0xff54, lowerByte)
+  }
+
+  private get hdmaSourceAddress() {
     const upperByte = this.readByte(0xff51)
     const lowerByte = this.readByte(0xff52) & 0b11110000
 
     return ((upperByte << 8) + lowerByte)
   }
 
+  private set hdmaSourceAddress(newAddress: number) {
+    const lowerByte = newAddress & 0b11110000
+    const upperByte = (newAddress >> 8)
+
+    this.writeByte(0xff51, upperByte)
+    this.writeByte(0xff52, lowerByte)
+  }
+
   private doGeneralPurposeHdma(sourceStartAddress: number, destinationStartAddress: number, transferLength: number) {
-    const actualDestinationStartAddress = destinationStartAddress < 0x8000 ? destinationStartAddress + 0x8000 : destinationStartAddress
+    const actualDestinationStartAddress = destinationStartAddress | 0x8000
 
     for (let i = 0; i < transferLength; i++) {
       this.writeByte(actualDestinationStartAddress + i, this.readByte(sourceStartAddress + i))
     }
+
+    // transfer completed
+    this.writeByte(0xff55, 0xff)
+    this.hdmaDestinationAddress += transferLength
+    this.hdmaSourceAddress += transferLength
   }
 
   doHblankHdmaTransfer() {
     if (this.currentHdmaDestinationAddress === -1) {
       this.currentHdmaDestinationAddress = this.initialHdmaDestinationAddress
-    } else {
-      this.currentHdmaDestinationAddress += 0x10
     }
     if (this.currentHdmaSourceAddress === -1) {
       this.currentHdmaSourceAddress = this.initialHdmaSourceAddress
-    } else {
-      this.currentHdmaSourceAddress += 0x10
     }
 
-    const actualDestinationStart = this.currentHdmaDestinationAddress < 0x8000 ? this.currentHdmaDestinationAddress + 0x8000 : this.currentHdmaDestinationAddress
+    const actualDestinationStart = this.currentHdmaDestinationAddress | 0x8000
 
     for (let i = 0; i < 0x10; i++) {
       this.writeByte(actualDestinationStart + i, this.readByte(this.currentHdmaSourceAddress + i))
     }
 
-    // transfer completed
-    this.writeByte(0xff55, 0xff)
+    this.hdmaDestinationAddress += 0x10
+    this.hdmaSourceAddress += 0x10
+
+    this.currentHdmaDestinationAddress = this.hdmaDestinationAddress
+    this.currentHdmaSourceAddress = this.hdmaSourceAddress
   }
 }

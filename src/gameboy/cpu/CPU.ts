@@ -147,17 +147,26 @@ export class CPU {
     }
   }
 
-  // TODO: refactor this
-  step(): number {
-    this.checkInterrupts()
-    this.checkIfDoubleSpeed()
+  performCbInstruction() {
+    const cbOpCode = this.memory.readByte(this.registers.PC.value)
+    const cbInstruction = this.cbMap.get(cbOpCode)
 
-    if (this.isHalted) {
-      this.updateTimers(4)
+    if (cbInstruction == null) {
+      throw new Error(`Invalid CB op code: 0x${cbOpCode.toString(16)}`)
+    }
+    const previousAddress = this.registers.PC.hexValue
+    this.registers.PC.value++
 
-      return 4
+    if (Gameboy.shouldOutputLogs) {
+      console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}`)
     }
 
+    cbInstruction.operation()
+
+    return cbInstruction.cycleTime
+  }
+
+  performInstruction() {
     try {
       const opCode = this.memory.readByte(this.registers.PC.value)
 
@@ -177,23 +186,9 @@ export class CPU {
         let cbCycles = null
 
         if (instruction.name === "PREFIX CB") {
-          const cbOpCode = this.memory.readByte(this.registers.PC.value)
-          const cbInstruction = this.cbMap.get(cbOpCode)
-
-          if (cbInstruction == null) {
-            throw new Error(`Invalid CB op code: 0x${cbOpCode.toString(16)}`)
-          }
-          const previousAddress = this.registers.PC.hexValue
-          this.registers.PC.value++
-
-          if (Gameboy.shouldOutputLogs) {
-            console.log(`found instruction ${cbInstruction.name} with code 0x${cbOpCode.toString(16)} at address ${previousAddress}`)
-          }
-
-          cbInstruction.operation()
-
-          cbCycles = cbInstruction.cycleTime
+          cbCycles = this.performCbInstruction()
         }
+
         let cycles = 0
         if (cbCycles == null) {
           cycles = instruction.cycleTime
@@ -215,5 +210,18 @@ export class CPU {
       console.log(`execution failed at frame ${Gameboy.frames}`)
       throw e
     }
+  }
+
+  step(): number {
+    this.checkInterrupts()
+    this.checkIfDoubleSpeed()
+
+    if (this.isHalted) {
+      this.updateTimers(4)
+
+      return 4
+    }
+
+    return this.performInstruction()
   }
 }
