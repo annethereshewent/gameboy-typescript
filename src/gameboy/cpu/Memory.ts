@@ -156,10 +156,6 @@ export class Memory {
     return this.memoryView.getUint8(0xff4f) & 0b1
   }
 
-  // set vramBank(newVal) {
-  //   this.memoryView.setUint8(0xff4f, newVal & 0b1)
-  // }
-
   readSignedByte(address: number): number {
     if (this.cartridge == null) {
       throw new Error("game ROM not loaded into memory!")
