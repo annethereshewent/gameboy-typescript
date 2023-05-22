@@ -144,7 +144,7 @@ export class Memory {
     if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getUint8(address - 0x8000)
     }
-    if (address >= 0xd000 && address <= 0xdfff) {
+    if (this.isWramBanks(address)) {
       return this.wramBankViews[this.wramBank].getUint8(address - 0xd000)
     }
 
@@ -169,7 +169,7 @@ export class Memory {
     if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getInt8(address - 0x8000)
     }
-    if (address >= 0xd000 && address <= 0xdfff) {
+    if (this.isWramBanks(address)) {
       return this.wramBankViews[this.wramBank].getInt8(address - 0xd000)
     }
 
@@ -186,7 +186,7 @@ export class Memory {
     if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getUint16(address - 0x8000, true)
     }
-    if (address >= 0xd000 && address <= 0xdfff) {
+    if (this.isWramBanks(address)) {
       return this.wramBankViews[this.wramBank].getUint16(address - 0xd000, true)
     }
 
@@ -228,7 +228,7 @@ export class Memory {
       this.vramView.setUint8(address - 0x8000, value)
       return
     }
-    if (address >= 0xd000 && address <= 0xdfff) {
+    if (this.isWramBanks(address)) {
       this.wramBankViews[this.wramBank].setUint8(address - 0xd000, value)
       return
     }
@@ -252,19 +252,23 @@ export class Memory {
       this.vramView.setUint16(address - 0x8000, value, true)
       return
     }
-    if (address >= 0xd000 && address <= 0xdfff) {
+    if (this.isWramBanks(address)) {
       this.wramBankViews[this.wramBank].setUint16(address - 0xd000, value, true)
       return
     }
     this.memoryView.setUint16(address, value, true)
   }
 
-  isAccessingCartridge(address: number): boolean {
+  private isAccessingCartridge(address: number): boolean {
     return address <= 0x7FFF || (address >= 0xA000 && address <= 0xBFFF)
   }
 
-  isVram(address: number): boolean {
+  private isVram(address: number): boolean {
     return address >= 0x8000 && address <= 0x9fff
+  }
+
+  private isWramBanks(address: number): boolean {
+    return address >= 0xd000 && address <= 0xdfff
   }
 
   // see http://www.codeslinger.co.uk/pages/projects/gameboy/dma.html
