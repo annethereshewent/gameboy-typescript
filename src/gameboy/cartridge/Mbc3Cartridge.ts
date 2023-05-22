@@ -74,7 +74,7 @@ export class Mbc3Cartridge extends MbcCartridge {
 
       const maskedAddress = address & 0b11111111111111
 
-      const actualAddress = (this.romBankNumber << 14) + maskedAddress
+      const actualAddress = (this.romBankNumber << 14) | maskedAddress
       return read(actualAddress)
     }
     if (!this.ramAndTimerEnable) {
@@ -82,7 +82,7 @@ export class Mbc3Cartridge extends MbcCartridge {
     }
     if (this.ramBankNumberOrRtcRegister <= 3) {
       const maskedAddress = (address - 0xa000) & 0b1111111111111
-      const realAddress = ((this.ramBankNumberOrRtcRegister << 13) + maskedAddress)
+      const realAddress = ((this.ramBankNumberOrRtcRegister << 13) | maskedAddress)
 
       return ramRead(realAddress)
     } else {

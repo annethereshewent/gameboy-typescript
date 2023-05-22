@@ -39,6 +39,8 @@ export class Memory {
   currentHdmaSourceAddress = -1
   currentHdmaDestinationAddress = -1
 
+  currentTransferLength = -1
+
   private vramBank1Buffer = new ArrayBuffer(0x2000)
   private vramView = new DataView(this.vramBank1Buffer)
   private vramBytes = new Uint8Array(this.vramBank1Buffer)
@@ -54,6 +56,20 @@ export class Memory {
   cartridge?: Cartridge
 
   isGBC?: boolean
+
+  wramBankBuffers: ArrayBuffer[] = []
+  wramBankViews: DataView[] = []
+  wramBankBytes: Uint8Array[] = []
+
+  // create the wram banks
+  constructor() {
+    for (let i = 1; i < 8; i++) {
+      const arrayBuffer = new ArrayBuffer(0x1000)
+      this.wramBankBuffers[i] = arrayBuffer
+      this.wramBankViews[i] = new DataView(arrayBuffer)
+      this.wramBankBytes[i] = new Uint8Array(arrayBuffer)
+    }
+  }
 
   loadCartridge(gameDataView: DataView) {
     const cartridgeType = gameDataView.getUint8(CARTRIDGE_TYPE_ADDRESS) as CartridgeType
@@ -92,6 +108,16 @@ export class Memory {
     return this.isGBC
   }
 
+  get wramBank() {
+    const val = this.readByte(0xff70)
+    return val === 0 ? 1 : val & 0b111
+  }
+
+  set wramBank(newVal: number) {
+    const actualVal = (newVal & 0b111) === 0 ? 1 : newVal
+    this.writeByte(0xff70, actualVal & 0b111)
+  }
+
   reset() {
     this.memoryBytes.fill(0, 0, this.memoryBytes.length - 1)
     this.vramBytes.fill(0, 0, this.vramBytes.length - 1)
@@ -118,6 +144,9 @@ export class Memory {
     if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getUint8(address - 0x8000)
     }
+    if (address >= 0xd000 && address <= 0xdfff) {
+      return this.wramBankViews[this.wramBank].getUint8(address - 0xd000)
+    }
 
     return this.memoryView.getUint8(address)
   }
@@ -140,6 +169,9 @@ export class Memory {
     if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getInt8(address - 0x8000)
     }
+    if (address >= 0xd000 && address <= 0xdfff) {
+      return this.wramBankViews[this.wramBank].getInt8(address - 0xd000)
+    }
 
     return this.memoryView.getInt8(address)
   }
@@ -153,6 +185,9 @@ export class Memory {
     }
     if (this.isVram(address) && this.vramBank === 1) {
       return this.vramView.getUint16(address - 0x8000, true)
+    }
+    if (address >= 0xd000 && address <= 0xdfff) {
+      return this.wramBankViews[this.wramBank].getUint16(address - 0xd000, true)
     }
 
     return this.memoryView.getUint16(address, true)
@@ -193,6 +228,10 @@ export class Memory {
       this.vramView.setUint8(address - 0x8000, value)
       return
     }
+    if (address >= 0xd000 && address <= 0xdfff) {
+      this.wramBankViews[this.wramBank].setUint8(address - 0xd000, value)
+      return
+    }
 
     this.memoryView.setUint8(address, value)
 
@@ -211,6 +250,10 @@ export class Memory {
     }
     if (this.isVram(address) && this.isGBC && this.vramBank === 1) {
       this.vramView.setUint16(address - 0x8000, value, true)
+      return
+    }
+    if (address >= 0xd000 && address <= 0xdfff) {
+      this.wramBankViews[this.wramBank].setUint16(address - 0xd000, value, true)
       return
     }
     this.memoryView.setUint16(address, value, true)
@@ -248,6 +291,7 @@ export class Memory {
       this.currentHdmaSourceAddress = -1
       this.initialHdmaSourceAddress = sourceStartAddress
       this.initialHdmaDestinationAddress = destinationStartAddress
+      this.currentTransferLength = transferLength
     }
   }
 
@@ -259,8 +303,8 @@ export class Memory {
   }
 
   private set hdmaDestinationAddress(newAddress: number) {
-    const lowerByte = newAddress & 0b11110000
     const upperByte = (newAddress >> 8) & 0b11111
+    const lowerByte = newAddress & 0b11110000
 
     this.writeByte(0xff53, upperByte)
     this.writeByte(0xff54, lowerByte)
@@ -274,8 +318,8 @@ export class Memory {
   }
 
   private set hdmaSourceAddress(newAddress: number) {
-    const lowerByte = newAddress & 0b11110000
     const upperByte = (newAddress >> 8)
+    const lowerByte = newAddress & 0b11110000
 
     this.writeByte(0xff51, upperByte)
     this.writeByte(0xff52, lowerByte)
@@ -295,6 +339,9 @@ export class Memory {
   }
 
   doHblankHdmaTransfer() {
+    if (this.currentTransferLength === 0) {
+      return
+    }
     if (this.currentHdmaDestinationAddress === -1) {
       this.currentHdmaDestinationAddress = this.initialHdmaDestinationAddress
     }
@@ -310,6 +357,8 @@ export class Memory {
 
     this.hdmaDestinationAddress += 0x10
     this.hdmaSourceAddress += 0x10
+
+    this.currentTransferLength -= 0x10
 
     this.currentHdmaDestinationAddress = this.hdmaDestinationAddress
     this.currentHdmaSourceAddress = this.hdmaSourceAddress
