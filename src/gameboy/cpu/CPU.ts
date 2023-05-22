@@ -202,7 +202,7 @@ export class CPU {
           cycles = cycles / 2
         }
 
-        return cycles
+        return cycles / 4
       } else {
         throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
       }
@@ -219,7 +219,7 @@ export class CPU {
     if (this.isHalted) {
       this.updateTimers(4)
 
-      return 4
+      return 1
     }
 
     return this.performInstruction()
