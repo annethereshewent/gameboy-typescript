@@ -125,7 +125,8 @@ export class Memory {
     this.objectPaletteBytes.fill(0, 0, this.objectPaletteBytes.length - 1)
   }
 
-  readByte(address: number): number {
+  readByte(address: number, vramBankNumber?: number): number {
+    const vramBank = vramBankNumber != null ? vramBankNumber : this.vramBank
     if (this.cartridge == null) {
       throw new Error("game ROM not loaded into memory!")
     }
@@ -141,7 +142,7 @@ export class Memory {
     if (address === JOYPAD_REGISTER_ADDRESS) {
       return joypadRegister.getInput()
     }
-    if (this.isVram(address) && this.vramBank === 1) {
+    if (this.isVram(address) && vramBank === 1) {
       return this.vramView.getUint8(address - 0x8000)
     }
     if (this.isWramBanks(address)) {
@@ -155,9 +156,9 @@ export class Memory {
     return this.memoryView.getUint8(0xff4f) & 0b1
   }
 
-  set vramBank(newVal) {
-    this.memoryView.setUint8(0xff4f, newVal & 0b1)
-  }
+  // set vramBank(newVal) {
+  //   this.memoryView.setUint8(0xff4f, newVal & 0b1)
+  // }
 
   readSignedByte(address: number): number {
     if (this.cartridge == null) {

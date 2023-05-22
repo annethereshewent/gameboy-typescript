@@ -224,12 +224,12 @@ export class GPU {
       const xPosInTile = scrolledX % 8
       let yPosInTile = scrolledY % 8
 
-      this.memory.vramBank = 0
+      // this.memory.vramBank = 0
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
 
       // https://gbdev.io/pandocs/Tile_Maps.html see CGB section for details
-      this.memory.vramBank = 1
-      const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex)
+      // this.memory.vramBank = 1
+      const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex, 1)
 
       const backgroundPaletteNumber = tileByteAttributes & 0b111
       const tileVramBankNumber = getBit(tileByteAttributes, 3)
@@ -244,7 +244,7 @@ export class GPU {
 
       const paletteColors = this.getPaletteColors(backgroundPaletteStartAddress, Memory.BgpdRegisterAddress, backgroundPaletteIndexRegister)
 
-      this.memory.vramBank = tileVramBankNumber
+      // this.memory.vramBank = tileVramBankNumber
 
       if (yFlip) {
         yPosInTile = 7 - yPosInTile
@@ -254,8 +254,8 @@ export class GPU {
 
       const tileLineAddress = tileDataAddress + (tileByteIndex * 16) + tileBytePosition
 
-      const lowerByte = this.memory.readByte(tileLineAddress)
-      const upperByte = this.memory.readByte(tileLineAddress + 1)
+      const lowerByte = this.memory.readByte(tileLineAddress, tileVramBankNumber)
+      const upperByte = this.memory.readByte(tileLineAddress + 1, tileVramBankNumber)
 
       const bitIndex = xFlip ? xPosInTile : 7 - xPosInTile
 
@@ -303,7 +303,7 @@ export class GPU {
 
     const yPos = this.internalWindowLineCounter
     while (x < GPU.screenWidth) {
-      this.memory.vramBank = 0
+      // this.memory.vramBank = 0
 
       if (x < adjustedWindowX) {
         this.windowPixelsDrawn.push(false)
@@ -316,9 +316,9 @@ export class GPU {
 
       const tileByteIndex = memoryRead(tileMapAddress + tileMapIndex) + offset
 
-      this.memory.vramBank = 1
+      // this.memory.vramBank = 1
 
-      const tileByteAttributes = this.memory.readByte(tileMapAddress + tileMapIndex)
+      const tileByteAttributes = this.memory.readByte(tileMapAddress + tileMapIndex, 1)
 
       const backgroundPaletteNumber = tileByteAttributes & 0b111
       const tileVramBankNumber = getBit(tileByteAttributes, 3)
@@ -345,10 +345,10 @@ export class GPU {
       // 2 bytes are needed to represent one line in a tile, 8 lines total means 16 bytes to represent one tile.
       const tileLineAddress = windowDataAddress + (tileByteIndex * 16) + tileBytePosition
 
-      this.memory.vramBank = tileVramBankNumber
+      // this.memory.vramBank = tileVramBankNumber
 
-      const lowerByte = this.memory.readByte(tileLineAddress)
-      const upperByte = this.memory.readByte(tileLineAddress + 1)
+      const lowerByte = this.memory.readByte(tileLineAddress, tileVramBankNumber)
+      const upperByte = this.memory.readByte(tileLineAddress + 1, tileVramBankNumber)
 
       for (let i = 7; i >= 0; i--) {
         const bitPos = xFlip ? 7 - i : i
@@ -420,7 +420,7 @@ export class GPU {
     const spritePixelsDrawn: boolean[] = []
 
     for (const sprite of this.oamTable.entries) {
-      this.memory.vramBank = 0
+      // this.memory.vramBank = 0
       if (numSprites === maxNumberSprites) {
         break
       }
@@ -453,10 +453,10 @@ export class GPU {
 
       const paletteColors = this.getPaletteColors(spritePaletteStartAddress, Memory.ObpdRegisterAddress, objectPaletteIndexRegister)
 
-      this.memory.vramBank = sprite.tileVramBankNumber
+      // this.memory.vramBank = sprite.tileVramBankNumber
 
-      const lowerByte = this.memory.readByte(tileAddress)
-      const upperByte = this.memory.readByte(tileAddress+1)
+      const lowerByte = this.memory.readByte(tileAddress, sprite.tileVramBankNumber)
+      const upperByte = this.memory.readByte(tileAddress+1, sprite.tileVramBankNumber)
 
       for (let i = 0; i < 8; i++) {
         const bitPos = sprite.isXFlipped ? i : 7 - i
