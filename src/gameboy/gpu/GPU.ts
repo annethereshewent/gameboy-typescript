@@ -9,13 +9,14 @@ import { LCDMode } from "./registers/lcd_status/LCDMode"
 
 
 // see http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings
-// multiply by 4 to adjust for t-cycles
-const CYCLES_IN_HBLANK = 204 * 4
-const CYCLES_IN_OAM = 80 * 4
-const CYCLES_IN_VRAM = 172 * 4
+// multiply by 2 because currently the rendering is going way too fast
+// and i have no idea how to fix it otherwise 😫
+const CYCLES_IN_HBLANK = 204 * 2
+const CYCLES_IN_OAM = 80 * 2
+const CYCLES_IN_VRAM = 172 * 2
 
 const CYCLES_PER_SCANLINE = CYCLES_IN_HBLANK + CYCLES_IN_OAM + CYCLES_IN_VRAM
-const CYCLES_IN_VBLANK = 4560 * 4
+const CYCLES_IN_VBLANK = 4560 * 2
 
 const SCANLINES_PER_FRAME = 144
 
@@ -83,6 +84,8 @@ export class GPU {
     this.memory = memory
     this.registers = new GPURegisters(memory)
     this.oamTable = new OAMTable(memory)
+
+    this.registers.lineYRegister.value = 0x91
   }
 
   tick(cycles: number) {
@@ -90,9 +93,8 @@ export class GPU {
 
     if (!this.registers.lcdControlRegister.isLCDControllerOn()) {
       this.registers.lcdStatusRegister.mode = LCDMode.HBlank
-      // pokemon gold will get stuck in a loop if the controller is off and lineY isn't 145 at bootup.
-      // this may be hacky, but it seems to work out.
-      this.registers.lineYRegister.value = this.registers.lineYRegister.value  === 0x91 ? 0 : 0x91
+      // some games will not start unless the line y value becomes 0x91
+      this.registers.lineYRegister.value = this.registers.lineYRegister.value === 0 ? 0x91 : 0
       this.cycles = 0
       return
     }

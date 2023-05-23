@@ -40,6 +40,7 @@ export class Gameboy {
 
 
   execute(currentTime: number, context: CanvasRenderingContext2D) {
+
     const diff = currentTime - this.previousTime
 
     let cycles = 0
