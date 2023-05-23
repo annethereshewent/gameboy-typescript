@@ -1,4 +1,5 @@
 import { Gameboy } from "../Gameboy"
+import { GPU } from "../gpu/GPU"
 import { getBit } from "../misc/BitOperations"
 import { CPURegisters } from "./CPURegisters"
 import { Instruction } from "./Instruction"
@@ -21,19 +22,22 @@ export class CPU {
   isHalted = false
   interruptMasterEnabled = true
 
-  setInstructionMap = setInstructionMap
-  setCbMap = setCbMap
+  private setInstructionMap = setInstructionMap
+  private setCbMap = setCbMap
   instructionMap: Map<Number, Instruction> = new Map()
   cbMap: Map<Number, Instruction> = new Map()
 
-  counter = 0
-  timerCycles = 0
+  private counter = 0
+  private timerCycles = 0
 
   isDoubleSpeed = false
 
-  constructor(memory: Memory) {
-    this.registers = new CPURegisters(memory)
+  private gpu: GPU
+
+  constructor(memory: Memory, gpu: GPU) {
+    this.registers = new CPURegisters(memory, this)
     this.memory = memory
+    this.gpu = gpu
 
     this.setInstructionMap()
     this.setCbMap()
@@ -166,7 +170,7 @@ export class CPU {
     return cbInstruction.cycleTime
   }
 
-  performInstruction() {
+  tick() {
     try {
       const opCode = this.memory.readByte(this.registers.PC.value)
 
@@ -196,13 +200,11 @@ export class CPU {
           cycles = cbCycles
         }
 
-        this.updateTimers(cycles)
-
         if (this.isDoubleSpeed) {
           cycles = cycles / 2
         }
 
-        return cycles / 4
+        return cycles
       } else {
         throw new Error(`invalid instruction code: 0x${opCode.toString(16).toUpperCase()}`)
       }
@@ -212,16 +214,27 @@ export class CPU {
     }
   }
 
+  cycle(cycles: number) {
+    this.updateTimers(cycles)
+    this.gpu.tick(cycles)
+  }
+
   step(): number {
     this.checkInterrupts()
     this.checkIfDoubleSpeed()
 
     if (this.isHalted) {
-      this.updateTimers(4)
+      this.cycle(4)
 
-      return 1
+      return 4
     }
 
-    return this.performInstruction()
+    const cycles = this.tick()
+
+    if (cycles !== 0) {
+      this.cycle(cycles)
+    }
+
+    return cycles
   }
 }

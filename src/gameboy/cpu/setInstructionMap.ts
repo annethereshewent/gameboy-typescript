@@ -476,7 +476,7 @@ export function setInstructionMap(this: CPU) {
     get name() {
       return `LD (HL), 0x${memory.readByte(registers.PC.value).toString(16)}`
     },
-    cycleTime: 12,
+    cycleTime: 0,
     operation: () => {
       this.registers.writeByteIntoRegisterAddress(this.registers.HL)
     }
@@ -1879,7 +1879,7 @@ export function setInstructionMap(this: CPU) {
     get name() {
       return `LDH (0xff00 + 0x${memory.readByte(registers.PC.value).toString(16)}), A`
     },
-    cycleTime: 12,
+    cycleTime: 0,
     operation: () => {
       this.registers.writeToMemory8Bit(this.registers.A)
     }
@@ -1952,7 +1952,7 @@ export function setInstructionMap(this: CPU) {
     get name() {
       return `LD (${memory.readWord(registers.PC.value).toString(16)}), A`
     },
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.writeToMemory16bit(this.registers.A)
     }
@@ -1984,7 +1984,7 @@ export function setInstructionMap(this: CPU) {
     get name() {
       return `LDH A, (0x${memory.readByte(registers.PC.value).toString(16)})`
     },
-    cycleTime: 12,
+    cycleTime: 0,
     operation: () => {
       this.registers.loadFromBase(this.registers.A)
     }
@@ -2064,7 +2064,7 @@ export function setInstructionMap(this: CPU) {
     get name() {
       return `LD A, (0x${memory.readWord(registers.PC.value).toString(16)})`
     },
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.loadFrom16bitAddr(this.registers.A)
     }

@@ -7,6 +7,7 @@ import { FlagsRegisterPair } from "./FlagsRegisterPair"
 import { MemoryRegister } from "./memory_registers/MemoryRegister"
 import { TimerControlRegister } from "./memory_registers/TimerControlRegister"
 import { DividerRegister } from "./memory_registers/DividerRegister"
+import { CPU } from "./CPU"
 
 export class CPURegisters {
   A: CPURegister
@@ -36,9 +37,11 @@ export class CPURegisters {
   memory: Memory
 
   private registerDataView: DataView
+  private cpu: CPU
 
-  constructor(memory: Memory) {
+  constructor(memory: Memory, cpu: CPU) {
 
+    this.cpu = cpu
     this.registerDataView = new DataView(new ArrayBuffer(12))
 
     this.A = new CPURegister("A", 0, 1, this.registerDataView, false)
@@ -73,10 +76,10 @@ export class CPURegisters {
   }
 
   initialize() {
-    this.AF.value = 0x11b0
-    this.BC.value = 0x13
-    this.DE.value = 0xd8
-    this.HL.value = 0x14d
+    this.AF.value = 0x1180
+    this.BC.value = 0x0
+    this.DE.value = 0xff56
+    this.HL.value = 0xd
     this.SP.value = 0xfffe
     this.PC.value = 0x100
   }
@@ -205,19 +208,28 @@ export class CPURegisters {
   }
 
   loadFromBase(target: CPURegister) {
+    this.cpu.cycle(4)
     const baseAddress = this.memory.readByte(this.PC.value)
 
     this.PC.value++
 
     target.value = this.memory.readByte(0xff00 + baseAddress)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   loadFrom16bitAddr(target: CPURegister) {
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
     const memoryAddress = this.memory.readWord(this.PC.value)
 
     this.PC.value += 2
 
     target.value = this.memory.readByte(memoryAddress)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   loadByte(target: CPURegister, source: CPURegister) {
@@ -342,17 +354,29 @@ export class CPURegisters {
   }
 
   writeToMemory8Bit(source: CPURegister) {
+    this.cpu.cycle(4)
+
     const baseAddress = this.memory.readByte(this.PC.value)
+
     this.PC.value++
 
+    this.cpu.cycle(4)
+
     this.memory.writeByte(0xff00 + baseAddress, source.value, "writeToMemory8Bit")
+
+    this.cpu.cycle(4)
   }
 
   writeToMemory16bit(source: CPURegister) {
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
     const memoryAddress = this.memory.readWord(this.PC.value)
     this.PC.value += 2
 
     this.memory.writeByte(memoryAddress, source.value, "writeToMemory16bit")
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   writeStackPointerToMemory() {
@@ -381,8 +405,14 @@ export class CPURegisters {
 
   writeByteIntoRegisterAddress(target: CPURegister) {
     if (target.is16Bit) {
+      this.cpu.cycle(4)
+
       this.memory.writeByte(target.value, this.memory.readByte(this.PC.value), "writeByteIntoRegisterAddr")
+
       this.PC.value++
+
+      this.cpu.cycle(4)
+      this.cpu.cycle(4)
     } else {
       throw new Error(`invalid register selected: ${target.name}; need a 16 bit register.`)
     }
@@ -916,13 +946,18 @@ export class CPURegisters {
   }
 
   testBitAtRegisterAddr(bitPos: number) {
+    this.cpu.cycle(4)
     const byteToTest = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit = (byteToTest >> bitPos) & 1
 
     this.F.zero = bit === 0
     this.F.halfCarry = true
     this.F.subtract = false
+
+    this.cpu.cycle(4)
   }
 
   resetBit(bitPos: number, target: CPURegister) {
@@ -930,11 +965,18 @@ export class CPURegisters {
   }
 
   resetBitAtRegisterAddr(bitPos: number) {
+    this.cpu.cycle(4)
     let result = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     result = result & ~(0b1 << bitPos)
 
+    this.cpu.cycle(4)
+
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
   }
 
   shiftLeft(target: CPURegister) {
@@ -1023,11 +1065,17 @@ export class CPURegisters {
   }
 
   setBitAtRegisterAddress(bitPos: number) {
+    this.cpu.cycle(4)
     let result = this.memory.readByte(this.HL.value)
+    this.cpu.cycle(4)
 
     result |= 1 << bitPos
 
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
+
+    this.cpu.cycle(4)
   }
 
   outputState() {

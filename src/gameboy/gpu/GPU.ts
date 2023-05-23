@@ -84,7 +84,7 @@ export class GPU {
     this.oamTable = new OAMTable(memory)
   }
 
-  step(cycles: number) {
+  tick(cycles: number) {
     const interruptRequestRegister = new InterruptRequestRegister(this.memory)
 
     if (!this.registers.lcdControlRegister.isLCDControllerOn()) {

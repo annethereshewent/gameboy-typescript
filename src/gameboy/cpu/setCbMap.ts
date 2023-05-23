@@ -563,7 +563,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x46, {
     name: "BIT 0, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(0)
     }
@@ -627,7 +627,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x4e, {
     name: "BIT 1, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(1)
     }
@@ -691,7 +691,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x56, {
     name: "BIT 2, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(2)
     }
@@ -755,7 +755,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x5e, {
     name: "BIT 3, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(3)
     }
@@ -819,7 +819,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x66, {
     name: "BIT 4, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(4)
     }
@@ -883,7 +883,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x6e, {
     name: "BIT 5, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(5)
     }
@@ -947,7 +947,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x76, {
     name: "BIT 6, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(6)
     }
@@ -1011,7 +1011,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x7e, {
     name: "BIT 7, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.testBitAtRegisterAddr(7)
     }
@@ -1074,7 +1074,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x86, {
     name: "RES 0, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(0)
     }
@@ -1138,7 +1138,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x8e, {
     name: "RES 1, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(1)
     }
@@ -1202,7 +1202,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x96, {
     name: "RES 2, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(2)
     }
@@ -1266,7 +1266,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0x9e, {
     name: "RES 3, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(3)
     }
@@ -1330,7 +1330,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xa6, {
     name: "RES 4, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(4)
     }
@@ -1394,7 +1394,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xae, {
     name: "RES 5, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(5)
     }
@@ -1458,7 +1458,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xb6, {
     name: "RES 6, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(6)
     }
@@ -1522,7 +1522,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xbe, {
     name: "RES 7, (HL) ",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.resetBitAtRegisterAddr(7)
     }
@@ -1586,7 +1586,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xc6, {
     name: "SET 0, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(0)
     }
@@ -1650,7 +1650,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xce, {
     name: "SET 1, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(1)
     }
@@ -1714,7 +1714,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xd6, {
     name: "SET 2, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(2)
     }
@@ -1778,7 +1778,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xde, {
     name: "SET 3, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(3)
     }
@@ -1842,7 +1842,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xe6, {
     name: "SET 4, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(4)
     }
@@ -1906,7 +1906,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xee, {
     name: "SET 5, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(5)
     }
@@ -1970,7 +1970,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xf6, {
     name: "SET 6, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(6)
     }
@@ -2034,7 +2034,7 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xfe, {
     name: "SET 7, (HL)",
-    cycleTime: 16,
+    cycleTime: 0,
     operation: () => {
       this.registers.setBitAtRegisterAddress(7)
     }
@@ -2042,9 +2042,11 @@ export function setCbMap(this: CPU) {
 
   this.cbMap.set(0xff, {
     name: "SET 7, A",
-    cycleTime: 8,
+    cycleTime: 0,
     operation: () => {
+      this.cycle(4)
       this.registers.A.setBit(7, 1)
+      this.cycle(4)
     }
   })
 }
