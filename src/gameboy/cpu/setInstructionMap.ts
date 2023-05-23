@@ -458,7 +458,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x34, {
     name: "INC (HL)",
-    cycleTime: 12,
+    cycleTime: 0,
     operation: () => {
       this.registers.incrementMemoryValAtRegisterAddr(this.registers.HL)
     }
@@ -466,7 +466,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x35, {
     name: "DEC (HL)",
-    cycleTime: 12,
+    cycleTime: 0,
     operation: () => {
        this.registers.decrementMemoryValAtRegisterAddr(this.registers.HL)
     }
@@ -1122,7 +1122,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0x86, {
     name: "ADD A, (HL)",
-    cycleTime: 4,
+    cycleTime: 8,
     operation: () => {
       this.registers.addFromRegisterAddr(this.registers.A, this.registers.HL)
     }
@@ -1562,7 +1562,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xBD, {
     name: "CP L",
-    cycleTime: 8,
+    cycleTime: 4,
     operation: () => {
       this.registers.compare(this.registers.L)
     }
@@ -1570,7 +1570,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xBE, {
     name: "CP (HL)",
-    cycleTime: 4,
+    cycleTime: 8,
     operation: () => {
       this.registers.compareFromRegisterAddr(this.registers.HL)
     }
@@ -1694,7 +1694,7 @@ export function setInstructionMap(this: CPU) {
 
   this.instructionMap.set(0xCB, {
     name: "PREFIX CB",
-    cycleTime: 4,
+    cycleTime: 0,
     operation: () => {
 
     }

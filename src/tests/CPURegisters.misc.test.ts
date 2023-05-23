@@ -11,10 +11,10 @@ test("it initializes registers to the proper values", () => {
 
   const { registers } = cpu
 
-  expect(registers.AF.value).toBe(0x11b0)
-  expect(registers.BC.value).toBe(0x13)
-  expect(registers.DE.value).toBe(0xd8)
-  expect(registers.HL.value).toBe(0x14d)
+  expect(registers.AF.value).toBe(0x1180)
+  expect(registers.BC.value).toBe(0x0)
+  expect(registers.DE.value).toBe(0xff56)
+  expect(registers.HL.value).toBe(0xd)
   expect(registers.SP.value).toBe(0xfffe)
   expect(registers.PC.value).toBe(0x100)
 })

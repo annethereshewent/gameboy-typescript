@@ -78,7 +78,7 @@ export class CPU {
 
     this.timerCycles += cycles
 
-    if (this.timerCycles >= timerControlRegister.getClockFrequency()) {
+    while (this.timerCycles >= timerControlRegister.getClockFrequency()) {
       this.timerCycles -= timerControlRegister.getClockFrequency()
       // if overflow happens
       if (timerCounterRegister.value === 0xff) {
@@ -87,9 +87,7 @@ export class CPU {
       } else {
         timerCounterRegister.value++
       }
-
     }
-
   }
 
   checkInterrupts() {

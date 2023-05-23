@@ -360,10 +360,9 @@ export class CPURegisters {
 
     this.PC.value++
 
-    this.cpu.cycle(4)
-
     this.memory.writeByte(0xff00 + baseAddress, source.value, "writeToMemory8Bit")
 
+    this.cpu.cycle(4)
     this.cpu.cycle(4)
   }
 
@@ -621,6 +620,8 @@ export class CPURegisters {
   }
 
   rotateRegisterLeft(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit7 = (target.value >> 7) & 1
     target.value = (target.value << 1) + bit7
 
@@ -628,9 +629,13 @@ export class CPURegisters {
     this.F.carry = bit7 === 1
     this.F.subtract = false
     this.F.halfCarry = false
+
+    this.cpu.cycle(4)
   }
 
   rotateRegisterLeftCarry(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit7 = target.value >> 7
     const carry = this.F.carry ? 1 : 0
 
@@ -642,10 +647,16 @@ export class CPURegisters {
     this.F.zero = result === 0
 
     target.value = result
+
+    this.cpu.cycle(4)
   }
 
   rotateAtRegisterAddrLeftCarry() {
+    this.cpu.cycle(4)
+
     const byte = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit7 = byte >> 7
     const result = ((byte << 1) + (this.F.carry ? 1 : 0)) & 0xff
@@ -656,9 +667,14 @@ export class CPURegisters {
     this.F.zero = result === 0
 
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
+
+    this.cpu.cycle(4)
   }
 
   rotateRegisterRight(target: CPURegister) {
+    this.cpu.cycle(4)
     const bit0 = target.value & 1
     target.value = (target.value >> 1) + (bit0 << 7)
 
@@ -666,9 +682,13 @@ export class CPURegisters {
     this.F.carry = bit0 === 1
     this.F.subtract = false
     this.F.halfCarry = false
+
+    this.cpu.cycle(4)
   }
 
   rotateRegisterRightCarry(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit0 = target.value & 1
     const carry = this.F.carry ? 1 : 0
 
@@ -679,11 +699,15 @@ export class CPURegisters {
     this.F.halfCarry = false
     this.F.subtract = false
 
-
+    this.cpu.cycle(4)
   }
 
   rotateAtRegisterAddrRightCarry() {
+    this.cpu.cycle(4)
+
     const byte = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit0 = byte & 1
 
@@ -694,13 +718,18 @@ export class CPURegisters {
     this.F.halfCarry = false
     this.F.subtract = false
 
-
-
     this.memory.writeByte(this.HL.value, newValue)
+
+    this.cpu.cycle(4)
+
+    this.cpu.cycle(4)
   }
 
   rotateValueAtRegisterAddrLeft() {
+    this.cpu.cycle(4)
     const byte = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit7 = (byte >> 7) & 1
     const newValue = (byte << 1) + bit7
@@ -711,10 +740,17 @@ export class CPURegisters {
     this.F.halfCarry = false
 
     this.memory.writeByte(this.HL.value, newValue)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   rotateValueAtRegisterAddrRight() {
+    this.cpu.cycle(4)
+
     const byte = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit0 = byte & 1
     const newValue = (byte >> 1) + (bit0 << 7)
@@ -725,6 +761,9 @@ export class CPURegisters {
     this.F.halfCarry = false
 
     this.memory.writeByte(this.HL.value, newValue)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   rotateRight() {
@@ -794,22 +833,32 @@ export class CPURegisters {
     const oldValue = this.memory.readByte(target.value)
     const newValue = (oldValue + 1) & 0xff
 
+    this.cpu.cycle(4)
+
     this.F.subtract = false
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) < (oldValue & 0x0f)
 
     this.memory.writeByte(target.value, newValue, "incrementMemoryValAtRegisterAddr")
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   decrementMemoryValAtRegisterAddr(target: CPURegister) {
     const oldValue = this.memory.readByte(target.value)
     const newValue = (oldValue - 1) & 0xff
 
+    this.cpu.cycle(4)
+
     this.F.subtract = true
     this.F.zero = newValue === 0
     this.F.halfCarry = (newValue & 0x0f) > (oldValue & 0x0f)
 
     this.memory.writeByte(target.value, newValue, "decrementMemoryValAtRegisterAddr")
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   callFunction() {
@@ -910,6 +959,8 @@ export class CPURegisters {
   }
 
   swap(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const lowerNibble = target.value & 0b1111
     const upperNibble = target.value >> 4
 
@@ -919,10 +970,16 @@ export class CPURegisters {
     this.F.carry = false
     this.F.subtract = false
     this.F.halfCarry = false
+
+    this.cpu.cycle(4)
   }
 
   swapAtRegisterAddr() {
+    this.cpu.cycle(4)
+
     let byte = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const lowerNibble = byte & 0b1111
     const upperNibble = byte >> 4
@@ -935,14 +992,21 @@ export class CPURegisters {
     this.F.halfCarry = false
 
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   testBit(bitPos: number, target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit = (target.value >> bitPos) & 1
 
     this.F.zero = bit === 0
     this.F.halfCarry = true
     this.F.subtract = false
+
+    this.cpu.cycle(4)
   }
 
   testBitAtRegisterAddr(bitPos: number) {
@@ -961,7 +1025,11 @@ export class CPURegisters {
   }
 
   resetBit(bitPos: number, target: CPURegister) {
+    this.cpu.cycle(4)
+
     target.value = target.value & ~(0b1 << bitPos)
+
+    this.cpu.cycle(4)
   }
 
   resetBitAtRegisterAddr(bitPos: number) {
@@ -972,14 +1040,15 @@ export class CPURegisters {
 
     result = result & ~(0b1 << bitPos)
 
-    this.cpu.cycle(4)
-
     this.memory.writeByte(this.HL.value, result)
 
+    this.cpu.cycle(4)
     this.cpu.cycle(4)
   }
 
   shiftLeft(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit7 = (target.value >> 7) & 1
     target.value = (target.value << 1) & 0xff
 
@@ -987,10 +1056,16 @@ export class CPURegisters {
     this.F.subtract = false
     this.F.halfCarry = false
     this.F.zero = target.value === 0
+
+    this.cpu.cycle(4)
   }
 
   shiftLeftAtRegisterAddr() {
+    this.cpu.cycle(4)
+
     let result = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit7 = (result >> 7) & 1
     result = (result << 1) & 0xff
@@ -1001,9 +1076,14 @@ export class CPURegisters {
     this.F.zero = result === 0
 
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   shiftRight(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit7 = target.value >> 7
     const bit0 = target.value & 1
     target.value = (target.value >> 1) & 0xff
@@ -1014,9 +1094,13 @@ export class CPURegisters {
     this.F.subtract = false
     this.F.halfCarry = false
     this.F.zero = target.value === 0
+
+    this.cpu.cycle(4)
   }
 
   shiftRightCarry(target: CPURegister) {
+    this.cpu.cycle(4)
+
     const bit0 = target.value & 1
 
     target.value = (target.value >> 1) & 0xff
@@ -1025,10 +1109,16 @@ export class CPURegisters {
     this.F.zero = target.value === 0
     this.F.subtract = false
     this.F.halfCarry = false
+
+    this.cpu.cycle(4)
   }
 
   shiftRightCarryAtRegisterAddr() {
+    this.cpu.cycle(4)
+
     let result = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit0 = result & 1
 
@@ -1044,10 +1134,17 @@ export class CPURegisters {
     this.F.halfCarry = false
 
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   shiftRightAtRegisterAddr() {
+    this.cpu.cycle(4)
+
     let result = this.memory.readByte(this.HL.value)
+
+    this.cpu.cycle(4)
 
     const bit7 = result >> 7
     const bit0 = result & 1
@@ -1062,6 +1159,9 @@ export class CPURegisters {
     this.F.zero = result === 0
 
     this.memory.writeByte(this.HL.value, result)
+
+    this.cpu.cycle(4)
+    this.cpu.cycle(4)
   }
 
   setBitAtRegisterAddress(bitPos: number) {
@@ -1074,7 +1174,6 @@ export class CPURegisters {
     this.memory.writeByte(this.HL.value, result)
 
     this.cpu.cycle(4)
-
     this.cpu.cycle(4)
   }
 
