@@ -11,4 +11,4 @@ This is a gameboy emulator written in typescript. Currently it plays most Gamebo
 - Pokemon Trading Card Game (with some graphical glitches)
 - Super Mario Bros Deluxe
 
-Sound is yet to be implemented. Emulator is not yet cycle accurate, still a WIP. 
+Sound is yet to be implemented. Emulator now passes all of Blargg's CPU and memory timing tests, as well as all of the cpu instruction tests. Emulator also passes CGB and DMG acid tests for graphics rendering.
