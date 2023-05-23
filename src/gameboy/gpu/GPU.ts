@@ -9,12 +9,13 @@ import { LCDMode } from "./registers/lcd_status/LCDMode"
 
 
 // see http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings
-const CYCLES_IN_HBLANK = 204
-const CYCLES_IN_OAM = 80
-const CYCLES_IN_VRAM = 172
+// multiply by 4 to adjust for t-cycles
+const CYCLES_IN_HBLANK = 204 * 4
+const CYCLES_IN_OAM = 80 * 4
+const CYCLES_IN_VRAM = 172 * 4
 
 const CYCLES_PER_SCANLINE = CYCLES_IN_HBLANK + CYCLES_IN_OAM + CYCLES_IN_VRAM
-const CYCLES_IN_VBLANK = 4560
+const CYCLES_IN_VBLANK = 4560 * 4
 
 const SCANLINES_PER_FRAME = 144
 
@@ -84,7 +85,7 @@ export class GPU {
     this.oamTable = new OAMTable(memory)
   }
 
-  step(cycles: number) {
+  tick(cycles: number) {
     const interruptRequestRegister = new InterruptRequestRegister(this.memory)
 
     if (!this.registers.lcdControlRegister.isLCDControllerOn()) {

@@ -1,8 +1,10 @@
 import { CPU } from "../gameboy/cpu/CPU"
 import { Memory } from "../gameboy/cpu/Memory"
+import { GPU } from "../gameboy/gpu/GPU"
 
 const memory = new Memory()
-const cpu = new CPU(memory)
+const gpu: GPU = jest.createMockFromModule("../gameboy/gpu/GPU")
+const cpu = new CPU(memory, gpu)
 
 const arrayBuffer = new ArrayBuffer(0x1000)
 const gameDataView = new DataView(arrayBuffer)
