@@ -44,6 +44,7 @@ export class GPURegisters {
 
     // default value according to docs
     this.lcdControlRegister.value = 0x83
+    this.lineYRegister.value = 0x91
   }
 }
 

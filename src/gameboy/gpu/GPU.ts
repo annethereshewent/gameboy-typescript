@@ -9,14 +9,12 @@ import { LCDMode } from "./registers/lcd_status/LCDMode"
 
 
 // see http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings
-// multiply by 2 because currently the rendering is going way too fast
-// and i have no idea how to fix it otherwise 😫
-const CYCLES_IN_HBLANK = 204 * 2
-const CYCLES_IN_OAM = 80 * 2
-const CYCLES_IN_VRAM = 172 * 2
+const CYCLES_IN_HBLANK = 204
+const CYCLES_IN_OAM = 80
+const CYCLES_IN_VRAM = 172
 
 const CYCLES_PER_SCANLINE = CYCLES_IN_HBLANK + CYCLES_IN_OAM + CYCLES_IN_VRAM
-const CYCLES_IN_VBLANK = 4560 * 2
+const CYCLES_IN_VBLANK = 4560
 
 const SCANLINES_PER_FRAME = 144
 
@@ -93,8 +91,7 @@ export class GPU {
 
     if (!this.registers.lcdControlRegister.isLCDControllerOn()) {
       this.registers.lcdStatusRegister.mode = LCDMode.HBlank
-      // some games will not start unless the line y value becomes 0x91
-      this.registers.lineYRegister.value = this.registers.lineYRegister.value === 0 ? 0x91 : 0
+      this.registers.lineYRegister.value = 0x91
       this.cycles = 0
       return
     }

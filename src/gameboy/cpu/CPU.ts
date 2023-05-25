@@ -185,17 +185,10 @@ export class CPU {
 
         instruction.operation()
 
-        let cbCycles = null
+        let cycles = instruction.cycleTime
 
         if (instruction.name === "PREFIX CB") {
-          cbCycles = this.performCbInstruction()
-        }
-
-        let cycles = 0
-        if (cbCycles == null) {
-          cycles = instruction.cycleTime
-        } else {
-          cycles = cbCycles
+          this.performCbInstruction()
         }
 
         if (this.isDoubleSpeed) {
