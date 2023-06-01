@@ -43,15 +43,13 @@ export class Gameboy {
 
     const diff = currentTime - this.previousTime
 
-    let cycles = 0
     if (diff >= INTERVAL || this.previousTime === 0) {
       this.fps = 1000 / diff
 
       this.previousTime = currentTime - (diff % INTERVAL)
 
       while (this.cycles <= GPU.CyclesPerFrame) {
-        cycles = this.cpu.step()
-        this.cycles += cycles
+        this.cycles += this.cpu.step()
       }
 
       Joypad.handleInput()
