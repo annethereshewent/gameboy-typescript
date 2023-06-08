@@ -1,3 +1,4 @@
+import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { getBit, resetBit } from "../misc/BitOperations"
@@ -29,34 +30,34 @@ const COLOR_GRAYSCALE = [
   { red: 0, green: 0, blue: 0 },
 ]
 
-const COLOR_INVERTED = [
-  // black
-  { red: 0, green: 0, blue: 0 },
-  // gray
-  { red: 96, green: 96, blue: 96 },
-  // light grey
-  { red: 192, green: 192, blue: 192 },
-  // white
-  { red: 255, green: 255, blue: 255 },
-]
+// const COLOR_INVERTED = [
+//   // black
+//   { red: 0, green: 0, blue: 0 },
+//   // gray
+//   { red: 96, green: 96, blue: 96 },
+//   // light grey
+//   { red: 192, green: 192, blue: 192 },
+//   // white
+//   { red: 255, green: 255, blue: 255 },
+// ]
 
-const COLOR_ORIGINAL = [
-  // lightest green
-  { red: 155, green: 188, blue: 15 },
-  // light green
-  { red: 139, green: 172, blue: 15 },
-  // green
-  { red: 48, green: 98, blue: 48 },
-  // dark green
-  { red: 15, green: 56, blue: 15 },
-]
+// const COLOR_ORIGINAL = [
+//   // lightest green
+//   { red: 155, green: 188, blue: 15 },
+//   // light green
+//   { red: 139, green: 172, blue: 15 },
+//   // green
+//   { red: 48, green: 98, blue: 48 },
+//   // dark green
+//   { red: 15, green: 56, blue: 15 },
+// ]
 
 export class GPU {
-  static screenWidth = 160
-  static screenHeight = 144
-  static offscreenHeight = 154
+  static readonly screenWidth = 160
+  static readonly screenHeight = 144
+  static readonly offscreenHeight = 154
 
-  static CyclesPerFrame = (CYCLES_PER_SCANLINE * SCANLINES_PER_FRAME) + CYCLES_IN_VBLANK
+  static readonly CyclesPerFrame = (CYCLES_PER_SCANLINE * SCANLINES_PER_FRAME) + CYCLES_IN_VBLANK
 
   windowPixelsDrawn: boolean[] = []
   backgroundPixelsDrawn: boolean[] = []
@@ -68,7 +69,6 @@ export class GPU {
 
   isGBC = false
 
-  // color is determined by the palette registers
   colors = COLOR_GRAYSCALE
 
   memory: Memory
@@ -115,7 +115,7 @@ export class GPU {
             this.registers.lcdStatusRegister.mode = LCDMode.SearchingOAM
           }
 
-          this.cycles %= CYCLES_IN_HBLANK
+          this.cycles -= CYCLES_IN_HBLANK
         }
         break
       case LCDMode.VBlank:
@@ -134,7 +134,7 @@ export class GPU {
             this.internalWindowLineCounter = 0
           }
 
-          this.cycles %= CYCLES_PER_SCANLINE
+          this.cycles -= CYCLES_PER_SCANLINE
         }
 
         break
@@ -142,7 +142,7 @@ export class GPU {
         if (this.cycles >= CYCLES_IN_OAM) {
           this.registers.lcdStatusRegister.mode = LCDMode.TransferringToLCD
 
-          this.cycles %= CYCLES_IN_OAM
+          this.cycles -= CYCLES_IN_OAM
         }
         break
       case LCDMode.TransferringToLCD:
@@ -161,7 +161,7 @@ export class GPU {
 
           this.registers.lcdStatusRegister.mode = LCDMode.HBlank
 
-          this.cycles %= CYCLES_IN_VRAM
+          this.cycles -= CYCLES_IN_VRAM
         }
         break
     }
@@ -224,11 +224,9 @@ export class GPU {
       const xPosInTile = scrolledX % 8
       let yPosInTile = scrolledY % 8
 
-      // this.memory.vramBank = 0
       const tileByteIndex = memoryRead(lcdControlRegister.bgTileMapArea()  + tileMapIndex) + offset
 
       // https://gbdev.io/pandocs/Tile_Maps.html see CGB section for details
-      // this.memory.vramBank = 1
       const tileByteAttributes = this.memory.readByte(lcdControlRegister.bgTileMapArea() + tileMapIndex, 1)
 
       const backgroundPaletteNumber = tileByteAttributes & 0b111
@@ -243,8 +241,6 @@ export class GPU {
       const backgroundPaletteStartAddress = backgroundPaletteNumber * colorsPerPalette * bytesPerColor
 
       const paletteColors = this.getPaletteColors(backgroundPaletteStartAddress, Memory.BgpdRegisterAddress, backgroundPaletteIndexRegister)
-
-      // this.memory.vramBank = tileVramBankNumber
 
       if (yFlip) {
         yPosInTile = 7 - yPosInTile
