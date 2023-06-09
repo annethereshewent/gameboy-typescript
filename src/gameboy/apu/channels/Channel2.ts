@@ -86,7 +86,7 @@ export class Channel2 {
 
     const sampleWithVolume = this.volume !== 0 && this.soundOnRegister.isChannel2On ? amplitude * channelVolume * this.volume :  0.0
 
-    return (sampleWithVolume / 7.5)
+    return (sampleWithVolume / 7.5) - 1
   }
 
   clockLength() {
