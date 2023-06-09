@@ -58,7 +58,7 @@ export class AudioBufferPlayer {
    * credit to https://github.com/roblouie/gameboy-emulator for these methods
    *
    */
-  push(elements: Float32Array) {
+  private push(elements: Float32Array) {
     const readPosition = Atomics.load(this.readPointer, 0)
     const writePosition = Atomics.load(this.writePointer, 0)
 
@@ -83,7 +83,7 @@ export class AudioBufferPlayer {
     return howManyToWrite;
   }
 
-  availableWrite() {
+  private availableWrite() {
     const readPosition = Atomics.load(this.readPointer, 0)
     const writePosition = Atomics.load(this.writePointer, 0)
     return this._availableWrite(readPosition, writePosition)
