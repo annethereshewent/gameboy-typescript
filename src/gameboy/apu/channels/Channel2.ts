@@ -36,6 +36,9 @@ export class Channel2 {
   private periodTimer = 0
   private lengthTimer = 0
 
+  frequencyTimer = 0
+  waveDutyPosition = 0
+
   constructor(memory: Memory) {
     this.memory = memory
 
@@ -47,13 +50,7 @@ export class Channel2 {
     this.soundOnRegister = new SoundOnRegister(this.memory)
     this.soundPanningRegister = new SoundPanningRegister(this.memory)
     this.masterVolumeAndVinPanningRegister = new MasterVolumeAndVinPanningRegister(this.memory)
-
-    this.volume = this.channel2VolumeAndEnvelopeRegister.initialVolume
-    this.lengthTimer = 64 - this.channel2LengthTimerAndDutyRegister.initialLengthTimer
   }
-
-  frequencyTimer = this.getFrequencyTimer()
-  waveDutyPosition = 0
 
   tick(cycles: number) {
     this.frequencyTimer -= cycles
@@ -83,7 +80,7 @@ export class Channel2 {
   getSample(channel: StereoChannel) {
     const amplitude = this.dutyTable[this.channel2LengthTimerAndDutyRegister.waveDuty][this.waveDutyPosition]
 
-    let channelVolume = 0
+    let channelVolume = 0.0
 
     if (channel === StereoChannel.Left && this.soundPanningRegister.mixChannel2Left) {
       channelVolume = this.masterVolumeAndVinPanningRegister.leftVolume
@@ -91,13 +88,9 @@ export class Channel2 {
       channelVolume = this.masterVolumeAndVinPanningRegister.rightVolume
     }
 
-    let sampleWithVolume = 0
+    const sampleWithVolume = this.volume !== 0 && this.soundOnRegister.isChannel2On ? amplitude * channelVolume * this.volume :  0.0
 
-    if (this.volume !== 0 && this.soundOnRegister.isChannel2On) {
-      sampleWithVolume = amplitude * (channelVolume + this.volume)
-    }
-
-    return (sampleWithVolume / 7.5) - 1.0
+    return (sampleWithVolume / 7.5)
   }
 
   clockLength() {

@@ -1,15 +1,17 @@
 export class AudioBufferPlayer {
   private audioContext: AudioContext
 
-  private readonly sampleBufferLength = 1024
+  private leftAudioBuffer: SharedArrayBuffer
+  private leftAudioData: Float32Array
 
-  private audioBuffer: SharedArrayBuffer
-  private audioData: Float32Array
+  private rightAudioBuffer: SharedArrayBuffer
+  private rightAudioData: Float32Array
+
   private readPointer = new Uint32Array(new SharedArrayBuffer(4))
   private writePointer = new Uint32Array(new SharedArrayBuffer(4))
 
-  private leftSamples = new Float32Array(1024)
-  private rightSamples = new Float32Array(1024)
+  private leftSamples = new Float32Array(128)
+  private rightSamples = new Float32Array(128)
 
   private sampleIndex = 0
 
@@ -18,8 +20,11 @@ export class AudioBufferPlayer {
   constructor(audioContext: AudioContext) {
     this.audioContext = audioContext
 
-    this.audioBuffer = new SharedArrayBuffer(this.audioContext.sampleRate / 20 * Float32Array.BYTES_PER_ELEMENT)
-    this.audioData = new Float32Array(this.audioBuffer)
+    this.leftAudioBuffer = new SharedArrayBuffer(128 * Float32Array.BYTES_PER_ELEMENT)
+    this.leftAudioData = new Float32Array(this.leftAudioBuffer)
+
+    this.rightAudioBuffer = new SharedArrayBuffer(128 * Float32Array.BYTES_PER_ELEMENT)
+    this.rightAudioData = new Float32Array(this.rightAudioBuffer)
 
     this.addAudioWorklet()
   }
@@ -32,9 +37,8 @@ export class AudioBufferPlayer {
       "audio-processor",
       {
         processorOptions: {
-          audioData: this.audioData,
-          readPointer: this.readPointer,
-          writePointer: this.writePointer
+          leftAudioData: this.leftAudioData,
+          rightAudioData: this.rightAudioData
         }
       }
     )
@@ -49,10 +53,18 @@ export class AudioBufferPlayer {
     this.sampleIndex++
 
     // either leftSamples or rightSamples would do here
-    if (this.sampleIndex === this.leftSamples.length) {
-
-
+    if (this.sampleIndex === this.leftAudioData.length) {
+      this.copyData(this.leftSamples, this.leftAudioData)
+      this.copyData(this.rightSamples, this.rightAudioData)
       this.sampleIndex = 0
     }
   }
+
+  copyData(input: Float32Array, output: Float32Array) {
+    for (let i = 0; i < output.length; i++) {
+      output[i] = input[i]
+    }
+  }
 }
+
+

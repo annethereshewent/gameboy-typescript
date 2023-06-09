@@ -2,10 +2,12 @@ import './App.scss'
 import JSZip from 'jszip'
 import { Gameboy } from './gameboy/Gameboy'
 function App() {
-  const gameboy = new Gameboy()
 
+
+  let gameboy: Gameboy|null = null
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    gameboy = new Gameboy()
     if (e.target.files != null) {
       const file = e.target.files[0]
 
@@ -25,8 +27,6 @@ function App() {
         gameboy.loadCartridge(rom as ArrayBuffer)
 
         gameboy.run()
-
-        addNoise()
       }
     }
   }
@@ -54,7 +54,14 @@ function App() {
         <input type="file" onChange={handleFileChange} />
         <label>Toggle logs</label>
         <input type="checkbox" onChange={(e: React.ChangeEvent<HTMLInputElement>) => Gameboy.shouldOutputLogs = e.target.checked ? true : false} />
-        <button type="button" onClick={() => gameboy.isRunning = false}>Stop execution</button>
+        <button type="button" onClick={() => {
+            if (gameboy != null) {
+              gameboy.isRunning = false
+            }
+          }
+        }>
+          Stop execution
+        </button>
         <button type="button" onClick={() => addNoise()}>Play noise</button>
         <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>

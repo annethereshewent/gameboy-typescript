@@ -1,4 +1,5 @@
 import { Gameboy } from "../Gameboy"
+import { APU } from "../apu/APU"
 import { GPU } from "../gpu/GPU"
 import { getBit } from "../misc/BitOperations"
 import { CPURegisters } from "./CPURegisters"
@@ -33,11 +34,13 @@ export class CPU {
   isDoubleSpeed = false
 
   private gpu: GPU
+  private apu: APU
 
-  constructor(memory: Memory, gpu: GPU) {
+  constructor(memory: Memory, gpu: GPU, apu: APU) {
     this.registers = new CPURegisters(memory, this)
     this.memory = memory
     this.gpu = gpu
+    this.apu = apu
 
     this.setInstructionMap()
     this.setCbMap()
@@ -208,6 +211,7 @@ export class CPU {
   cycle(cycles: number) {
     this.updateTimers(cycles)
     this.gpu.tick(cycles)
+    this.apu.tick(cycles)
   }
 
   step(): number {

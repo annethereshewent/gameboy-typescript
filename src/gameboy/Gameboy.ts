@@ -1,3 +1,4 @@
+import { APU } from "./apu/APU"
 import { CPU } from "./cpu/CPU"
 import { Memory } from "./cpu/Memory"
 import { GPU } from "./gpu/GPU"
@@ -11,7 +12,7 @@ const INTERVAL = 1000 / MAX_FPS
 export class Gameboy {
 
   gpu = new GPU(memory)
-  cpu = new CPU(memory, this.gpu)
+  cpu = new CPU(memory, this.gpu, new APU(memory))
 
 
   fps = 0

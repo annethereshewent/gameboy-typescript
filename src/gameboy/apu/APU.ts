@@ -17,11 +17,12 @@ export class APU {
   private sampleCycles = 0
   private frameSequencerCycles = 0
 
-  private audioBufferPlayer = new AudioBufferPlayer(this.audioContext)
+  private audioBufferPlayer: AudioBufferPlayer
 
   constructor(memory: Memory) {
     this.memory = memory
-    this.channel2 = new Channel2(this.memory)
+    this.channel2 = new Channel2(memory)
+    this.audioBufferPlayer = new AudioBufferPlayer(this.audioContext)
   }
 
   tick(cycles: number) {
