@@ -31,7 +31,7 @@ class AudioProcessor extends AudioWorkletProcessor {
     const availableToRead = this.availableRead(read, write)
 
     if (availableToRead === 0) {
-      return 0;
+      return 0
     }
 
     const howManyToRead = Math.min(availableToRead, elements.length)
@@ -56,9 +56,9 @@ class AudioProcessor extends AudioWorkletProcessor {
 
   dequeue(byteArray) {
     if (this.isEmpty()) {
-      return 0;
+      return 0
     }
-    return this.pop(byteArray);
+    return this.pop(byteArray)
   }
 
   availableRead(readPosition, writePosition) {
