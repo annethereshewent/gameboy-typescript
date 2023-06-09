@@ -1,4 +1,6 @@
-This is a gameboy emulator written in typescript. Currently it plays most Gameboy games (a few have been tested to be working), as well as a few Gameboy color games, with some glitches. Sound is still not implemented. Games that are confirmed working:
+This is a gameboy emulator written in typescript. Currently it plays most Gameboy games (a few have been tested to be working), as well as a few Gameboy color games, with some glitches.
+
+## Supported Games
 
 - Megaman - Dr. Wiley's Revenge
 - Tetris
@@ -10,5 +12,17 @@ This is a gameboy emulator written in typescript. Currently it plays most Gamebo
 - Zelda: Link's Awakening (DMG version)
 - Pokemon Trading Card Game (with some graphical glitches)
 - Super Mario Bros Deluxe
+- Super Mario Land
 
-Sound is yet to be implemented. Emulator now passes all of Blargg's CPU and memory timing tests, as well as all of the cpu instruction tests. Emulator also passes CGB and DMG acid tests for graphics rendering.
+## Sound
+
+Sound is working, though in some games sound may be sped up (and also works with varying degrees of success between different browsers.) Currently, Firefox has the best support for audio.
+
+## Controller/Keyboard Support
+
+Controller support is implemented in Chrome and Safari. Controller support does not work as well in Firefox, but keyboard support works across all browsers.
+
+## Usage
+
+This uses a very basic react app to load the gameboy emulator. Install node modules for react by running `yarn install`. To run this you will need https support on your local machine for sound to work properly. To start a local dev server, use `yarn start`, othewise, to build a production build, use `yarn build`.
+
