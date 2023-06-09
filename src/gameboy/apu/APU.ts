@@ -1,9 +1,13 @@
 import { Memory } from "../cpu/Memory"
 import { AudioBufferPlayer } from "./AudioBufferPlayer"
-import { Channel2, StereoChannel } from "./channels/Channel2"
+import { Channel1 } from "./channels/Channel1"
+import { Channel2 } from "./channels/Channel2"
+import { StereoChannel } from "./channels/StereoChannel"
 
 export class APU {
   private memory: Memory
+
+  private channel1: Channel1
   private channel2: Channel2
 
   // https://nightshade256.github.io/2021/03/27/gb-sound-emulation.html
@@ -21,7 +25,10 @@ export class APU {
 
   constructor(memory: Memory) {
     this.memory = memory
+
+    this.channel1 = new Channel1(memory)
     this.channel2 = new Channel2(memory)
+
     this.audioBufferPlayer = new AudioBufferPlayer(this.audioContext)
   }
 
@@ -29,6 +36,7 @@ export class APU {
     this.sampleCycles += cycles
     this.frameSequencerCycles += cycles
 
+    this.channel1.tick(cycles)
     this.channel2.tick(cycles)
 
     if (this.frameSequencerCycles >= this.frameSequencerCyclesPerStep) {
@@ -78,21 +86,29 @@ export class APU {
   }
 
   private sampleAudio() {
+    const channel1LeftSample = this.channel1.getSample(StereoChannel.Left)
+    const channel1RightSample = this.channel1.getSample(StereoChannel.Right)
+
     const channel2LeftSample = this.channel2.getSample(StereoChannel.Left)
     const channel2RightSample = this.channel2.getSample(StereoChannel.Right)
 
-    this.audioBufferPlayer.writeSamples(channel2LeftSample, channel2RightSample)
+    const channelLeft = (channel1LeftSample + channel2LeftSample) / 4
+    const channelRight = (channel1RightSample + channel2RightSample) / 4
+
+    this.audioBufferPlayer.writeSamples(channelLeft, channelRight)
   }
 
   private clockLength() {
+    this.channel1.clockLength()
     this.channel2.clockLength()
   }
 
   private clockSweep() {
-
+    this.channel1.clockSweep()
   }
 
   private clockVolume() {
+    this.channel1.clockVolume()
     this.channel2.clockVolume()
   }
 }

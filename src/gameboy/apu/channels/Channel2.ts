@@ -6,35 +6,31 @@ import { ChannelVolumeAndEnvelopeRegister } from "../registers/ChannelVolumeAndE
 import { MasterVolumeAndVinPanningRegister } from "../registers/MasterVolumeAndVinPanningRegister"
 import { SoundOnRegister } from "../registers/SoundOnRegister"
 import { SoundPanningRegister } from "../registers/SoundPanningRegister"
-
-export enum StereoChannel {
-  Left,
-  Right
-}
+import { StereoChannel } from "./StereoChannel"
 
 export class Channel2 {
   // per https://nightshade256.github.io/2021/03/27/gb-sound-emulation.html
-  private dutyTable = [
+  protected dutyTable = [
     [0,0,0,0,0,0,0,1], // 0%
     [0,0,0,0,0,0,1,1], // 25%
     [0,0,0,0,1,1,1,1], // 50%
     [1,1,1,1,1,1,0,0] // 75%
   ]
 
-  private memory: Memory
+  protected memory: Memory
 
-  private channel2FrequencyLowRegister: MemoryRegister
-  private channel2FrequencyHighRegister: ChannelFrequencyHighRegister
-  private channel2LengthTimerAndDutyRegister: ChannelLengthTimerAndDutyRegister
-  private channel2VolumeAndEnvelopeRegister: ChannelVolumeAndEnvelopeRegister
+  protected channelFrequencyLowRegister: MemoryRegister
+  protected channelFrequencyHighRegister: ChannelFrequencyHighRegister
+  protected channelLengthTimerAndDutyRegister: ChannelLengthTimerAndDutyRegister
+  protected channelVolumeAndEnvelopeRegister: ChannelVolumeAndEnvelopeRegister
 
-  private soundPanningRegister: SoundPanningRegister
-  private soundOnRegister: SoundOnRegister
-  private masterVolumeAndVinPanningRegister: MasterVolumeAndVinPanningRegister
+  protected soundPanningRegister: SoundPanningRegister
+  protected soundOnRegister: SoundOnRegister
+  protected masterVolumeAndVinPanningRegister: MasterVolumeAndVinPanningRegister
 
-  private volume = 0
-  private periodTimer = 0
-  private lengthTimer = 0
+  protected volume = 0
+  protected periodTimer = 0
+  protected lengthTimer = 0
 
   frequencyTimer = 0
   waveDutyPosition = 0
@@ -42,10 +38,10 @@ export class Channel2 {
   constructor(memory: Memory) {
     this.memory = memory
 
-    this.channel2LengthTimerAndDutyRegister = new ChannelLengthTimerAndDutyRegister(0xff16, this.memory)
-    this.channel2VolumeAndEnvelopeRegister = new ChannelVolumeAndEnvelopeRegister(0xff17, this.memory)
-    this.channel2FrequencyLowRegister = new MemoryRegister(0xff18, this.memory)
-    this.channel2FrequencyHighRegister = new ChannelFrequencyHighRegister(0xff19, this.memory)
+    this.channelLengthTimerAndDutyRegister = new ChannelLengthTimerAndDutyRegister(0xff16, this.memory)
+    this.channelVolumeAndEnvelopeRegister = new ChannelVolumeAndEnvelopeRegister(0xff17, this.memory)
+    this.channelFrequencyLowRegister = new MemoryRegister(0xff18, this.memory)
+    this.channelFrequencyHighRegister = new ChannelFrequencyHighRegister(0xff19, this.memory)
 
     this.soundOnRegister = new SoundOnRegister(this.memory)
     this.soundPanningRegister = new SoundPanningRegister(this.memory)
@@ -55,9 +51,9 @@ export class Channel2 {
   tick(cycles: number) {
     this.frequencyTimer -= cycles
 
-    if (this.channel2FrequencyHighRegister.restartTrigger) {
+    if (this.channelFrequencyHighRegister.restartTrigger) {
       this.restartSound()
-      this.channel2FrequencyHighRegister.restartTrigger = 0
+      this.channelFrequencyHighRegister.restartTrigger = 0
     }
 
     if (this.frequencyTimer <= 0) {
@@ -67,18 +63,18 @@ export class Channel2 {
     }
   }
 
-  private restartSound() {
+  protected restartSound() {
     this.soundOnRegister.isChannel2On = 1
 
-    this.periodTimer = this.channel2VolumeAndEnvelopeRegister.sweepPace
-    this.volume = this.channel2VolumeAndEnvelopeRegister.initialVolume
+    this.periodTimer = this.channelVolumeAndEnvelopeRegister.sweepPace
+    this.volume = this.channelVolumeAndEnvelopeRegister.initialVolume
 
     this.frequencyTimer = this.getFrequencyTimer()
-    this.lengthTimer = 64 - this.channel2LengthTimerAndDutyRegister.initialLengthTimer
+    this.lengthTimer = 64 - this.channelLengthTimerAndDutyRegister.initialLengthTimer
   }
 
   getSample(channel: StereoChannel) {
-    const amplitude = this.dutyTable[this.channel2LengthTimerAndDutyRegister.waveDuty][this.waveDutyPosition]
+    const amplitude = this.dutyTable[this.channelLengthTimerAndDutyRegister.waveDuty][this.waveDutyPosition]
 
     let channelVolume = 0.0
 
@@ -94,7 +90,7 @@ export class Channel2 {
   }
 
   clockLength() {
-    if (this.channel2FrequencyHighRegister.soundLengthEnable) {
+    if (this.channelFrequencyHighRegister.soundLengthEnable) {
       this.lengthTimer--
 
       if (this.lengthTimer === 0) {
@@ -104,7 +100,7 @@ export class Channel2 {
   }
 
   clockVolume() {
-    const { sweepPace, envelopeDirection } = this.channel2VolumeAndEnvelopeRegister
+    const { sweepPace, envelopeDirection } = this.channelVolumeAndEnvelopeRegister
     if (sweepPace !== 0) {
       if (this.periodTimer !== 0) {
         this.periodTimer--
@@ -122,11 +118,11 @@ export class Channel2 {
     }
   }
 
-  private getFrequencyTimer() {
+  protected getFrequencyTimer() {
     return (2048 - this.getFrequency()) * 4
   }
 
-  private getFrequency() {
-    return this.channel2FrequencyLowRegister.value | (this.channel2FrequencyHighRegister.frequencyHighBits << 8)
+  protected getFrequency() {
+    return this.channelFrequencyLowRegister.value | (this.channelFrequencyHighRegister.frequencyHighBits << 8)
   }
 }

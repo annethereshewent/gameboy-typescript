@@ -29,4 +29,8 @@ export class SoundOnRegister extends MemoryRegister {
   set isChannel2On(newValue: number) {
     this.setBit(1, newValue & 0b1)
   }
+
+  set isChannel1On(newValue: number) {
+    this.setBit(0, newValue & 0b1)
+  }
 }

@@ -32,11 +32,76 @@ export class Gameboy {
 
   run() {
     const context = document.querySelector("canvas")?.getContext('2d')
+
+    this.initializeKeyboardInputs()
+
     if (context != null) {
       requestAnimationFrame((time: number) => this.execute(time, context))
     } else {
       throw new Error("canvas context is null!")
     }
+  }
+
+  initializeKeyboardInputs() {
+    document.addEventListener("keyup", (e) => {
+      e.preventDefault()
+      switch (e.key) {
+        case "ArrowDown":
+          Joypad.isDownKeyPressed = false
+          break
+        case "ArrowUp":
+          Joypad.isUpKeyPressed = false
+          break
+        case "ArrowLeft":
+          Joypad.isLeftKeyPressed = false
+          break
+        case "ArrowRight":
+          Joypad.isRightKeyPressed = false
+          break
+        case "Enter":
+          Joypad.isEnterKeyPressed = false
+          break
+        case "Shift":
+          Joypad.isShiftKeyPressed = false
+          break
+        case "s":
+          Joypad.isSKeyPressed = false
+          break
+        case "a":
+          Joypad.isAKeyPressed = false
+          break
+      }
+    })
+
+    document.addEventListener("keydown", (e) => {
+      e.preventDefault()
+      switch (e.key) {
+        case "ArrowDown":
+          Joypad.isDownKeyPressed = true
+          break
+        case "ArrowUp":
+          Joypad.isUpKeyPressed = true
+          break
+        case "ArrowLeft":
+          Joypad.isLeftKeyPressed = true
+          break
+        case "ArrowRight":
+          Joypad.isRightKeyPressed = true
+          break
+        case "Enter":
+          Joypad.isEnterKeyPressed = true
+          break
+        case "Shift":
+          Joypad.isShiftKeyPressed = true
+          break
+        case "s":
+          Joypad.isSKeyPressed = true
+          break
+        case "a":
+          Joypad.isAKeyPressed = true
+          break
+      }
+    })
   }
 
 
