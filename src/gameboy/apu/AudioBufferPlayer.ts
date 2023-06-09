@@ -1,11 +1,8 @@
 export class AudioBufferPlayer {
   private audioContext: AudioContext
 
-  private leftAudioBuffer: SharedArrayBuffer
-  private leftAudioData: Float32Array
-
-  private rightAudioBuffer: SharedArrayBuffer
-  private rightAudioData: Float32Array
+  private audioBuffer: SharedArrayBuffer
+  private audioData: Float32Array
 
   private readPointer = new Uint32Array(new SharedArrayBuffer(4))
   private writePointer = new Uint32Array(new SharedArrayBuffer(4))
@@ -19,11 +16,8 @@ export class AudioBufferPlayer {
   constructor(audioContext: AudioContext) {
     this.audioContext = audioContext
 
-    this.leftAudioBuffer = new SharedArrayBuffer(this.audioContext.sampleRate / 20 * Float32Array.BYTES_PER_ELEMENT)
-    this.leftAudioData = new Float32Array(this.leftAudioBuffer)
-
-    this.rightAudioBuffer = new SharedArrayBuffer(this.audioContext.sampleRate / 20 * Float32Array.BYTES_PER_ELEMENT)
-    this.rightAudioData = new Float32Array(this.rightAudioBuffer)
+    this.audioBuffer = new SharedArrayBuffer(this.audioContext.sampleRate / 20 * Float32Array.BYTES_PER_ELEMENT)
+    this.audioData = new Float32Array(this.audioBuffer)
 
     this.addAudioWorklet()
   }
@@ -36,8 +30,7 @@ export class AudioBufferPlayer {
       "audio-processor",
       {
         processorOptions: {
-          leftAudioData: this.leftAudioData,
-          rightAudioData: this.rightAudioData,
+          audioData: this.audioData,
           readPointer: this.readPointer,
           writePointer: this.writePointer
         }
@@ -76,14 +69,14 @@ export class AudioBufferPlayer {
     }
 
     const howManyToWrite = Math.min(availableToWrite, elements.length)
-    const sizeUpToEndOfArray = Math.min(this.leftAudioData.length - writePosition, howManyToWrite)
+    const sizeUpToEndOfArray = Math.min(this.audioData.length - writePosition, howManyToWrite)
     const sizeFromStartOfArrayOrZero = howManyToWrite - sizeUpToEndOfArray
 
-    this.copy(elements, 0, this.leftAudioData, writePosition, sizeUpToEndOfArray)
-    this.copy(elements, sizeUpToEndOfArray, this.leftAudioData, 0, sizeFromStartOfArrayOrZero)
+    this.copy(elements, 0, this.audioData, writePosition, sizeUpToEndOfArray)
+    this.copy(elements, sizeUpToEndOfArray, this.audioData, 0, sizeFromStartOfArrayOrZero)
 
 
-    const writePointerPositionAfterWrite = (writePosition + howManyToWrite) % this.leftAudioData.length
+    const writePointerPositionAfterWrite = (writePosition + howManyToWrite) % this.audioData.length
 
     Atomics.store(this.writePointer, 0, writePointerPositionAfterWrite)
 
@@ -99,7 +92,7 @@ export class AudioBufferPlayer {
   private _availableWrite(readPosition: number, writePosition: number) {
     let distanceToWrite = readPosition - writePosition - 1
     if (writePosition >= readPosition) {
-      distanceToWrite += this.leftAudioData.length
+      distanceToWrite += this.audioData.length
     }
     return distanceToWrite
   }

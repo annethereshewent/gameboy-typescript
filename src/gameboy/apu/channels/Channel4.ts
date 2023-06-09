@@ -90,7 +90,7 @@ export class Channel4 {
     const sampleWithVolume = ~this.linearFeedbackShift & 0b1 * this.volume
 
     if (this.soundOnRegister.isChannel4On) {
-      return sampleWithVolume
+      return (sampleWithVolume / 7.5) - 1
     } else {
       return 0
     }

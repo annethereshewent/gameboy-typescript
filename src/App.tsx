@@ -31,23 +31,6 @@ function App() {
     }
   }
 
-  let audioContext: AudioContext|null = null
-
-  async function addNoise() {
-    audioContext = new AudioContext()
-    if (audioContext !== null) {
-      await audioContext.resume()
-      await audioContext.audioWorklet.addModule("AudioProcessor.js")
-
-      const randomNoiseNode = new AudioWorkletNode(
-        audioContext,
-        "audio-processor"
-      )
-
-      randomNoiseNode.connect(audioContext.destination)
-    }
-  }
-
   return (
     <div className="App">
       <div className="gameboy">
@@ -62,10 +45,8 @@ function App() {
         }>
           Stop execution
         </button>
-        <button type="button" onClick={() => addNoise()}>Play noise</button>
         <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
-
       </div>
     </div>
   );

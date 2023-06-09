@@ -2,8 +2,7 @@ class AudioProcessor extends AudioWorkletProcessor {
   constructor(options) {
     super(options)
 
-    this.leftAudioData = options.processorOptions.leftAudioData
-    this.rightAudioData = options.processorOptions.rightAudioData
+    this.audioData = options.processorOptions.audioData
 
     this.writePointer = options.processorOptions.writePointer
     this.readPointer = options.processorOptions.readPointer
@@ -36,13 +35,13 @@ class AudioProcessor extends AudioWorkletProcessor {
     }
 
     const howManyToRead = Math.min(availableToRead, elements.length)
-    let sizeUpToEndOfArray = Math.min(this.leftAudioData.length - read, howManyToRead)
+    let sizeUpToEndOfArray = Math.min(this.audioData.length - read, howManyToRead)
     let sizeFromStartOfTheArrayOrZero = howManyToRead - sizeUpToEndOfArray
 
-    this.copy(this.leftAudioData, read, elements, 0, sizeUpToEndOfArray)
-    this.copy(this.leftAudioData, 0, elements, sizeUpToEndOfArray, sizeFromStartOfTheArrayOrZero)
+    this.copy(this.audioData, read, elements, 0, sizeUpToEndOfArray)
+    this.copy(this.audioData, 0, elements, sizeUpToEndOfArray, sizeFromStartOfTheArrayOrZero)
 
-    const readPointerPositionAfterRead = (read + howManyToRead) % this.leftAudioData.length
+    const readPointerPositionAfterRead = (read + howManyToRead) % this.audioData.length
     Atomics.store(this.readPointer, 0, readPointerPositionAfterRead)
 
     return howManyToRead
@@ -66,7 +65,7 @@ class AudioProcessor extends AudioWorkletProcessor {
     if (writePosition > readPosition) {
       return writePosition - readPosition
     } else {
-      return writePosition + this.leftAudioData.length - readPosition
+      return writePosition + this.audioData.length - readPosition
     }
   }
 

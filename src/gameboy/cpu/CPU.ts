@@ -195,7 +195,7 @@ export class CPU {
         }
 
         if (this.isDoubleSpeed) {
-          cycles = cycles / 2
+          cycles = cycles * 2
         }
 
         return cycles

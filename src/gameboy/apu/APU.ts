@@ -44,6 +44,7 @@ export class APU {
     this.channel1.tick(cycles)
     this.channel2.tick(cycles)
     this.channel3.tick(cycles)
+    this.channel4.tick(cycles)
 
     if (this.frameSequencerCycles >= this.frameSequencerCyclesPerStep) {
       this.advanceFrameSequencer()
