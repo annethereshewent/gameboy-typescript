@@ -1,4 +1,3 @@
-import { Gameboy } from "../Gameboy"
 import { Memory } from "../cpu/Memory"
 import { InterruptRequestRegister } from "../cpu/memory_registers/InterruptRequestRegister"
 import { getBit, resetBit } from "../misc/BitOperations"

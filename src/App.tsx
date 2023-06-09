@@ -25,7 +25,26 @@ function App() {
         gameboy.loadCartridge(rom as ArrayBuffer)
 
         gameboy.run()
+
+        addNoise()
       }
+    }
+  }
+
+  let audioContext: AudioContext|null = null
+
+  async function addNoise() {
+    audioContext = new AudioContext()
+    if (audioContext !== null) {
+      await audioContext.resume()
+      await audioContext.audioWorklet.addModule("AudioProcessor.js")
+
+      const randomNoiseNode = new AudioWorkletNode(
+        audioContext,
+        "audio-processor"
+      )
+
+      randomNoiseNode.connect(audioContext.destination)
     }
   }
 
@@ -36,6 +55,7 @@ function App() {
         <label>Toggle logs</label>
         <input type="checkbox" onChange={(e: React.ChangeEvent<HTMLInputElement>) => Gameboy.shouldOutputLogs = e.target.checked ? true : false} />
         <button type="button" onClick={() => gameboy.isRunning = false}>Stop execution</button>
+        <button type="button" onClick={() => addNoise()}>Play noise</button>
         <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
 
