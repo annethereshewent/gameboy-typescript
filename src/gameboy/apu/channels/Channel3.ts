@@ -68,7 +68,7 @@ export class Channel3 {
   getSample() {
     const memoryIndex = Math.floor(this.samplePosition / 2)
 
-    const isUpper = this.samplePosition % 2 === 1
+    const isUpper = this.samplePosition % 2 === 0
 
     const byte = this.memory.readByte(this.sampleStartAddress + memoryIndex)
 

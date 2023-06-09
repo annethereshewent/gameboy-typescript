@@ -20,36 +20,39 @@ class AudioProcessor extends AudioWorkletProcessor {
     return true
   }
 
+  /**
+   *
+   * credit to https://github.com/roblouie/gameboy-emulator for these methods
+   *
+   */
   pop(elements) {
-    const read = Atomics.load(this.readPointer, 0);
-    const write = Atomics.load(this.writePointer, 0);
+    const read = Atomics.load(this.readPointer, 0)
+    const write = Atomics.load(this.writePointer, 0)
 
-    const availableToRead = this.availableRead(read, write);
+    const availableToRead = this.availableRead(read, write)
 
     if (availableToRead === 0) {
       return 0;
     }
 
-    // Allows circular writing to array. Usually only the first call to copy is called, but if we are near the end
-    // of the array, the first copy writes up to the end, then the seczond copy writes the remainder at the start
-    const howManyToRead = Math.min(availableToRead, elements.length);
-    let sizeUpToEndOfArray = Math.min(this.leftAudioData.length - read, howManyToRead);
-    let sizeFromStartOfTheArrayOrZero = howManyToRead - sizeUpToEndOfArray;
+    const howManyToRead = Math.min(availableToRead, elements.length)
+    let sizeUpToEndOfArray = Math.min(this.leftAudioData.length - read, howManyToRead)
+    let sizeFromStartOfTheArrayOrZero = howManyToRead - sizeUpToEndOfArray
 
-    this.copy(this.leftAudioData, read, elements, 0, sizeUpToEndOfArray);
-    this.copy(this.leftAudioData, 0, elements, sizeUpToEndOfArray, sizeFromStartOfTheArrayOrZero);
+    this.copy(this.leftAudioData, read, elements, 0, sizeUpToEndOfArray)
+    this.copy(this.leftAudioData, 0, elements, sizeUpToEndOfArray, sizeFromStartOfTheArrayOrZero)
 
-    const readPointerPositionAfterRead = (read + howManyToRead) % this.leftAudioData.length;
-    Atomics.store(this.readPointer, 0, readPointerPositionAfterRead);
+    const readPointerPositionAfterRead = (read + howManyToRead) % this.leftAudioData.length
+    Atomics.store(this.readPointer, 0, readPointerPositionAfterRead)
 
-    return howManyToRead;
+    return howManyToRead
   }
 
   isEmpty() {
-    const readPosition = Atomics.load(this.readPointer, 0);
-    const writePosition = Atomics.load(this.writePointer, 0);
+    const readPosition = Atomics.load(this.readPointer, 0)
+    const writePosition = Atomics.load(this.writePointer, 0)
 
-    return writePosition === readPosition;
+    return writePosition === readPosition
   }
 
   dequeue(byteArray) {
@@ -61,15 +64,15 @@ class AudioProcessor extends AudioWorkletProcessor {
 
   availableRead(readPosition, writePosition) {
     if (writePosition > readPosition) {
-      return writePosition - readPosition;
+      return writePosition - readPosition
     } else {
-      return writePosition + this.leftAudioData.length - readPosition;
+      return writePosition + this.leftAudioData.length - readPosition
     }
   }
 
   copy(input, inputOffset, output, outputOffset, size) {
     for (let i = 0; i < size; i++) {
-      output[outputOffset + i] = input[inputOffset + i];
+      output[outputOffset + i] = input[inputOffset + i]
     }
   }
 }

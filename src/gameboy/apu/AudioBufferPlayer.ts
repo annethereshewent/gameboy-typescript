@@ -60,58 +60,53 @@ export class AudioBufferPlayer {
     }
   }
 
-  copyData(input: Float32Array, output: Float32Array) {
-    for (let i = 0; i < output.length; i++) {
-      output[i] = input[i]
-    }
-  }
-
+  /**
+   *
+   * credit to https://github.com/roblouie/gameboy-emulator for these methods
+   *
+   */
   push(elements: Float32Array) {
-    const readPosition = Atomics.load(this.readPointer, 0);
-    const writePosition = Atomics.load(this.writePointer, 0);
+    const readPosition = Atomics.load(this.readPointer, 0)
+    const writePosition = Atomics.load(this.writePointer, 0)
 
-    const availableToWrite = this._availableWrite(readPosition, writePosition);
+    const availableToWrite = this._availableWrite(readPosition, writePosition)
 
     if (availableToWrite === 0) {
-      console.log('full');
-      return 0;
+      return 0
     }
 
-    // Allows circular writing to array. Usually only the first call to copy is called, but if we are near the end
-    // of the array, the first copy writes up to the end, then the second copy writes the remainder at the start
-    const howManyToWrite = Math.min(availableToWrite, elements.length);
-    const sizeUpToEndOfArray = Math.min(this.leftAudioData.length - writePosition, howManyToWrite);
-    const sizeFromStartOfArrayOrZero = howManyToWrite - sizeUpToEndOfArray;
+    const howManyToWrite = Math.min(availableToWrite, elements.length)
+    const sizeUpToEndOfArray = Math.min(this.leftAudioData.length - writePosition, howManyToWrite)
+    const sizeFromStartOfArrayOrZero = howManyToWrite - sizeUpToEndOfArray
 
-    this.copy(elements, 0, this.leftAudioData, writePosition, sizeUpToEndOfArray);
-    this.copy(elements, sizeUpToEndOfArray, this.leftAudioData, 0, sizeFromStartOfArrayOrZero);
+    this.copy(elements, 0, this.leftAudioData, writePosition, sizeUpToEndOfArray)
+    this.copy(elements, sizeUpToEndOfArray, this.leftAudioData, 0, sizeFromStartOfArrayOrZero)
 
 
-    const writePointerPositionAfterWrite = (writePosition + howManyToWrite) % this.leftAudioData.length;
+    const writePointerPositionAfterWrite = (writePosition + howManyToWrite) % this.leftAudioData.length
 
-    // publish the enqueued data to the other side
-    Atomics.store(this.writePointer, 0, writePointerPositionAfterWrite);
+    Atomics.store(this.writePointer, 0, writePointerPositionAfterWrite)
 
     return howManyToWrite;
   }
 
   availableWrite() {
-    const readPosition = Atomics.load(this.readPointer, 0);
-    const writePosition = Atomics.load(this.writePointer, 0);
-    return this._availableWrite(readPosition, writePosition);
+    const readPosition = Atomics.load(this.readPointer, 0)
+    const writePosition = Atomics.load(this.writePointer, 0)
+    return this._availableWrite(readPosition, writePosition)
   }
 
   private _availableWrite(readPosition: number, writePosition: number) {
-    let distanceToWrite = readPosition - writePosition - 1;
+    let distanceToWrite = readPosition - writePosition - 1
     if (writePosition >= readPosition) {
-      distanceToWrite += this.leftAudioData.length;
+      distanceToWrite += this.leftAudioData.length
     }
-    return distanceToWrite;
+    return distanceToWrite
   }
 
   private copy(input: Float32Array, offsetInput: number, output: Float32Array, offsetOutput: number, size: number) {
     for (let i = 0; i < size; i++) {
-      output[offsetOutput + i] = input[offsetInput + i];
+      output[offsetOutput + i] = input[offsetInput + i]
     }
   }
 }
