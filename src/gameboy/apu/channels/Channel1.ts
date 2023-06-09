@@ -44,10 +44,6 @@ export class Channel1 extends Channel2 {
     }
 
     this.shadowFrequency = this.getFrequency()
-
-    if (this.channelSweepRegister.sweepShift > 0 && this.shadowFrequency > 2047) {
-      this.soundOnRegister.isChannel1On = 0
-    }
   }
 
   private calculateFrequency() {
@@ -80,10 +76,6 @@ export class Channel1 extends Channel2 {
         if (newFrequency < 2047 && this.sweepTimer > 0) {
           this.frequencyTimer = newFrequency
           this.shadowFrequency = newFrequency
-
-          if (newFrequency > 2047) {
-            this.soundOnRegister.isChannel1On = 0
-          }
         }
       }
     }

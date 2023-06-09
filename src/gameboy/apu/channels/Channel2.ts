@@ -6,7 +6,6 @@ import { ChannelVolumeAndEnvelopeRegister } from "../registers/ChannelVolumeAndE
 import { MasterVolumeAndVinPanningRegister } from "../registers/MasterVolumeAndVinPanningRegister"
 import { SoundOnRegister } from "../registers/SoundOnRegister"
 import { SoundPanningRegister } from "../registers/SoundPanningRegister"
-import { StereoChannel } from "./StereoChannel"
 
 export class Channel2 {
   // per https://nightshade256.github.io/2021/03/27/gb-sound-emulation.html
@@ -16,6 +15,12 @@ export class Channel2 {
     [0,0,0,0,1,1,1,1], // 50%
     [1,1,1,1,1,1,0,0] // 75%
   ]
+  // protected dutyTable = [
+  //   [0, 0, 0, 0, 0, 0, 0, 1], // 12.5 %
+  //   [1, 0, 0, 0, 0, 0, 0, 1], // 25 %
+  //   [1, 0, 0, 0, 0, 1, 1, 1], // 50 %
+  //   [0, 1, 1, 1, 1, 1, 1, 0], // 75 %
+  // ]
 
   protected memory: Memory
 
@@ -32,8 +37,8 @@ export class Channel2 {
   protected periodTimer = 0
   protected lengthTimer = 0
 
-  frequencyTimer = 0
-  waveDutyPosition = 0
+  protected frequencyTimer = 0
+  protected waveDutyPosition = 0
 
   constructor(memory: Memory) {
     this.memory = memory
@@ -73,18 +78,10 @@ export class Channel2 {
     this.lengthTimer = 64 - this.channelLengthTimerAndDutyRegister.initialLengthTimer
   }
 
-  getSample(channel: StereoChannel) {
+  getSample() {
     const amplitude = this.dutyTable[this.channelLengthTimerAndDutyRegister.waveDuty][this.waveDutyPosition]
 
-    let channelVolume = 0.0
-
-    if (channel === StereoChannel.Left && this.soundPanningRegister.mixChannel2Left) {
-      channelVolume = this.masterVolumeAndVinPanningRegister.leftVolume
-    } else if (channel === StereoChannel.Right && this.soundPanningRegister.mixChannel2Right) {
-      channelVolume = this.masterVolumeAndVinPanningRegister.rightVolume
-    }
-
-    const sampleWithVolume = this.volume !== 0 && this.soundOnRegister.isChannel2On ? amplitude * channelVolume * this.volume :  0.0
+    const sampleWithVolume = this.volume !== 0 && this.soundOnRegister.isChannel2On ? amplitude * this.volume :  0.0
 
     return (sampleWithVolume / 7.5) - 1
   }
