@@ -1,6 +1,8 @@
-This is a gameboy emulator written in typescript. Currently it plays most Gameboy games (a few have been tested to be working), as well as a few Gameboy color games, with some glitches.
+# Gameboy Typescript Emulator
 
-## Supported Games
+This is a gameboy emulator written in typescript. Currently it plays quite a few Gameboy games (a few have been tested to be working), as well as a few Gameboy color games, with some glitches. Compatibility varies between browsers with Firefox being the most compatible.
+
+## Tested Games
 
 - Megaman - Dr. Wiley's Revenge
 - Tetris
@@ -20,9 +22,12 @@ Sound is working, though in some games sound may be sped up (and also works with
 
 ## Controller/Keyboard Support
 
-Controller support is implemented in Chrome and Safari. Controller support does not work as well in Firefox, but keyboard support works across all browsers.
+Controller support varies depending on browser. Controller has been verified to work in Chrome, Firefox (Windows only), and Safari.
 
 ## Usage
 
 This uses a very basic react app to load the gameboy emulator. Install node modules for react by running `yarn install`. To run this you will need https support on your local machine for sound to work properly. To start a local dev server, use `yarn start`, othewise, to build a production build, use `yarn build`.
 
+## Demo
+
+A live demo is available at https://gameboy-typescript.onrender.com. You will need to provide your own roms for testing purposes.
