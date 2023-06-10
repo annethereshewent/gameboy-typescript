@@ -37,10 +37,29 @@ function App() {
     document.documentElement.requestFullscreen()
   }
 
+  function showControlsModal() {
+    const modal = document.getElementById("modal")
+
+    if (modal != null) {
+      modal.style.display = "block"
+    }
+  }
+
+  function hideControlsModal() {
+    const modal = document.getElementById("modal")
+
+    if (modal != null) {
+      modal.style.display = "none"
+    }
+  }
 
   return (
     <div className="App">
-      <button className="full-screen" onClick={enterFullScreen}>Full screen</button>
+      <div className="buttons">
+        <button className="button" onClick={enterFullScreen}>Full screen</button>
+        <button className="button help" onClick={showControlsModal}>Help</button>
+      </div>
+
       <div className="gameboy">
         <div className="load-game">
           <img id="load-icon" src="/load_button_white.png" alt="load game" onClick={loadRom} />
@@ -59,25 +78,27 @@ function App() {
         <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
       </div>
-      <div className="controls">
-        <h2>CONTROLS:</h2>
-
-        <h3>Keyboard:</h3>
-        <ul>
-          <li><label>D-Pad:</label> Arrow keys</li>
-          <li><label>A button:</label> S key</li>
-          <li><label>B button:</label> A key</li>
-          <li><label>Select:</label> Tab</li>
-          <li><label>Start:</label> Enter</li>
-        </ul>
-        <h3>Xbox 360 Controller:</h3>
-        <ul>
-          <li><label>D-Pad:</label> D-pad or left thumb stick</li>
-          <li><label>A button:</label> A button</li>
-          <li><label>B button:</label> X button</li>
-          <li><label>Start:</label> Start</li>
-          <li><label>Select:</label> Select</li>
-        </ul>
+      <div id="modal">
+        <div className="controls">
+          <span className="close" onClick={hideControlsModal}>&times;</span>
+          <h2>CONTROLS:</h2>
+          <h3>Keyboard:</h3>
+          <ul>
+            <li><label>D-Pad:</label> Arrow keys</li>
+            <li><label>A button:</label> S key</li>
+            <li><label>B button:</label> A key</li>
+            <li><label>Select:</label> Tab</li>
+            <li><label>Start:</label> Enter</li>
+          </ul>
+          <h3>Xbox 360 Controller:</h3>
+          <ul>
+            <li><label>D-Pad:</label> D-pad or left thumb stick</li>
+            <li><label>A button:</label> A button</li>
+            <li><label>B button:</label> X button</li>
+            <li><label>Start:</label> Start</li>
+            <li><label>Select:</label> Select</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

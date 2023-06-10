@@ -56,7 +56,7 @@ export class Joypad {
 
   isPressingRight(): boolean {
     const axes = this.gamepad?.axes[0] || 0
-    return this.gamepad?.buttons[GamepadButtons.Right].pressed || axes > 0.1 || Joypad.isRightKeyPressed
+    return this.gamepad?.buttons[GamepadButtons.Right]?.pressed || axes > 0.1 || Joypad.isRightKeyPressed
   }
 
   isPressingUp(): boolean {

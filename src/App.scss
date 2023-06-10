@@ -2,13 +2,41 @@ body {
   background: #1B1212;
   color: #ffffff
 }
-
+#modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 100; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  .controls {
+    padding: 20px;
+    background: #343434;
+    margin: 15% auto;
+    background: #343434;
+    width: 400px;
+    border: 1px solid white;
+    ul {
+      label {
+        font-weight: 700;
+      }
+    }
+    .close {
+      float: right;
+      cursor: pointer;
+    }
+  }
+}
 
 
 canvas {
   width: 575px;
   image-rendering: pixelated;
-  z-index: 100;
+  z-index: 1;
   position: absolute;
   top: 170px;
   left: 210px;
@@ -29,25 +57,22 @@ canvas {
     }
   }
 }
-.full-screen {
+.buttons {
   margin-top: 20px;
   margin-left: 60px;
-  background: #1B1212;
-  color: white;
-  padding-top: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 10px;
-  font-size: 16px;
-  border-color: white;
-}
-.controls {
-  float: right;
-  margin-top: 20px;
-  margin-right: 150px;
-  ul {
-    label {
-      font-weight: 700;
-    }
+  .button {
+    box-shadow: none;
+    background: #1B1212;
+    margin-right: 10px;
+    color: white;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    font-size: 16px;
+    border-color: white;
+  }
+  .button.help {
+    background: #F2D2BD;
   }
 }
