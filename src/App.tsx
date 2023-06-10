@@ -81,7 +81,7 @@ function App() {
       <div id="modal">
         <div className="controls">
           <span className="close" onClick={hideControlsModal}>&times;</span>
-          <h2>CONTROLS:</h2>
+          <h2>CONTROLS</h2>
           <h3>Keyboard:</h3>
           <ul>
             <li><label>D-Pad:</label> Arrow keys</li>
