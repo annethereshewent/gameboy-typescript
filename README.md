@@ -12,9 +12,11 @@ This is a gameboy emulator written in typescript. Currently it plays quite a few
 - Frogger
 - Pokemon Gold/Silver (with some glitches)
 - Zelda: Link's Awakening (DMG version)
+- Zelda: Link's Awakening DX
 - Pokemon Trading Card Game (with some graphical glitches)
 - Super Mario Bros Deluxe
 - Super Mario Land
+- Super Mario Land 2
 
 ## Sound
 
@@ -22,7 +24,7 @@ Sound is working, though in some games sound may be sped up (and also works with
 
 ## Controller/Keyboard Support
 
-Controller support varies depending on browser. Controller has been verified to work in Chrome, Firefox (Windows only), and Safari.
+Controller support varies depending on browser. Controller has been verified to work in Chrome, Firefox (Windows only), and Safari. Keyboard is supported as well across all browsers.
 
 ## Usage
 
