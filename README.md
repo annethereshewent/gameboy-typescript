@@ -32,4 +32,4 @@ This uses a very basic react app to load the gameboy emulator. Install node modu
 
 ## Demo
 
-A live demo is available at https://gameboy-typescript.onrender.com. You will need to provide your own roms for testing purposes.
+A live demo is available at https://gameboy-typescript-web.onrender.com. You will need to provide your own roms for testing purposes.
