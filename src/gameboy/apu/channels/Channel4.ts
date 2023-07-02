@@ -24,7 +24,7 @@ export class Channel4 {
 
   private volume = 0
 
-  private linearFeedbackShift = 0
+  private linearFeedbackShift = 1
 
   private periodTimer = 0
 
@@ -39,12 +39,14 @@ export class Channel4 {
   }
 
   tick(cycles: number) {
-
     if (this.channel4ControlRegister.restartTrigger) {
       this.restartSound()
+
+      this.channel4ControlRegister.restartTrigger = 0
     }
     this.frequencyTimer -= cycles
-    if (this.frequencyTimer === 0) {
+
+    if (this.frequencyTimer <= 0) {
       this.frequencyTimer = this.getFrequencyTimer()
 
       const xorResult = getBit(this.linearFeedbackShift, 0) ^ getBit(this.linearFeedbackShift, 1)
@@ -87,7 +89,7 @@ export class Channel4 {
   }
 
   getSample() {
-    const sampleWithVolume = (~this.linearFeedbackShift & 0b1) * this.volume
+    const sampleWithVolume = ((~this.linearFeedbackShift) & 0b1) * this.volume
 
     if (this.soundOnRegister.isChannel4On) {
       return (sampleWithVolume / 7.5) - 1
@@ -99,7 +101,12 @@ export class Channel4 {
   private restartSound() {
     this.soundOnRegister.isChannel4On = 1
     this.frequencyTimer = this.getFrequencyTimer()
-    this.linearFeedbackShift = 0b111111111111111
+    this.linearFeedbackShift = 0x7fff
+
+    this.volume = this.channelVolumeAndEnvelopeRegister.initialVolume
+    this.periodTimer = this.channelVolumeAndEnvelopeRegister.sweepPace
+
+    this.lengthTimer = 64 - this.channel4LengthTimerRegister.lengthTimer
   }
 
   private getFrequencyTimer() {

@@ -13,4 +13,8 @@ export class Channel4ControlRegister extends MemoryRegister {
   get restartTrigger() {
     return this.getBit(7)
   }
+
+  set restartTrigger(value: number) {
+    this.setBit(7, value)
+  }
 }

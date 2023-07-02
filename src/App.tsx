@@ -65,16 +65,6 @@ function App() {
           <img id="load-icon" src="/load_button_white.png" alt="load game" onClick={loadRom} />
         </div>
         <input id="rom-input" type="file" style={{ display: 'none' }} onChange={handleFileChange} />
-        {/* <label>Toggle logs</label>
-        <input type="checkbox" onChange={(e: React.ChangeEvent<HTMLInputElement>) => Gameboy.shouldOutputLogs = e.target.checked ? true : false} />
-        <button type="button" onClick={() => {
-            if (gameboy != null) {
-              gameboy.isRunning = false
-            }
-          }
-        }>
-          Stop execution
-        </button> */}
         <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
       </div>
