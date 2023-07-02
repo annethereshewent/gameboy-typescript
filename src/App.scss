@@ -1,7 +1,3 @@
-body {
-  background: #1B1212;
-  color: #ffffff
-}
 #modal {
   display: none; /* Hidden by default */
   position: fixed; /* Stay in place */
@@ -15,9 +11,8 @@ body {
   background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
   .controls {
     padding: 20px;
-    background: #343434;
+    background: #ffffff;
     margin: 15% auto;
-    background: #343434;
     width: 400px;
     border: 1px solid white;
     ul {
@@ -32,47 +27,50 @@ body {
   }
 }
 
-
 canvas {
-  width: 575px;
+  width: 640px;
   image-rendering: pixelated;
-  z-index: 1;
-  position: absolute;
-  top: 170px;
-  left: 210px;
-}
-#gameboy-case {
-  width: 100%;
 }
 .gameboy {
-  position: absolute;
-  left: 25%;
-  width: 1000px;
-  .load-game {
-    position: absolute;
-    top: 20px;
-    left: 160px;
-    #load-icon {
-      cursor: pointer;
+  margin: 240px auto;
+  width: 640px;
+}
+.app-bar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 60px;
+  background: #E6E6FA;
+  .buttons {
+    margin-left: 20px;
+    #full-screen {
+      float: right;
+      margin-right: 20px;
     }
   }
 }
-.buttons {
-  margin-top: 20px;
-  margin-left: 60px;
-  .button {
-    box-shadow: none;
-    background: #088F8F;
-    margin-right: 10px;
-    color: white;
-    padding-top: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    font-size: 16px;
-    border-color: white;
+
+@media all and (display-mode: fullscreen) {
+  .App {
+    height: 100vh;
   }
-  .button.help {
-    background: #FFBF00;
+  #root {
+    height: 100vh;
+  }
+  body {
+    background: #000000 !important;
+    height: 100vh;
+  }
+  .app-bar {
+    display: none;
+  }
+  .gameboy {
+    margin: 0 auto;
+    height: 100vh;
+    width: 66%;
+  }
+  canvas {
+    height: 100% !important;
+    width: auto;
   }
 }

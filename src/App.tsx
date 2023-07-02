@@ -1,6 +1,8 @@
 import './App.scss'
+import './mui.min.css'
 import JSZip from 'jszip'
 import { Gameboy } from './gameboy/Gameboy'
+
 function App() {
   let gameboy: Gameboy|null = null
 
@@ -54,18 +56,17 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <div className="buttons">
-        <button className="button" onClick={enterFullScreen}>Full screen</button>
-        <button className="button help" onClick={showControlsModal}>Help</button>
+    <div>
+      <div className="app-bar">
+        <div className="buttons">
+        <button className="mui-btn mui-btn--primary mui-btn--raised" onClick={loadRom}>Load Game</button>
+        <button className="mui-btn mui-btn--accent mui-btn--raised" onClick={showControlsModal}>Help</button>
+        <button id="full-screen" className="mui-btn mui-btn--danger mui-btn--raised" onClick={enterFullScreen}>Full Screen</button>
+        </div>
       </div>
 
       <div className="gameboy">
-        <div className="load-game">
-          <img id="load-icon" src="/load_button_white.png" alt="load game" onClick={loadRom} />
-        </div>
         <input id="rom-input" type="file" style={{ display: 'none' }} onChange={handleFileChange} />
-        <img id="gameboy-case" alt="gameboy-case" src="/gameboy_transparent.png"></img>
         <canvas width="160" height="144"></canvas>
       </div>
       <div id="modal">
@@ -88,6 +89,7 @@ function App() {
             <li><label>Start:</label> Start</li>
             <li><label>Select:</label> Select</li>
           </ul>
+          <p>Emulator written by <a href="https://www.github.com/annethereshewent">annethereshewent</a></p>
         </div>
       </div>
     </div>
